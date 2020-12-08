@@ -8,9 +8,9 @@ import ttfw_idf
 
 
 @ttfw_idf.idf_example_test(env_tag="Example_GENERIC", target=['esp32', 'esp32s2'], ci_target=['esp32'])
-def test_examples_hello_world(env, extra_data):
-    app_name = 'hello_world'
-    dut = env.get_dut(app_name, "examples/get-started/hello_world")
+def test_examples_keyboard(env, extra_data):
+    app_name = 'keyboard'
+    dut = env.get_dut(app_name, "examples/get-started/keyboard")
     dut.start_app()
     res = dut.expect(ttfw_idf.MINIMUM_FREE_HEAP_SIZE_RE)
     if not res:
@@ -19,4 +19,4 @@ def test_examples_hello_world(env, extra_data):
 
 
 if __name__ == '__main__':
-    test_examples_hello_world()
+    test_examples_keyboard()
