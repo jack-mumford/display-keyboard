@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 
 # Fefore running:
 # . $HOME/esp/esp-idf/export.sh
