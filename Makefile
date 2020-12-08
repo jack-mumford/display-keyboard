@@ -9,4 +9,4 @@ include $(IDF_PATH)/make/project.mk
 
 .PHONY: format
 format:
-	clang-format -i main/*.c
+	clang-format -i main/*.cc
