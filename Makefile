@@ -6,3 +6,7 @@
 PROJECT_NAME := keyboard
 
 include $(IDF_PATH)/make/project.mk
+
+.PHONY: format
+format:
+	clang-format -i main/*.c
