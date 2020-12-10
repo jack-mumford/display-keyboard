@@ -3,6 +3,5 @@
 # Fefore running:
 # . $HOME/esp/esp-idf/export.sh
 
-./doclean.sh
-./config.sh
-./dobuild.sh
+idf.py set-target esp32s2
+idf.py menuconfig
