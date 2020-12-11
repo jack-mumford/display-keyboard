@@ -8,6 +8,9 @@
 */
 #include <stdio.h>
 
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+
+#include <esp_log.h>
 #include <esp_spi_flash.h>
 #include <esp_system.h>
 #include <freertos/FreeRTOS.h>
@@ -16,7 +19,22 @@
 
 #include "display.h"
 
+namespace {
+
+constexpr char TAG[] = "main";
+
+void WaitForDebugMonitor() {
+  // Poor man's way of waiting till the monitor has connected.
+  const TickType_t kStartupDelay = 1000 / portTICK_PERIOD_MS;
+  ESP_LOGI(TAG, "Waiting for debug monitor connection");
+  vTaskDelay(kStartupDelay);
+}
+
+}  // namespace
+
 extern "C" void app_main(void) {
+  WaitForDebugMonitor();
+
   Display display;
 
   printf("Hello world!\n");
