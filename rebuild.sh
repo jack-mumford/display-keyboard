@@ -3,6 +3,6 @@
 # Fefore running:
 # . $HOME/esp/esp-idf/export.sh
 
-./doclean.sh
+./clean.sh
 ./config.sh
 ./dobuild.sh
