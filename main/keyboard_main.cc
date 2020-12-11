@@ -14,7 +14,11 @@
 #include <freertos/task.h>
 #include <sdkconfig.h>
 
+#include "display.h"
+
 extern "C" void app_main(void) {
+  Display display;
+
   printf("Hello world!\n");
 
   /* Print chip information */

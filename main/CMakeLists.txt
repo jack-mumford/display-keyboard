@@ -1,5 +1,6 @@
 idf_component_register(
   SRCS
+    "display.cc"
     "keyboard_main.cc"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src/tusb.c"
   INCLUDE_DIRS
