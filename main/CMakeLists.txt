@@ -2,6 +2,7 @@ idf_component_register(
   SRCS
     "display.cc"
     "main.cc"
+    "main_screen.cc"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src/tusb.c"
   INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/main"
