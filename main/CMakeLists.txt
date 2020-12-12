@@ -20,10 +20,6 @@ idf_component_register(
     spiffs
 )
 
-#target_compile_definitions(
-#  ${COMPONENT_LIB} PRIVATE LV_CONF_INCLUDE_SIMPLE=1 LV_LVGL_H_INCLUDE_SIMPLE
-#)
-
 target_compile_options(
   ${COMPONENT_TARGET} PUBLIC
   "-DCFG_TUSB_MCU=OPT_MCU_ESP32S2"
