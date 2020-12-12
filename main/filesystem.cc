@@ -22,6 +22,7 @@ esp_err_t Filesystem::Initialize() {
   esp_err_t err = esp_vfs_spiffs_register(&conf);
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "Error registering filesystem: %s", esp_err_to_name(err));
+    return err;
   }
 
   size_t total = 0, used = 0;

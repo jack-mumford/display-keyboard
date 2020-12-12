@@ -12,3 +12,5 @@ EXTRA_COMPONENT_DIRS := \
 	components/lv_port_esp32/components/lvgl_esp32_drivers/lvgl_tft \
 	components/lv_port_esp32/components/lvgl_esp32_drivers/lvgl_touch
 
+SPIFFS_IMAGE_FLASH_IN_PROJECT := 1
+$(eval $(call spiffs_create_partition_image,storage,fs))

@@ -17,6 +17,8 @@
 #include <freertos/task.h>
 #include <sdkconfig.h>
 
+#include "config.h"
+#include "config_reader.h"
 #include "display.h"
 #include "filesystem.h"
 #include "usb.h"
@@ -48,6 +50,14 @@ extern "C" void app_main(void) {
 
   Filesystem fs;
   fs.Initialize();
+  ConfigReader config_reader;
+  std::unique_ptr<Config> config(new Config());
+  esp_err_t err = config_reader.Read(config.get());
+  if (err == ESP_OK) {
+    ESP_LOGI(TAG, "Wi-Fi SSID: %s", config->wifi.ssid.c_str());
+    ESP_LOGI(TAG, "Wi-Fi pre shared key: %s", config->wifi.key.c_str());
+  }
+
   USB usb;
   Display display(320, 240);
   display.Initialize();
