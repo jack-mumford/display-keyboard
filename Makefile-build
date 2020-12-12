@@ -2,16 +2,26 @@
 # Fefore running:
 # . $HOME/esp/esp-idf/export.sh
 
-PORT=/dev/cu.usbserial-GT4YU06W
-IDF=IDF.py
+# Download mkspiffs from:
+# https://github.com/igrr/mkspiffs/releases
 
-.PHONY: format clean target build flash config
+# pip install esptool
+PORT=/dev/cu.usbserial-GT4YU06W
+BAUD=115200
+IDF=IDF.py
+ESPTOOL=esptool.py
+MKSPIFFS=./mkspiffs
+FS_BLOCK_SIZE=4096
+FS_PAGE_SIZE=256
+FS_IMAGE_SIZE=0x100000
+
+.PHONY: format clean target build flash config flash-spiffs
 
 format:
 	clang-format -i main/*.cc
 
 clean:
-	rm -rf build sdkconfig.old
+	rm -rf build sdkconfig.old spiffs.bin
 
 config:
 	${IDF} menuconfig
@@ -24,3 +34,9 @@ build:
 
 flash:
 	${IDF} -p ${PORT} flash monitor
+
+spiffs.bin: Makefile-build fs/*
+	${MKSPIFFS} -c fs -b ${FS_BLOCK_SIZE} -p ${FS_PAGE_SIZE} -s ${FS_IMAGE_SIZE} spiffs.bin
+
+flash-spiffs: spiffs.bin
+	${ESPTOOL} --chip esp32s2 --port ${PORT} --baud ${BAUD} write_flash -z 0x110000 spiffs.bin

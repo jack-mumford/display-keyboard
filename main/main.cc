@@ -18,6 +18,7 @@
 #include <sdkconfig.h>
 
 #include "display.h"
+#include "filesystem.h"
 #include "usb.h"
 
 namespace {
@@ -45,6 +46,8 @@ void WaitForDebugMonitor() {
 extern "C" void app_main(void) {
   WaitForDebugMonitor();
 
+  Filesystem fs;
+  fs.Initialize();
   USB usb;
   Display display(320, 240);
   display.Initialize();

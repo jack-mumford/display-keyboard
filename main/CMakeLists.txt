@@ -3,6 +3,7 @@ idf_component_register(
     "display.cc"
     "main.cc"
     "main_screen.cc"
+    "filesystem.cc"
     "usb.cc"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src/tusb.c"
   INCLUDE_DIRS
@@ -10,11 +11,13 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/components/lv_port_esp32/components/lvgl/lvgl/src"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src"
     "${IDF_PATH}/components/freertos/include/freertos"
+    "${IDF_PATH}/components/spiffs/include"
   REQUIRES
     lvgl_esp32_drivers
     lvgl_tft
     lvgl_touch
     spi_flash
+    spiffs
 )
 
 #target_compile_definitions(
