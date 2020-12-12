@@ -12,6 +12,3 @@ EXTRA_COMPONENT_DIRS := \
 	components/lv_port_esp32/components/lvgl_esp32_drivers/lvgl_tft \
 	components/lv_port_esp32/components/lvgl_esp32_drivers/lvgl_touch
 
-.PHONY: format
-format:
-	clang-format -i main/*.cc
