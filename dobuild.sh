@@ -5,7 +5,7 @@
 
 idf.py build
 
-exit 0
+#exit 0
 
-PORT=foo
+PORT=/dev/cu.usbserial-GT4YU06W
 idf.py -p ${PORT} flash monitor

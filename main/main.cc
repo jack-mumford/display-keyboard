@@ -23,6 +23,7 @@
 namespace {
 
 constexpr char TAG[] = "main";
+constexpr uint64_t kMaxMainLoopWaitUsecs = 50000;
 
 void WaitForDebugMonitor() {
   // Poor man's way of waiting till the monitor has connected.
@@ -33,13 +34,22 @@ void WaitForDebugMonitor() {
 
 }  // namespace
 
+// Current breadboard wiring for Cucumber board:
+// MISO => 13 # don't need this (display is read-only)
+// SCK  => 12
+// MOSI => 11
+// CS   => 38
+// DC   => 34
+// RST  => 37
+
 extern "C" void app_main(void) {
   WaitForDebugMonitor();
 
   USB usb;
-  Display display;
+  Display display(320, 240);
+  display.Initialize();
 
-  printf("Hello world!\n");
+  printf("Keyboard app!\n");
 
   /* Print chip information */
   esp_chip_info_t chip_info;
@@ -57,11 +67,16 @@ extern "C" void app_main(void) {
   printf("Minimum free heap size: %d bytes\n",
          esp_get_minimum_free_heap_size());
 
-  for (int i = 10; i >= 0; i--) {
-    printf("Restarting in %d seconds...\n", i);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-  }
-  printf("Restarting now.\n");
+  printf("Going into loop.\n");
   fflush(stdout);
-  esp_restart();
+  display.Update();
+  while (true) {
+    uint32_t wait_usecs = display.HandleTask();
+    if (!wait_usecs)
+      wait_usecs = 5000;  // 5 msec.
+    else if (wait_usecs > kMaxMainLoopWaitUsecs)
+      wait_usecs = kMaxMainLoopWaitUsecs;
+    ets_delay_us(wait_usecs);
+    taskYIELD();
+  }
 }

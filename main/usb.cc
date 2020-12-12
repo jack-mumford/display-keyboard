@@ -3,7 +3,7 @@
 #include <tusb.h>
 
 USB::USB() {
-  //tusb_init();
+  // tusb_init();
 }
 
 USB::~USB() = default;
