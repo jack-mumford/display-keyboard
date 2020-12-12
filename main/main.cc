@@ -18,6 +18,7 @@
 #include <sdkconfig.h>
 
 #include "display.h"
+#include "usb.h"
 
 namespace {
 
@@ -35,6 +36,7 @@ void WaitForDebugMonitor() {
 extern "C" void app_main(void) {
   WaitForDebugMonitor();
 
+  USB usb;
   Display display;
 
   printf("Hello world!\n");

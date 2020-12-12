@@ -3,6 +3,7 @@ idf_component_register(
     "display.cc"
     "main.cc"
     "main_screen.cc"
+    "usb.cc"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src/tusb.c"
   INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/main"
