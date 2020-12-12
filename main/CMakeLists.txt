@@ -10,18 +10,18 @@ idf_component_register(
     "${IDF_PATH}/components/freertos/include/freertos"
   REQUIRES
     lvgl_esp32_drivers
-    lvgl
-    lv_examples
     lvgl_tft
     lvgl_touch
     spi_flash
 )
 
 target_compile_definitions(
-  ${COMPONENT_LIB} PRIVATE LV_CONF_INCLUDE_SIMPLE=1
+  ${COMPONENT_LIB} PRIVATE LV_CONF_INCLUDE_SIMPLE=1 LV_LVGL_H_INCLUDE_SIMPLE
 )
 
 target_compile_options(
   ${COMPONENT_TARGET} PUBLIC
   "-DCFG_TUSB_MCU=OPT_MCU_ESP32S2"
+  "-DLV_LVGL_H_INCLUDE_SIMPLE"
+  "-DLV_CONF_INCLUDE_SIMPLE=1"
 )
