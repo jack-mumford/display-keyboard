@@ -6,6 +6,7 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src/tusb.c"
   INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/main"
+    "${CMAKE_SOURCE_DIR}/components/lv_port_esp32/components/lvgl/lvgl/src"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src"
     "${IDF_PATH}/components/freertos/include/freertos"
   REQUIRES
