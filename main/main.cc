@@ -37,13 +37,7 @@ void WaitForDebugMonitor() {
 
 }  // namespace
 
-// Current breadboard wiring for Cucumber board:
-// MISO => 13 # don't need this (display is read-only)
-// SCK  => 12
-// MOSI => 11
-// CS   => 38
-// DC   => 34
-// RST  => 37
+// See GPIO pin assignments in sdconfig.defaults
 
 extern "C" void app_main(void) {
   WaitForDebugMonitor();
