@@ -28,7 +28,13 @@
 namespace {
 
 constexpr char TAG[] = "main";
-constexpr uint64_t kMaxMainLoopWaitUsecs = 50000;
+
+constexpr uint64_t kMaxMainLoopWaitMSecs = 100;
+constexpr uint32_t kMinMainLoopWaitMSecs = 10;
+
+// Make sure min wait time is at least one tick.
+static_assert((kMinMainLoopWaitMSecs / portTICK_PERIOD_MS) > 0);
+static_assert(kMaxMainLoopWaitMSecs > kMinMainLoopWaitMSecs);
 
 void WaitForDebugMonitor() {
   // Poor man's way of waiting till the monitor has connected.
@@ -97,12 +103,13 @@ extern "C" void app_main(void) {
   fflush(stdout);
   display.Update();
   while (true) {
-    uint32_t wait_usecs = display.HandleTask();
-    if (!wait_usecs)
-      wait_usecs = 5000;  // 5 msec.
-    else if (wait_usecs > kMaxMainLoopWaitUsecs)
-      wait_usecs = kMaxMainLoopWaitUsecs;
-    ets_delay_us(wait_usecs);
+    uint32_t wait_msecs = display.HandleTask() / 1000;
+    if (wait_msecs < kMinMainLoopWaitMSecs)
+      wait_msecs = kMinMainLoopWaitMSecs;
+    else if (wait_msecs > kMaxMainLoopWaitMSecs)
+      wait_msecs = kMaxMainLoopWaitMSecs;
+    // Need to use vTaskDelay to avoid triggering the task WDT.
+    vTaskDelay(pdMS_TO_TICKS(wait_msecs));
     taskYIELD();
   }
 }
