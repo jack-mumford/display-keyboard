@@ -82,7 +82,7 @@ const char* ip_event_name(ip_event_t event) {
 }  // namespace
 
 void WiFi::HandleWiFiEvent(wifi_event_t event_id, void* event_data) {
-  ESP_LOGD(TAG, "Wi-Fi event: %s", wifi_event_name(event_id));
+  ESP_LOGV(TAG, "Wi-Fi event: %s", wifi_event_name(event_id));
   switch (event_id) {
     case WIFI_EVENT_STA_START:
       ESP_LOGW(TAG, "Starting");
@@ -92,7 +92,6 @@ void WiFi::HandleWiFiEvent(wifi_event_t event_id, void* event_data) {
       if (retry_num_ < kMaxNumConnectRetry) {
         esp_wifi_connect();
         retry_num_++;
-        ESP_LOGD(TAG, "retry to connect to the AP");
       } else {
         ESP_LOGW(TAG, "Connection failed");
         xEventGroupSetBits(wifi_event_group_, EVENT_CONNECTION_FAILED);
@@ -104,7 +103,7 @@ void WiFi::HandleWiFiEvent(wifi_event_t event_id, void* event_data) {
 }
 
 void WiFi::HandleIPEvent(ip_event_t event_id, void* event_data) {
-  ESP_LOGD(TAG, "IP event: %s", ip_event_name(event_id));
+  ESP_LOGV(TAG, "IP event: %s", ip_event_name(event_id));
   switch (event_id) {
     case IP_EVENT_STA_GOT_IP: {
       const ip_event_got_ip_t* event =

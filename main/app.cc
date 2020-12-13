@@ -65,8 +65,12 @@ void IRAM_ATTR App::TaskHandler(void* arg) {
     EventBits_t bits =
         xEventGroupWaitBits(app->wifi_event_group_, WiFi::EVENT_ALL, pdFALSE,
                             pdFALSE, portMAX_DELAY);
-    ESP_LOGW(TAG, "Got Wi-Fi bits: 0x%x", bits);
     xEventGroupClearBits(app->wifi_event_group_, WiFi::EVENT_ALL);
+    if (bits & WiFi::EVENT_CONNECTED) {
+      ESP_LOGI(TAG, "Wi-Fi is connected.");
+    } else if (bits & WiFi::EVENT_CONNECTION_FAILED) {
+      ESP_LOGW(TAG, "Wi-Fi connection failed.");
+    }
   }
 }
 
@@ -77,9 +81,9 @@ esp_err_t App::Initialize() {
 
   fs_.reset(new Filesystem());
   ESP_ERROR_CHECK(fs_->Initialize());
-  std::unique_ptr<ConfigReader> config_reader(new ConfigReader);
+  ConfigReader config_reader;
   std::unique_ptr<Config> config(new Config());
-  ESP_ERROR_CHECK(config_reader->Read(config.get()));
+  ESP_ERROR_CHECK(config_reader.Read(config.get()));
 
   ESP_LOGI(TAG, "Wi-Fi SSID: \"%s\"", config->wifi.ssid.c_str());
   wifi_event_group_ = xEventGroupCreate();
