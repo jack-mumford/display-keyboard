@@ -8,7 +8,7 @@
 #include <esp_wifi.h>
 
 namespace {
-constexpr char TAG[] = "wifi";
+constexpr char TAG[] = "kbd_wifi";
 constexpr size_t kMaxSSIDLen = 31;
 constexpr size_t kMaxKeyLen = 63;
 constexpr int kMaxNumConnectRetry = 10;
@@ -81,33 +81,40 @@ const char* ip_event_name(ip_event_t event) {
 
 }  // namespace
 
-void WiFi::EventHandler(esp_event_base_t event_base,
-                        int32_t event_id,
-                        void* event_data) {
-  if (event_base == WIFI_EVENT) {
-    ESP_LOGW(TAG, "%s: %s", event_base,
-             wifi_event_name(static_cast<wifi_event_t>(event_id)));
-  } else if (event_base == IP_EVENT) {
-    ESP_LOGW(TAG, "%s: %s", event_base,
-             ip_event_name(static_cast<ip_event_t>(event_id)));
-  }
-  if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-    esp_wifi_connect();
-  } else if (event_base == WIFI_EVENT &&
-             event_id == WIFI_EVENT_STA_DISCONNECTED) {
-    if (retry_num_ < kMaxNumConnectRetry) {
+void WiFi::HandleWiFiEvent(wifi_event_t event_id, void* event_data) {
+  ESP_LOGD(TAG, "Wi-Fi event: %s", wifi_event_name(event_id));
+  switch (event_id) {
+    case WIFI_EVENT_STA_START:
+      ESP_LOGW(TAG, "Starting");
       esp_wifi_connect();
-      retry_num_++;
-      ESP_LOGI(TAG, "retry to connect to the AP");
-    } else {
-      xEventGroupSetBits(wifi_event_group_, EVENT_CONNECTION_FAILED);
-    }
-    ESP_LOGI(TAG, "connect to the AP fail");
-  } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-    ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
-    ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
-    retry_num_ = 0;
-    xEventGroupSetBits(wifi_event_group_, EVENT_CONNECTED);
+      break;
+    case WIFI_EVENT_STA_DISCONNECTED:
+      if (retry_num_ < kMaxNumConnectRetry) {
+        esp_wifi_connect();
+        retry_num_++;
+        ESP_LOGD(TAG, "retry to connect to the AP");
+      } else {
+        ESP_LOGW(TAG, "Connection failed");
+        xEventGroupSetBits(wifi_event_group_, EVENT_CONNECTION_FAILED);
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+void WiFi::HandleIPEvent(ip_event_t event_id, void* event_data) {
+  ESP_LOGD(TAG, "IP event: %s", ip_event_name(event_id));
+  switch (event_id) {
+    case IP_EVENT_STA_GOT_IP: {
+      const ip_event_got_ip_t* event =
+          static_cast<ip_event_got_ip_t*>(event_data);
+      ESP_LOGI(TAG, "Got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+      retry_num_ = 0;
+      xEventGroupSetBits(wifi_event_group_, EVENT_CONNECTED);
+    } break;
+    default:
+      break;
   }
 }
 
@@ -116,7 +123,13 @@ void WiFi::EventHandler(void* arg,
                         esp_event_base_t event_base,
                         int32_t event_id,
                         void* event_data) {
-  static_cast<WiFi*>(arg)->EventHandler(event_base, event_id, event_data);
+  if (event_base == WIFI_EVENT) {
+    static_cast<WiFi*>(arg)->HandleWiFiEvent(
+        static_cast<wifi_event_t>(event_id), event_data);
+  } else if (event_base == IP_EVENT) {
+    static_cast<WiFi*>(arg)->HandleIPEvent(static_cast<ip_event_t>(event_id),
+                                           event_data);
+  }
 }
 
 WiFi::WiFi(EventGroupHandle_t wifi_event_group)
@@ -166,8 +179,9 @@ esp_err_t WiFi::Inititialize() {
 }
 
 esp_err_t WiFi::Connect(const std::string& ssid, const std::string& key) {
-  ESP_LOGI(TAG, "Connecting to WiFi network: \"%s\"", ssid.c_str());
+  ESP_LOGI(TAG, "Attempting connection to WiFi network: \"%s\"", ssid.c_str());
 
+  xEventGroupClearBits(wifi_event_group_, EVENT_ALL);
   retry_num_ = 0;
 
   if (ssid.length() > kMaxSSIDLen || key.length() > kMaxKeyLen)

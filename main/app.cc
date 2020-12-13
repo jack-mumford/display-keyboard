@@ -1,5 +1,7 @@
 #include "app.h"
 
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+
 #include <esp_log.h>
 #include <esp_spi_flash.h>
 #include <freertos/FreeRTOS.h>
@@ -15,7 +17,7 @@
 
 namespace {
 
-constexpr char TAG[] = "main";
+constexpr char TAG[] = "kbd_app";
 
 constexpr uint64_t kMaxMainLoopWaitMSecs = 100;
 constexpr uint32_t kMinMainLoopWaitMSecs = 10;
@@ -36,11 +38,36 @@ esp_err_t InitNVRAM() {
 
 }  // namespace
 
-App::App() : wifi_event_group_(xEventGroupCreate()) {}
+App::App() : wifi_event_group_(nullptr), main_task_(nullptr) {}
 
 App::~App() {
   if (wifi_event_group_)
     vEventGroupDelete(wifi_event_group_);
+}
+
+esp_err_t App::CreateWiFiStatusTask() {
+  constexpr char kTaskName[] = "wifi-status";
+  // https://www.freertos.org/FAQMem.html#StackSize
+  constexpr uint32_t kStackDepthWords = 2048;
+
+  BaseType_t task = xTaskCreate(TaskHandler, kTaskName, kStackDepthWords, this,
+                                tskIDLE_PRIORITY, &main_task_);
+  if (task != pdPASS)
+    return ESP_FAIL;
+  return ESP_OK;
+}
+
+// static:
+void IRAM_ATTR App::TaskHandler(void* arg) {
+  App* app = static_cast<App*>(arg);
+  ESP_LOGW(TAG, "In Wi-Fi status task handler.");
+  while (true) {
+    EventBits_t bits =
+        xEventGroupWaitBits(app->wifi_event_group_, WiFi::EVENT_ALL, pdFALSE,
+                            pdFALSE, portMAX_DELAY);
+    ESP_LOGW(TAG, "Got Wi-Fi bits: 0x%x", bits);
+    xEventGroupClearBits(app->wifi_event_group_, WiFi::EVENT_ALL);
+  }
 }
 
 esp_err_t App::Initialize() {
@@ -55,9 +82,11 @@ esp_err_t App::Initialize() {
   ESP_ERROR_CHECK(config_reader->Read(config.get()));
 
   ESP_LOGI(TAG, "Wi-Fi SSID: \"%s\"", config->wifi.ssid.c_str());
-  std::unique_ptr<WiFi> wifi(new WiFi(wifi_event_group_));
-  ESP_ERROR_CHECK(wifi->Inititialize());
-  ESP_ERROR_CHECK(wifi->Connect(config->wifi.ssid, config->wifi.key));
+  wifi_event_group_ = xEventGroupCreate();
+  wifi_.reset(new WiFi(wifi_event_group_));
+  ESP_ERROR_CHECK(CreateWiFiStatusTask());
+  ESP_ERROR_CHECK(wifi_->Inititialize());
+  ESP_ERROR_CHECK(wifi_->Connect(config->wifi.ssid, config->wifi.key));
 
   usb_.reset(new USB());
   display_.reset(new Display(320, 240));

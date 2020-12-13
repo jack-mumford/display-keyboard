@@ -9,8 +9,9 @@
 
 class WiFi {
  public:
-  constexpr static TickType_t EVENT_CONNECTED = BIT0;
-  constexpr static TickType_t EVENT_CONNECTION_FAILED = BIT1;
+  constexpr static EventBits_t EVENT_CONNECTED = BIT0;
+  constexpr static EventBits_t EVENT_CONNECTION_FAILED = BIT1;
+  constexpr static EventBits_t EVENT_ALL = BIT0 | BIT1;
 
   WiFi(EventGroupHandle_t wifi_event_group);
   ~WiFi();
@@ -23,9 +24,8 @@ class WiFi {
                            esp_event_base_t event_base,
                            int32_t event_id,
                            void* event_data);
-  void EventHandler(esp_event_base_t event_base,
-                    int32_t event_id,
-                    void* event_data);
+  void HandleWiFiEvent(wifi_event_t event_id, void* event_data);
+  void HandleIPEvent(ip_event_t event_id, void* event_data);
 
   EventGroupHandle_t wifi_event_group_;
   esp_event_handler_instance_t instance_any_id_;

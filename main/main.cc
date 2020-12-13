@@ -1,3 +1,5 @@
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+
 #include <esp_log.h>
 #include <esp_system.h>
 #include <freertos/FreeRTOS.h>
@@ -9,7 +11,7 @@
 
 namespace {
 
-constexpr char TAG[] = "main";
+constexpr char TAG[] = "kbd_main";
 
 void WaitForDebugMonitor() {
   // Poor man's way of waiting till the monitor has connected.

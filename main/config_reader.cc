@@ -10,7 +10,7 @@
 
 namespace {
 
-constexpr char TAG[] = "config_reader";
+constexpr char TAG[] = "kbd_config_reader";
 constexpr char kConfigPath[] = "/spiffs/config.ini";
 
 bool streq(const char* a, const char* b) {
