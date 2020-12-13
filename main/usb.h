@@ -2,7 +2,7 @@
 #pragma once
 
 class USB {
-  public:
-    USB();
-    ~USB();
+ public:
+  USB();
+  ~USB();
 };
