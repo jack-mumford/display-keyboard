@@ -2,6 +2,8 @@
 
 #include <cstring>
 
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+
 #include <esp_log.h>
 #include <esp_wifi.h>
 
@@ -10,14 +12,87 @@ constexpr char TAG[] = "wifi";
 constexpr size_t kMaxSSIDLen = 31;
 constexpr size_t kMaxKeyLen = 63;
 constexpr int kMaxNumConnectRetry = 10;
-#define WIFI_CONNECTED_BIT BIT0
-#define WIFI_FAIL_BIT BIT1
+constexpr TickType_t WIFI_CONNECTED_BIT = BIT0;
+constexpr TickType_t WIFI_FAIL_BIT = BIT1;
+
+const char* wifi_event_name(wifi_event_t event) {
+  switch (event) {
+    case WIFI_EVENT_WIFI_READY:
+      return "WIFI_EVENT_WIFI_READY";
+    case WIFI_EVENT_SCAN_DONE:
+      return "WIFI_EVENT_SCAN_DONE";
+    case WIFI_EVENT_STA_START:
+      return "WIFI_EVENT_STA_START";
+    case WIFI_EVENT_STA_STOP:
+      return "WIFI_EVENT_STA_STOP";
+    case WIFI_EVENT_STA_CONNECTED:
+      return "WIFI_EVENT_STA_CONNECTED";
+    case WIFI_EVENT_STA_DISCONNECTED:
+      return "WIFI_EVENT_STA_DISCONNECTED";
+    case WIFI_EVENT_STA_AUTHMODE_CHANGE:
+      return "WIFI_EVENT_STA_AUTHMODE_CHANGE";
+    case WIFI_EVENT_STA_WPS_ER_SUCCESS:
+      return "WIFI_EVENT_STA_WPS_ER_SUCCESS";
+    case WIFI_EVENT_STA_WPS_ER_FAILED:
+      return "WIFI_EVENT_STA_WPS_ER_FAILED";
+    case WIFI_EVENT_STA_WPS_ER_TIMEOUT:
+      return "WIFI_EVENT_STA_WPS_ER_TIMEOUT";
+    case WIFI_EVENT_STA_WPS_ER_PIN:
+      return "WIFI_EVENT_STA_WPS_ER_PIN";
+    case WIFI_EVENT_STA_WPS_ER_PBC_OVERLAP:
+      return "WIFI_EVENT_STA_WPS_ER_PBC_OVERLAP";
+    case WIFI_EVENT_AP_START:
+      return "WIFI_EVENT_AP_START";
+    case WIFI_EVENT_AP_STOP:
+      return "WIFI_EVENT_AP_STOP";
+    case WIFI_EVENT_AP_STACONNECTED:
+      return "WIFI_EVENT_AP_STACONNECTED";
+    case WIFI_EVENT_AP_STADISCONNECTED:
+      return "WIFI_EVENT_AP_STADISCONNECTED";
+    case WIFI_EVENT_AP_PROBEREQRECVED:
+      return "WIFI_EVENT_AP_PROBEREQRECVED";
+    case WIFI_EVENT_FTM_REPORT:
+      return "WIFI_EVENT_FTM_REPORT";
+    case WIFI_EVENT_MAX:
+      return "WIFI_EVENT_MAX";
+    default:
+      return "<unknown: wifi_event_t>";
+  }
+}
+
+const char* ip_event_name(ip_event_t event) {
+  switch (event) {
+    case IP_EVENT_STA_GOT_IP:
+      return "IP_EVENT_STA_GOT_IP";
+    case IP_EVENT_STA_LOST_IP:
+      return "IP_EVENT_STA_LOST_IP";
+    case IP_EVENT_AP_STAIPASSIGNED:
+      return "IP_EVENT_AP_STAIPASSIGNED";
+    case IP_EVENT_GOT_IP6:
+      return "IP_EVENT_GOT_IP6";
+    case IP_EVENT_ETH_GOT_IP:
+      return "IP_EVENT_ETH_GOT_IP";
+    case IP_EVENT_PPP_GOT_IP:
+      return "IP_EVENT_PPP_GOT_IP";
+    case IP_EVENT_PPP_LOST_IP:
+      return "IP_EVENT_PPP_LOST_IP";
+    default:
+      return "<unknown: ip_event_t>";
+  }
+}
 
 }  // namespace
 
 void WiFi::EventHandler(esp_event_base_t event_base,
                         int32_t event_id,
                         void* event_data) {
+  if (event_base == WIFI_EVENT) {
+    ESP_LOGW(TAG, "%s: %s", event_base,
+             wifi_event_name(static_cast<wifi_event_t>(event_id)));
+  } else if (event_base == IP_EVENT) {
+    ESP_LOGW(TAG, "%s: %s", event_base,
+             ip_event_name(static_cast<ip_event_t>(event_id)));
+  }
   if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
     esp_wifi_connect();
   } else if (event_base == WIFI_EVENT &&
