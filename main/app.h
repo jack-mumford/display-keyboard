@@ -6,6 +6,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
 
+class Config;
 class Display;
 class Filesystem;
 class USB;
@@ -26,6 +27,7 @@ class App {
 
   esp_err_t CreateWiFiStatusTask();
 
+  std::unique_ptr<Config> config_;
   std::unique_ptr<Display> display_;
   std::unique_ptr<Filesystem> fs_;
   std::unique_ptr<USB> usb_;

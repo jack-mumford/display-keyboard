@@ -38,7 +38,8 @@ esp_err_t InitNVRAM() {
 
 }  // namespace
 
-App::App() : wifi_event_group_(nullptr), main_task_(nullptr) {}
+App::App()
+    : config_(new Config()), wifi_event_group_(nullptr), main_task_(nullptr) {}
 
 App::~App() {
   if (wifi_event_group_)
@@ -70,6 +71,7 @@ void IRAM_ATTR App::TaskHandler(void* arg) {
       ESP_LOGI(TAG, "Wi-Fi is connected.");
     } else if (bits & WiFi::EVENT_CONNECTION_FAILED) {
       ESP_LOGW(TAG, "Wi-Fi connection failed.");
+      // TODO: Set a timer so that we can retry in a little while.
     }
   }
 }
@@ -82,15 +84,14 @@ esp_err_t App::Initialize() {
   fs_.reset(new Filesystem());
   ESP_ERROR_CHECK(fs_->Initialize());
   ConfigReader config_reader;
-  std::unique_ptr<Config> config(new Config());
-  ESP_ERROR_CHECK(config_reader.Read(config.get()));
+  ESP_ERROR_CHECK(config_reader.Read(config_.get()));
 
-  ESP_LOGI(TAG, "Wi-Fi SSID: \"%s\"", config->wifi.ssid.c_str());
+  ESP_LOGI(TAG, "Wi-Fi SSID: \"%s\"", config_->wifi.ssid.c_str());
   wifi_event_group_ = xEventGroupCreate();
   wifi_.reset(new WiFi(wifi_event_group_));
   ESP_ERROR_CHECK(CreateWiFiStatusTask());
   ESP_ERROR_CHECK(wifi_->Inititialize());
-  ESP_ERROR_CHECK(wifi_->Connect(config->wifi.ssid, config->wifi.key));
+  ESP_ERROR_CHECK(wifi_->Connect(config_->wifi.ssid, config_->wifi.key));
 
   usb_.reset(new USB());
   display_.reset(new Display(320, 240));
