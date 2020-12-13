@@ -53,32 +53,43 @@ WiFi::WiFi()
       retry_num_(0) {}
 
 WiFi::~WiFi() {
-  /* The event will not be processed after unregister */
-  ESP_ERROR_CHECK(esp_event_handler_instance_unregister(
-      IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip_));
-  ESP_ERROR_CHECK(esp_event_handler_instance_unregister(
-      WIFI_EVENT, ESP_EVENT_ANY_ID, instance_any_id_));
-  vEventGroupDelete(wifi_event_group_);
+  if (instance_got_ip_) {
+    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(
+        IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip_));
+  }
+  if (instance_any_id_) {
+    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(
+        WIFI_EVENT, ESP_EVENT_ANY_ID, instance_any_id_));
+  }
+  if (wifi_event_group_)
+    vEventGroupDelete(wifi_event_group_);
 }
 
 esp_err_t WiFi::Inititialize() {
   wifi_event_group_ = xEventGroupCreate();
 
   esp_err_t err = esp_netif_init();
-  if (err != ESP_OK)
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "netif init failed: %s", esp_err_to_name(err));
     return err;
+  }
 
   esp_netif_create_default_wifi_sta();
 
   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   err = esp_wifi_init(&cfg);
-  if (err != ESP_OK)
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "esp_wifi_init failed: %s", esp_err_to_name(err));
     return err;
+  }
 
   err = esp_event_handler_instance_register(
       WIFI_EVENT, ESP_EVENT_ANY_ID, &EventHandler, this, &instance_any_id_);
-  if (err != ESP_OK)
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "esp_event_handler_instance_register failed: %s",
+             esp_err_to_name(err));
     return err;
+  }
   err = esp_event_handler_instance_register(
       IP_EVENT, IP_EVENT_STA_GOT_IP, &EventHandler, this, &instance_got_ip_);
 

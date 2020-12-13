@@ -1,9 +1,10 @@
 #include "config_reader.h"
 
-#include <esp_log.h>
-#include <string.h>
+#include <cstring>
 
+#include <esp_log.h>
 #include <ini.h>
+#include <stdio.h>
 
 #include "config.h"
 
@@ -23,9 +24,9 @@ int handler(void* user,
   Config* config = static_cast<Config*>(user);
   if (streq(section, "wifi")) {
     if (streq(name, "ssid"))
-      config->wifi.ssid.assign(value);
+      config->wifi.ssid = value;
     else if (streq(name, "key"))
-      config->wifi.key.assign(value);
+      config->wifi.key = value;
     else
       return 1;  // Unknown key.
   } else {
@@ -42,7 +43,7 @@ ConfigReader::ConfigReader() = default;
 ConfigReader::~ConfigReader() = default;
 
 esp_err_t ConfigReader::Read(Config* config) {
-  if (ini_parse(kConfigPath, handler, &config) < 0) {
+  if (ini_parse(kConfigPath, handler, config) < 0) {
     ESP_LOGE(TAG, "Can't load \"%s\".", kConfigPath);
     return ESP_FAIL;
   }

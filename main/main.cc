@@ -15,8 +15,9 @@
 #include <esp_system.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <sdkconfig.h>
+#include <nvs_flash.h>
 
+#include <sdkconfig.h>
 #include "config.h"
 #include "config_reader.h"
 #include "display.h"
@@ -36,6 +37,16 @@ void WaitForDebugMonitor() {
   vTaskDelay(kStartupDelay);
 }
 
+esp_err_t InitNVRAM() {
+  esp_err_t ret = nvs_flash_init();
+  if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
+      ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    ESP_ERROR_CHECK(nvs_flash_erase());
+    ret = nvs_flash_init();
+  }
+  return ret;
+}
+
 }  // namespace
 
 // See GPIO pin assignments in sdconfig.defaults
@@ -43,17 +54,22 @@ void WaitForDebugMonitor() {
 extern "C" void app_main(void) {
   WaitForDebugMonitor();
 
+  ESP_ERROR_CHECK(InitNVRAM());
+
+  ESP_ERROR_CHECK(esp_event_loop_create_default());
+
   Filesystem fs;
-  fs.Initialize();
-  ConfigReader config_reader;
+  ESP_ERROR_CHECK(fs.Initialize());
+  std::unique_ptr<ConfigReader> config_reader(new ConfigReader);
   std::unique_ptr<Config> config(new Config());
-  esp_err_t err = config_reader.Read(config.get());
-  if (err == ESP_OK) {
-    ESP_LOGI(TAG, "Wi-Fi SSID: %s", config->wifi.ssid.c_str());
-    ESP_LOGI(TAG, "Wi-Fi pre shared key: %s", config->wifi.key.c_str());
-  }
+  ESP_ERROR_CHECK(config_reader->Read(config.get()));
+
+  ESP_LOGI(TAG, "Wi-Fi SSID: \"%s\"", config->wifi.ssid.c_str());
+  ESP_LOGI(TAG, "Wi-Fi pre shared key: \"%s\"", config->wifi.key.c_str());
 
   std::unique_ptr<WiFi> wifi(new WiFi());
+  ESP_ERROR_CHECK(wifi->Inititialize());
+  ESP_ERROR_CHECK(wifi->Connect(config->wifi.ssid, config->wifi.key));
 
   USB usb;
   Display display(320, 240);
