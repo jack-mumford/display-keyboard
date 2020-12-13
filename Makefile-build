@@ -8,7 +8,7 @@
 # pip install esptool
 PORT=/dev/cu.usbserial-GT4YU06W
 BAUD=115200
-IDF=IDF.py
+IDF=idf.py
 ESPTOOL=esptool.py
 MKSPIFFS=./mkspiffs
 FS_BLOCK_SIZE=4096
