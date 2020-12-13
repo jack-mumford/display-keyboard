@@ -7,24 +7,25 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
 
-
 class WiFi {
  public:
-  WiFi();
+  constexpr static TickType_t EVENT_CONNECTED = BIT0;
+  constexpr static TickType_t EVENT_CONNECTION_FAILED = BIT1;
+
+  WiFi(EventGroupHandle_t wifi_event_group);
   ~WiFi();
 
   esp_err_t Inititialize();
   esp_err_t Connect(const std::string& ssid, const std::string& key);
 
  private:
-static void EventHandler(void* arg,
-                   esp_event_base_t event_base,
-                   int32_t event_id,
-                   void* event_data);
-void EventHandler(
-                   esp_event_base_t event_base,
-                   int32_t event_id,
-                   void* event_data);
+  static void EventHandler(void* arg,
+                           esp_event_base_t event_base,
+                           int32_t event_id,
+                           void* event_data);
+  void EventHandler(esp_event_base_t event_base,
+                    int32_t event_id,
+                    void* event_data);
 
   EventGroupHandle_t wifi_event_group_;
   esp_event_handler_instance_t instance_any_id_;

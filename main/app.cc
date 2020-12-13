@@ -36,9 +36,12 @@ esp_err_t InitNVRAM() {
 
 }  // namespace
 
-App::App() = default;
+App::App() : wifi_event_group_(xEventGroupCreate()) {}
 
-App::~App() = default;
+App::~App() {
+  if (wifi_event_group_)
+    vEventGroupDelete(wifi_event_group_);
+}
 
 esp_err_t App::Initialize() {
   ESP_ERROR_CHECK(InitNVRAM());
@@ -52,9 +55,7 @@ esp_err_t App::Initialize() {
   ESP_ERROR_CHECK(config_reader->Read(config.get()));
 
   ESP_LOGI(TAG, "Wi-Fi SSID: \"%s\"", config->wifi.ssid.c_str());
-  ESP_LOGI(TAG, "Wi-Fi pre shared key: \"%s\"", config->wifi.key.c_str());
-
-  std::unique_ptr<WiFi> wifi(new WiFi());
+  std::unique_ptr<WiFi> wifi(new WiFi(wifi_event_group_));
   ESP_ERROR_CHECK(wifi->Inititialize());
   ESP_ERROR_CHECK(wifi->Connect(config->wifi.ssid, config->wifi.key));
 
