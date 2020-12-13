@@ -22,6 +22,7 @@
 #include "display.h"
 #include "filesystem.h"
 #include "usb.h"
+#include "wifi.h"
 
 namespace {
 
@@ -51,6 +52,8 @@ extern "C" void app_main(void) {
     ESP_LOGI(TAG, "Wi-Fi SSID: %s", config->wifi.ssid.c_str());
     ESP_LOGI(TAG, "Wi-Fi pre shared key: %s", config->wifi.key.c_str());
   }
+
+  std::unique_ptr<WiFi> wifi(new WiFi());
 
   USB usb;
   Display display(320, 240);
