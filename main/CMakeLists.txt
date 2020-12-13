@@ -4,6 +4,10 @@ idf_component_register(
   SRCS
     ${SOURCES}
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src/tusb.c"
+    "${CMAKE_SOURCE_DIR}/components/tinyusb/src/device/usbd.c"
+    "${CMAKE_SOURCE_DIR}/components/tinyusb/src/device/usbd_control.c"
+    "${CMAKE_SOURCE_DIR}/components/tinyusb/src/portable/espressif/esp32s2/dcd_esp32s2.c"
+    "${CMAKE_SOURCE_DIR}/components/tinyusb/src/class/hid/hid_device.c"
     "${CMAKE_SOURCE_DIR}/components/inih/ini.c"
   INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/main"
