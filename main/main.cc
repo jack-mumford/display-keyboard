@@ -1,13 +1,3 @@
-/* Hello World Example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
-#include <stdio.h>
-
 #include <esp_log.h>
 #include <esp_system.h>
 #include <freertos/FreeRTOS.h>
@@ -28,32 +18,33 @@ void WaitForDebugMonitor() {
   vTaskDelay(kStartupDelay);
 }
 
+void LogHardwareInfo() {
+  esp_chip_info_t chip_info;
+  esp_chip_info(&chip_info);
+  ESP_LOGI(TAG, "This is %s chip with %d CPU core(s), WiFi%s%s.",
+           CONFIG_IDF_TARGET, chip_info.cores,
+           (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
+           (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
+
+  ESP_LOGI(TAG, "Silicon revision %u.", chip_info.revision);
+
+  ESP_LOGI(
+      TAG, "%dMB %s flash", spi_flash_get_chip_size() / (1024 * 1024),
+      (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
+
+  ESP_LOGI(TAG, "Minimum free heap size: %d bytes.",
+           esp_get_minimum_free_heap_size());
+}
+
 }  // namespace
 
 // See GPIO pin assignments in sdconfig.defaults
 
 extern "C" void app_main(void) {
   WaitForDebugMonitor();
-  printf("Keyboard app!\n");
 
-  /* Print chip information */
-  esp_chip_info_t chip_info;
-  esp_chip_info(&chip_info);
-  printf("This is %s chip with %d CPU core(s), WiFi%s%s, ", CONFIG_IDF_TARGET,
-         chip_info.cores, (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
-         (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
-
-  printf("silicon revision %d, ", chip_info.revision);
-
-  printf(
-      "%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
-      (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
-
-  printf("Minimum free heap size: %d bytes\n",
-         esp_get_minimum_free_heap_size());
-
-  printf("Going into loop.\n");
-  fflush(stdout);
+  ESP_LOGI(TAG, "Keyboard app!");
+  LogHardwareInfo();
 
   App app;
   ESP_ERROR_CHECK(app.Initialize());
