@@ -23,6 +23,7 @@ idf_component_register(
     lvgl_touch
     spi_flash
     spiffs
+    tinyusb
 )
 
 target_compile_options(
