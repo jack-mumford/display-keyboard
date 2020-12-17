@@ -25,6 +25,7 @@ idf_component_register(
     spiffs
     tinyusb
     Adafruit_TinyUSB_ArduinoCore
+    Adafruit_TinyUSB_Arduino
 )
 
 target_compile_options(
