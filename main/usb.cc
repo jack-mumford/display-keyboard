@@ -82,3 +82,13 @@ esp_err_t USB::KeyboardRelease(uint8_t report_id) {
 bool USB::Ready() {
   return usb_hid_.ready();
 }
+
+// static
+esp_err_t USB::RemoteWakup() {
+  return USBDevice.remoteWakeup() ? ESP_OK : ESP_FAIL;
+}
+
+// static
+bool USB::Suspended() {
+  return USBDevice.suspended();
+}

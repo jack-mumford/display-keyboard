@@ -97,6 +97,11 @@ void IRAM_ATTR App::USBTestTaskHandler(void* arg) {
   constexpr uint8_t kReportID = 0;
   while (true) {
     vTaskDelay(2000 / portTICK_PERIOD_MS);
+    if (USB::Suspended()) {
+      if (USB::RemoteWakup() != ESP_OK)
+        ESP_LOGE(TAG, "Error waking up");
+      continue;
+    }
     if (!app->usb_->Ready()) {
       ESP_LOGW(TAG, "USB not ready.");
       continue;

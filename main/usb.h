@@ -16,6 +16,10 @@ class USB {
    */
   esp_err_t Initialize();
 
+  static esp_err_t RemoteWakup();
+
+  static bool Suspended();
+
   /**
    * Standard HID Boot Protocol Keyboard Report.
    *
