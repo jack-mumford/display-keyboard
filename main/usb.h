@@ -5,6 +5,8 @@
 
 #include <esp_err.h>
 
+namespace usb {
+
 class USB {
  public:
   USB() = delete;
@@ -30,3 +32,5 @@ class USB {
    */
   static bool Suspended();
 };
+
+}  // namespace usb

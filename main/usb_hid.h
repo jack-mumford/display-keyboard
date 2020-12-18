@@ -4,6 +4,8 @@
 #include <Adafruit_USBD_HID.h>
 #include <esp_err.h>
 
+namespace usb {
+
 class USB_HID {
  public:
   USB_HID();
@@ -34,3 +36,5 @@ class USB_HID {
  private:
   Adafruit_USBD_HID usb_hid_;
 };
+
+}  // namespace usb

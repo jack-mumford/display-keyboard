@@ -7,6 +7,8 @@
 #include <freertos/task.h>
 #include <tusb.h>
 
+namespace usb {
+
 namespace {
 constexpr char TAG[] = "kbd_usb";
 }
@@ -33,3 +35,5 @@ esp_err_t USB::RemoteWakup() {
 bool USB::Suspended() {
   return USBDevice.suspended();
 }
+
+}  // namespace usb

@@ -6,6 +6,8 @@
 #include <freertos/task.h>
 #include <tusb.h>
 
+namespace usb {
+
 namespace {
 
 constexpr uint8_t desc_hid_report[] = {
@@ -65,3 +67,5 @@ esp_err_t USB_HID::KeyboardRelease(uint8_t report_id) {
 bool USB_HID::Ready() {
   return usb_hid_.ready();
 }
+
+}  // namespace usb

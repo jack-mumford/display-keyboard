@@ -98,8 +98,8 @@ void IRAM_ATTR App::USBTestTaskHandler(void* arg) {
   constexpr uint8_t kReportID = 0;
   while (true) {
     vTaskDelay(2000 / portTICK_PERIOD_MS);
-    if (USB::Suspended()) {
-      if (USB::RemoteWakup() != ESP_OK)
+    if (usb::USB::Suspended()) {
+      if (usb::USB::RemoteWakup() != ESP_OK)
         ESP_LOGE(TAG, "Error waking up");
       continue;
     }
@@ -107,7 +107,7 @@ void IRAM_ATTR App::USBTestTaskHandler(void* arg) {
       ESP_LOGW(TAG, "USB not ready.");
       continue;
     }
-    if (!USB::Mounted()) {
+    if (!usb::USB::Mounted()) {
       ESP_LOGI(TAG, "Sending 'A' key");
       app->usb_hid_->KeyboardReport(kReportID, 0, keycodes);
       app->usb_hid_->KeyboardRelease(kReportID);
@@ -151,10 +151,10 @@ esp_err_t App::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  err = USB::Initialize();
+  err = usb::USB::Initialize();
   if (err != ESP_OK)
     return err;
-  usb_hid_.reset(new USB_HID());
+  usb_hid_.reset(new usb::USB_HID());
 
   display_.reset(new Display(320, 240));
   if (!display_->Initialize())
