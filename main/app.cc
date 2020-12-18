@@ -2,6 +2,7 @@
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
+#include <class/hid/hid.h>
 #include <esp_log.h>
 #include <esp_spi_flash.h>
 #include <freertos/FreeRTOS.h>
@@ -51,15 +52,15 @@ esp_err_t App::CreateWiFiStatusTask() {
   // https://www.freertos.org/FAQMem.html#StackSize
   constexpr uint32_t kStackDepthWords = 2048;
 
-  BaseType_t task = xTaskCreate(TaskHandler, kTaskName, kStackDepthWords, this,
-                                tskIDLE_PRIORITY, &main_task_);
+  BaseType_t task = xTaskCreate(WiFiTaskHandler, kTaskName, kStackDepthWords,
+                                this, tskIDLE_PRIORITY, &main_task_);
   if (task != pdPASS)
     return ESP_FAIL;
   return ESP_OK;
 }
 
 // static:
-void IRAM_ATTR App::TaskHandler(void* arg) {
+void IRAM_ATTR App::WiFiTaskHandler(void* arg) {
   App* app = static_cast<App*>(arg);
   ESP_LOGW(TAG, "In Wi-Fi status task handler.");
   while (true) {
@@ -76,27 +77,84 @@ void IRAM_ATTR App::TaskHandler(void* arg) {
   }
 }
 
-esp_err_t App::Initialize() {
-  ESP_ERROR_CHECK(InitNVRAM());
+esp_err_t App::CreateUSBTestTask() {
+  constexpr char kTaskName[] = "usb-status";
+  // https://www.freertos.org/FAQMem.html#StackSize
+  constexpr uint32_t kStackDepthWords = 2048;
 
-  ESP_ERROR_CHECK(esp_event_loop_create_default());
+  return xTaskCreate(USBTestTaskHandler, kTaskName, kStackDepthWords, this,
+                     tskIDLE_PRIORITY, &main_task_) == pdPASS
+             ? ESP_OK
+             : ESP_FAIL;
+}
+
+// static:
+void IRAM_ATTR App::USBTestTaskHandler(void* arg) {
+  App* app = static_cast<App*>(arg);
+  ESP_LOGW(TAG, "In USB test task handler.");
+  uint8_t keycodes[6] = {HID_KEY_A,    HID_KEY_NONE, HID_KEY_NONE,
+                         HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE};
+  constexpr uint8_t kReportID = 0;
+  while (true) {
+    vTaskDelay(2000 / portTICK_PERIOD_MS);
+    if (!app->usb_->Ready()) {
+      ESP_LOGW(TAG, "USB not ready.");
+      continue;
+    }
+    if (!USB::Mounted()) {
+      ESP_LOGI(TAG, "Sending 'A' key");
+      app->usb_->KeyboardReport(kReportID, 0, keycodes);
+      app->usb_->KeyboardRelease(kReportID);
+    } else {
+      ESP_LOGD(TAG, "USB not mounted");
+    }
+  }
+}
+
+esp_err_t App::Initialize() {
+  esp_err_t err = InitNVRAM();
+  if (err != ESP_OK)
+    return err;
+
+  err = esp_event_loop_create_default();
+  if (err != ESP_OK)
+    return err;
 
   fs_.reset(new Filesystem());
-  ESP_ERROR_CHECK(fs_->Initialize());
+  err = fs_->Initialize();
+  if (err != ESP_OK)
+    return err;
+
   ConfigReader config_reader;
-  ESP_ERROR_CHECK(config_reader.Read(config_.get()));
+  err = config_reader.Read(config_.get());
+  if (err != ESP_OK)
+    return err;
 
   ESP_LOGI(TAG, "Wi-Fi SSID: \"%s\"", config_->wifi.ssid.c_str());
   wifi_event_group_ = xEventGroupCreate();
   wifi_.reset(new WiFi(wifi_event_group_));
-  ESP_ERROR_CHECK(CreateWiFiStatusTask());
-  ESP_ERROR_CHECK(wifi_->Inititialize());
-  ESP_ERROR_CHECK(wifi_->Connect(config_->wifi.ssid, config_->wifi.key));
+  err = CreateWiFiStatusTask();
+  if (err != ESP_OK)
+    return err;
+
+  err = wifi_->Inititialize();
+  if (err != ESP_OK)
+    return err;
+
+  err = wifi_->Connect(config_->wifi.ssid, config_->wifi.key);
+  if (err != ESP_OK)
+    return err;
 
   usb_.reset(new USB());
+  err = usb_->Initialize();
+  if (err != ESP_OK)
+    return err;
+
   display_.reset(new Display(320, 240));
   if (!display_->Initialize())
     return ESP_FAIL;
+
+  CreateUSBTestTask();
 
   return ESP_OK;
 }
