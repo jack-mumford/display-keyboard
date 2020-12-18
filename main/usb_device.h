@@ -31,6 +31,8 @@ class Device {
    * Check if device is suspended.
    */
   static bool Suspended();
+
+  static void Tick();
 };
 
 }  // namespace usb

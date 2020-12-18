@@ -20,8 +20,6 @@ bool Device::Mounted() {
 
 // static
 esp_err_t Device::Initialize() {
-  if (!tusb_init())
-    return ESP_FAIL;
   ESP_LOGI(TAG, "USB device is initialized");
   return ESP_OK;
 }
@@ -34,6 +32,11 @@ esp_err_t Device::RemoteWakup() {
 // static
 bool Device::Suspended() {
   return USBDevice.suspended();
+}
+
+// static
+void Device::Tick() {
+  tud_task();
 }
 
 }  // namespace usb

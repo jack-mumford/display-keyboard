@@ -6,6 +6,7 @@
 #include <esp_log.h>
 #include <esp_spi_flash.h>
 #include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 #include <freertos/task.h>
 #include <nvs_flash.h>
 
@@ -18,6 +19,8 @@
 #include "wifi.h"
 
 namespace {
+
+enum { REPORT_ID_KEYBOARD = 1, REPORT_ID_MOUSE };
 
 constexpr char TAG[] = "kbd_app";
 
@@ -41,7 +44,10 @@ esp_err_t InitNVRAM() {
 }  // namespace
 
 App::App()
-    : config_(new Config()), wifi_event_group_(nullptr), main_task_(nullptr) {}
+    : config_(new Config()),
+      wifi_event_group_(nullptr),
+      main_task_(nullptr),
+      tusb_mutex_(xSemaphoreCreateMutex()) {}
 
 App::~App() {
   if (wifi_event_group_)
@@ -95,25 +101,50 @@ void IRAM_ATTR App::USBTestTaskHandler(void* arg) {
   ESP_LOGW(TAG, "In USB test task handler.");
   uint8_t keycodes[6] = {HID_KEY_A,    HID_KEY_NONE, HID_KEY_NONE,
                          HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE};
-  constexpr uint8_t kReportID = 0;
   while (true) {
     vTaskDelay(2000 / portTICK_PERIOD_MS);
+
+    xSemaphoreTake(app->tusb_mutex_, portMAX_DELAY);
     if (usb::Device::Suspended()) {
       if (usb::Device::RemoteWakup() != ESP_OK)
         ESP_LOGE(TAG, "Error waking up");
+      xSemaphoreGive(app->tusb_mutex_);
       continue;
     }
     if (!app->usb_hid_->Ready()) {
       ESP_LOGW(TAG, "USB not ready.");
+      xSemaphoreGive(app->tusb_mutex_);
       continue;
     }
     if (!usb::Device::Mounted()) {
       ESP_LOGI(TAG, "Sending 'A' key");
-      app->usb_hid_->KeyboardReport(kReportID, 0, keycodes);
-      app->usb_hid_->KeyboardRelease(kReportID);
+      app->usb_hid_->KeyboardReport(REPORT_ID_KEYBOARD, 0, keycodes);
+      app->usb_hid_->KeyboardRelease(REPORT_ID_KEYBOARD);
     } else {
       ESP_LOGD(TAG, "USB not mounted");
     }
+    xSemaphoreGive(app->tusb_mutex_);
+  }
+}
+
+esp_err_t App::CreateUSBTask() {
+  constexpr char kTaskName[] = "usb-tick";
+  // https://www.freertos.org/FAQMem.html#StackSize
+  constexpr uint32_t kStackDepthWords = 2048;
+
+  return xTaskCreate(USBTaskHandler, kTaskName, kStackDepthWords, this,
+                     tskIDLE_PRIORITY, &main_task_) == pdPASS
+             ? ESP_OK
+             : ESP_FAIL;
+}
+
+// static:
+void IRAM_ATTR App::USBTaskHandler(void* arg) {
+  App* app = static_cast<App*>(arg);
+  while (true) {
+    xSemaphoreTake(app->tusb_mutex_, portMAX_DELAY);
+    usb::Device::Tick();
+    xSemaphoreGive(app->tusb_mutex_);
   }
 }
 
@@ -140,6 +171,10 @@ esp_err_t App::Initialize() {
   wifi_event_group_ = xEventGroupCreate();
   wifi_.reset(new WiFi(wifi_event_group_));
   err = CreateWiFiStatusTask();
+  if (err != ESP_OK)
+    return err;
+
+  err = CreateUSBTask();
   if (err != ESP_OK)
     return err;
 

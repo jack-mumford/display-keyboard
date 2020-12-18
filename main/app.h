@@ -5,6 +5,7 @@
 #include <esp_err.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
+#include <freertos/semphr.h>
 
 class Config;
 class Display;
@@ -28,9 +29,11 @@ class App {
  private:
   static void IRAM_ATTR WiFiTaskHandler(void*);
   static void IRAM_ATTR USBTestTaskHandler(void* arg);
+  static void IRAM_ATTR USBTaskHandler(void* arg);
 
   esp_err_t CreateWiFiStatusTask();
   esp_err_t CreateUSBTestTask();
+  esp_err_t CreateUSBTask();
 
   std::unique_ptr<Config> config_;
   std::unique_ptr<Display> display_;
@@ -39,4 +42,5 @@ class App {
   std::unique_ptr<WiFi> wifi_;
   EventGroupHandle_t wifi_event_group_;
   TaskHandle_t main_task_;
+  SemaphoreHandle_t tusb_mutex_;  ///< TinyUSB mutex.
 };
