@@ -8,10 +8,8 @@
 
 namespace {
 
-enum { REPORT_ID_KEYBOARD = 1, REPORT_ID_MOUSE };
-
 constexpr uint8_t desc_hid_report[] = {
-    TUD_HID_REPORT_DESC_KEYBOARD(HID_REPORT_ID(REPORT_ID_KEYBOARD))};
+    TUD_HID_REPORT_DESC_KEYBOARD(HID_REPORT_ID(HID_PROTOCOL_KEYBOARD))};
 constexpr char TAG[] = "kbd_hid";
 constexpr char kUSBDescriptor[] = "Test Keyboard";
 
