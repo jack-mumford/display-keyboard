@@ -14,6 +14,7 @@
 #include "display.h"
 #include "filesystem.h"
 #include "usb.h"
+#include "usb_hid.h"
 #include "wifi.h"
 
 namespace {
@@ -102,14 +103,14 @@ void IRAM_ATTR App::USBTestTaskHandler(void* arg) {
         ESP_LOGE(TAG, "Error waking up");
       continue;
     }
-    if (!app->usb_->Ready()) {
+    if (!app->usb_hid_->Ready()) {
       ESP_LOGW(TAG, "USB not ready.");
       continue;
     }
     if (!USB::Mounted()) {
       ESP_LOGI(TAG, "Sending 'A' key");
-      app->usb_->KeyboardReport(kReportID, 0, keycodes);
-      app->usb_->KeyboardRelease(kReportID);
+      app->usb_hid_->KeyboardReport(kReportID, 0, keycodes);
+      app->usb_hid_->KeyboardRelease(kReportID);
     } else {
       ESP_LOGD(TAG, "USB not mounted");
     }
@@ -150,10 +151,10 @@ esp_err_t App::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  usb_.reset(new USB());
-  err = usb_->Initialize();
+  err = USB::Initialize();
   if (err != ESP_OK)
     return err;
+  usb_hid_.reset(new USB_HID());
 
   display_.reset(new Display(320, 240));
   if (!display_->Initialize())
