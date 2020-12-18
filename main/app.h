@@ -12,7 +12,7 @@ class Filesystem;
 class WiFi;
 
 namespace usb {
-class USB_HID;
+class HID;
 }
 
 class App {
@@ -35,7 +35,7 @@ class App {
   std::unique_ptr<Config> config_;
   std::unique_ptr<Display> display_;
   std::unique_ptr<Filesystem> fs_;
-  std::unique_ptr<usb::USB_HID> usb_hid_;
+  std::unique_ptr<usb::HID> usb_hid_;
   std::unique_ptr<WiFi> wifi_;
   EventGroupHandle_t wifi_event_group_;
   TaskHandle_t main_task_;

@@ -154,7 +154,7 @@ esp_err_t App::Initialize() {
   err = usb::USB::Initialize();
   if (err != ESP_OK)
     return err;
-  usb_hid_.reset(new usb::USB_HID());
+  usb_hid_.reset(new usb::HID());
 
   display_.reset(new Display(320, 240));
   if (!display_->Initialize())

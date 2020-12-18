@@ -35,11 +35,11 @@ void hid_set_report_cb(TU_ATTR_UNUSED uint8_t report_id,
 
 }  // namespace
 
-USB_HID::USB_HID() = default;
+HID::HID() = default;
 
-USB_HID::~USB_HID() = default;
+HID::~HID() = default;
 
-esp_err_t USB_HID::Initialize() {
+esp_err_t HID::Initialize() {
   constexpr uint8_t kPollIntervalMs = 2;
 
   usb_hid_.setPollInterval(kPollIntervalMs);
@@ -53,18 +53,18 @@ esp_err_t USB_HID::Initialize() {
   return ESP_OK;
 }
 
-esp_err_t USB_HID::KeyboardReport(uint8_t report_id,
-                                  uint8_t modifier,
-                                  uint8_t keycode[6]) {
+esp_err_t HID::KeyboardReport(uint8_t report_id,
+                              uint8_t modifier,
+                              uint8_t keycode[6]) {
   return usb_hid_.keyboardReport(report_id, modifier, keycode) ? ESP_OK
                                                                : ESP_FAIL;
 }
 
-esp_err_t USB_HID::KeyboardRelease(uint8_t report_id) {
+esp_err_t HID::KeyboardRelease(uint8_t report_id) {
   return usb_hid_.keyboardRelease(report_id) ? ESP_OK : ESP_FAIL;
 }
 
-bool USB_HID::Ready() {
+bool HID::Ready() {
   return usb_hid_.ready();
 }
 

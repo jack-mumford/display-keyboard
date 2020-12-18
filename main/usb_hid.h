@@ -6,10 +6,10 @@
 
 namespace usb {
 
-class USB_HID {
+class HID {
  public:
-  USB_HID();
-  ~USB_HID();
+  HID();
+  ~HID();
 
   /**
    * Initialize the USB instance.
