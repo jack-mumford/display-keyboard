@@ -6,7 +6,6 @@
 #include <esp_log.h>
 #include <esp_spi_flash.h>
 #include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
 #include <freertos/task.h>
 #include <nvs_flash.h>
 
@@ -14,6 +13,7 @@
 #include "config_reader.h"
 #include "display.h"
 #include "filesystem.h"
+#include "led_controller.h"
 #include "usb_device.h"
 #include "usb_hid.h"
 #include "wifi.h"
@@ -26,6 +26,7 @@ constexpr char TAG[] = "kbd_app";
 
 constexpr uint64_t kMaxMainLoopWaitMSecs = 100;
 constexpr uint32_t kMinMainLoopWaitMSecs = 10;
+constexpr gpio_num_t kActivityGPIO = GPIO_NUM_2;
 
 // Make sure min wait time is at least one tick.
 static_assert((kMinMainLoopWaitMSecs / portTICK_PERIOD_MS) > 0);
@@ -44,10 +45,7 @@ esp_err_t InitNVRAM() {
 }  // namespace
 
 App::App()
-    : config_(new Config()),
-      wifi_event_group_(nullptr),
-      main_task_(nullptr),
-      tusb_mutex_(xSemaphoreCreateMutex()) {}
+    : config_(new Config()), wifi_event_group_(nullptr), main_task_(nullptr) {}
 
 App::~App() {
   if (wifi_event_group_)
@@ -85,7 +83,7 @@ void IRAM_ATTR App::WiFiTaskHandler(void* arg) {
 }
 
 esp_err_t App::CreateUSBTestTask() {
-  constexpr char kTaskName[] = "usb-status";
+  constexpr char kTaskName[] = "usb-test";
   // https://www.freertos.org/FAQMem.html#StackSize
   constexpr uint32_t kStackDepthWords = 2048;
 
@@ -95,7 +93,7 @@ esp_err_t App::CreateUSBTestTask() {
              : ESP_FAIL;
 }
 
-// static:
+// static
 void IRAM_ATTR App::USBTestTaskHandler(void* arg) {
   App* app = static_cast<App*>(arg);
   ESP_LOGW(TAG, "In USB test task handler.");
@@ -104,16 +102,13 @@ void IRAM_ATTR App::USBTestTaskHandler(void* arg) {
   while (true) {
     vTaskDelay(2000 / portTICK_PERIOD_MS);
 
-    xSemaphoreTake(app->tusb_mutex_, portMAX_DELAY);
     if (usb::Device::Suspended()) {
       if (usb::Device::RemoteWakup() != ESP_OK)
         ESP_LOGE(TAG, "Error waking up");
-      xSemaphoreGive(app->tusb_mutex_);
       continue;
     }
     if (!app->usb_hid_->Ready()) {
       ESP_LOGW(TAG, "USB not ready.");
-      xSemaphoreGive(app->tusb_mutex_);
       continue;
     }
     if (!usb::Device::Mounted()) {
@@ -123,7 +118,6 @@ void IRAM_ATTR App::USBTestTaskHandler(void* arg) {
     } else {
       ESP_LOGD(TAG, "USB not mounted");
     }
-    xSemaphoreGive(app->tusb_mutex_);
   }
 }
 
@@ -138,13 +132,18 @@ esp_err_t App::CreateUSBTask() {
              : ESP_FAIL;
 }
 
-// static:
+// static
 void IRAM_ATTR App::USBTaskHandler(void* arg) {
-  App* app = static_cast<App*>(arg);
+  // App* app = static_cast<App*>(arg);
+  bool on = false;
   while (true) {
-    xSemaphoreTake(app->tusb_mutex_, portMAX_DELAY);
+    // Merely setting GPIO2 (built-in LED) to OUTPUT on the Cucumber ESP32-S2
+    // turns on the LED. Using gpio_set_level(_, 0) doesn't turn if off :-(.
+    // TODO: Figure this out later.
+    gpio_set_direction(kActivityGPIO, on ? GPIO_MODE_OUTPUT : GPIO_MODE_INPUT);
+    on = !on;
     usb::Device::Tick();
-    xSemaphoreGive(app->tusb_mutex_);
+    vTaskDelay(pdMS_TO_TICKS(100));
   }
 }
 

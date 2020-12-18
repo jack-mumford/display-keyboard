@@ -20,6 +20,7 @@ bool Device::Mounted() {
 
 // static
 esp_err_t Device::Initialize() {
+  tusb_init();
   ESP_LOGI(TAG, "USB device is initialized");
   return ESP_OK;
 }

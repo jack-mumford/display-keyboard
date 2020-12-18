@@ -5,13 +5,11 @@
 #include <esp_err.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
-#include <freertos/semphr.h>
 
 class Config;
 class Display;
 class Filesystem;
 class WiFi;
-
 namespace usb {
 class HID;
 }
@@ -42,5 +40,4 @@ class App {
   std::unique_ptr<WiFi> wifi_;
   EventGroupHandle_t wifi_event_group_;
   TaskHandle_t main_task_;
-  SemaphoreHandle_t tusb_mutex_;  ///< TinyUSB mutex.
 };
