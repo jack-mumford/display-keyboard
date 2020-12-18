@@ -7,10 +7,10 @@
 
 namespace usb {
 
-class USB {
+class Device {
  public:
-  USB() = delete;
-  ~USB() = delete;
+  Device() = delete;
+  ~Device() = delete;
 
   /**
    * Initialize the USB device.
