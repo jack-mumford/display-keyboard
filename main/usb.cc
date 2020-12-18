@@ -20,7 +20,7 @@ USB* g_usb;
 void hid_set_report_cb(TU_ATTR_UNUSED uint8_t report_id,
                        hid_report_type_t report_type,
                        uint8_t const* buffer,
-                       TU_ATTR_UNUSED uint16_t bufsize) {
+                       uint16_t bufsize) {
   if (!g_usb)
     return;
 

@@ -11,6 +11,9 @@ class USB {
 
   static bool Mounted();
 
+  /**
+   * Initialize the USB instance.
+   */
   esp_err_t Initialize();
 
   /**
