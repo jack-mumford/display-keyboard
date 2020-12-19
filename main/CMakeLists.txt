@@ -1,4 +1,4 @@
-file( GLOB SOURCES *.cc )
+file( GLOB SOURCES *.cc *.c )
 
 idf_component_register(
   SRCS
@@ -14,8 +14,12 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/components/inih"
     "${CMAKE_SOURCE_DIR}/components/lv_port_esp32/components/lvgl/lvgl/src"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src"
+    "${IDF_PATH}/components/driver/include"
     "${IDF_PATH}/components/freertos/include/freertos"
+    "${IDF_PATH}/components/hal/esp32s2/include"
+    "${IDF_PATH}/components/hal/include"
     "${IDF_PATH}/components/nvs_flash/include"
+    "${IDF_PATH}/components/soc/esp32s2/include"
     "${IDF_PATH}/components/spiffs/include"
   REQUIRES
     lvgl_esp32_drivers

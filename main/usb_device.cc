@@ -1,10 +1,9 @@
 #include "usb_device.h"
 
 #include <Adafruit_USBD_Device.h>
-#include <class/hid/hid.h>
-#include <class/hid/hid_device.h>
-#include <esp_log.h>
+#include "hardware.h"
 #include <freertos/task.h>
+#include <esp_log.h>
 #include <tusb.h>
 
 namespace usb {
@@ -37,6 +36,8 @@ bool Device::Mounted() {
 }
 
 esp_err_t Device::Initialize() {
+  //();
+
   // device_.addInterface(); // Serial
   // TODO: These are from random.org. Need to get actual VID/PID numbers to
   //       avoid conflicts with other products.
