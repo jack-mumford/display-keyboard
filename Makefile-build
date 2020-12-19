@@ -19,7 +19,7 @@ PARTITION_OFFSET=0x110000
 .PHONY: format clean target build flash config flash-spiffs monitor
 
 format:
-	clang-format -i main/*.cc main/*.h
+	clang-format -i main/*.cc main/*.c main/*.h
 
 clean:
 	rm -rf build sdkconfig.old spiffs.bin
