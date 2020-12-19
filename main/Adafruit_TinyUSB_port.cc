@@ -3,6 +3,7 @@
 #include <Adafruit_TinyUSB_Core.h>
 #include <esp_log.h>
 #include <tusb.h>
+
 namespace {
 constexpr char TAG[] = "usb_port";
 }

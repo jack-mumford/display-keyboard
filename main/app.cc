@@ -102,8 +102,8 @@ void IRAM_ATTR App::USBTestTaskHandler(void* arg) {
   while (true) {
     vTaskDelay(2000 / portTICK_PERIOD_MS);
 
-    if (usb::Device::Suspended()) {
-      if (usb::Device::RemoteWakup() != ESP_OK)
+    if (app->usb_device_->Suspended()) {
+      if (app->usb_device_->RemoteWakup() != ESP_OK)
         ESP_LOGE(TAG, "Error waking up");
       continue;
     }
@@ -111,7 +111,7 @@ void IRAM_ATTR App::USBTestTaskHandler(void* arg) {
       ESP_LOGW(TAG, "USB not ready.");
       continue;
     }
-    if (!usb::Device::Mounted()) {
+    if (!app->usb_device_->Mounted()) {
       ESP_LOGI(TAG, "Sending 'A' key");
       app->usb_hid_->KeyboardReport(REPORT_ID_KEYBOARD, 0, keycodes);
       app->usb_hid_->KeyboardRelease(REPORT_ID_KEYBOARD);
@@ -134,7 +134,7 @@ esp_err_t App::CreateUSBTask() {
 
 // static
 void IRAM_ATTR App::USBTaskHandler(void* arg) {
-  // App* app = static_cast<App*>(arg);
+  App* app = static_cast<App*>(arg);
   bool on = false;
   while (true) {
     // Merely setting GPIO2 (built-in LED) to OUTPUT on the Cucumber ESP32-S2
@@ -142,7 +142,7 @@ void IRAM_ATTR App::USBTaskHandler(void* arg) {
     // TODO: Figure this out later.
     gpio_set_direction(kActivityGPIO, on ? GPIO_MODE_OUTPUT : GPIO_MODE_INPUT);
     on = !on;
-    usb::Device::Tick();
+    app->usb_device_->Tick();
     vTaskDelay(pdMS_TO_TICKS(100));
   }
 }
@@ -185,10 +185,14 @@ esp_err_t App::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  err = usb::Device::Initialize();
+  usb_device_.reset(new usb::Device());
+  err = usb_device_->Initialize();
   if (err != ESP_OK)
     return err;
   usb_hid_.reset(new usb::HID());
+  err = usb_hid_->Initialize();
+  if (err != ESP_OK)
+    return err;
 
   display_.reset(new Display(320, 240));
   if (!display_->Initialize())

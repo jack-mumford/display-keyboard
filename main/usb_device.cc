@@ -11,31 +11,51 @@ namespace usb {
 
 namespace {
 constexpr char TAG[] = "kbd_usb";
-}
 
-// static
+class Port : public Adafruit_USBD_Device_Port {
+ public:
+  uint8_t getSerialDescriptor(uint16_t* serial_str,
+                              uint8_t max_num_chars) override {
+    return 0;
+  }
+};
+
+}  // namespace
+
+Device::Device() : device_(std::unique_ptr<Port>(new Port())) {}
+
+Device::~Device() = default;
+
 bool Device::Mounted() {
-  return USBDevice.mounted();
+  return device_.mounted();
 }
 
-// static
 esp_err_t Device::Initialize() {
-  tusb_init();
+  // device_.addInterface(); // Serial
+  // TODO: These are from random.org. Need to get actual VID/PID numbers to
+  //       avoid conflicts with other products.
+  constexpr uint16_t kVendorID = 44699;
+  constexpr uint16_t kProductID = 59002;
+
+  device_.setID(kVendorID, kProductID);
+  if (!device_.begin())
+    return ESP_OK;
+
+  if (!tusb_init())
+    return ESP_FAIL;
+
   ESP_LOGI(TAG, "USB device is initialized");
   return ESP_OK;
 }
 
-// static
 esp_err_t Device::RemoteWakup() {
-  return USBDevice.remoteWakeup() ? ESP_OK : ESP_FAIL;
+  return device_.remoteWakeup() ? ESP_OK : ESP_FAIL;
 }
 
-// static
 bool Device::Suspended() {
-  return USBDevice.suspended();
+  return device_.suspended();
 }
 
-// static
 void Device::Tick() {
   tud_task();
 }

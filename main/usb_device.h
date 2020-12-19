@@ -1,38 +1,45 @@
 
 #pragma once
 
+#include <memory>
+
 #include <freertos/FreeRTOS.h>
 
 #include <esp_err.h>
+
+#include "Adafruit_USBD_Device.h"
 
 namespace usb {
 
 class Device {
  public:
-  Device() = delete;
-  ~Device() = delete;
+  Device();
+  ~Device();
 
   /**
    * Initialize the USB device.
    */
-  static esp_err_t Initialize();
+  esp_err_t Initialize();
 
   /**
    * Is the device connected and configured.
    */
-  static bool Mounted();
+  bool Mounted();
 
   /**
    * Remote wake up host, only if suspended and enabled by host.
    */
-  static esp_err_t RemoteWakup();
+  esp_err_t RemoteWakup();
 
   /**
    * Check if device is suspended.
    */
-  static bool Suspended();
+  bool Suspended();
 
-  static void Tick();
+  void Tick();
+
+ private:
+  Adafruit_USBD_Device device_;
 };
 
 }  // namespace usb
