@@ -16,7 +16,13 @@ class Port : public Adafruit_USBD_Device_Port {
  public:
   uint8_t getSerialDescriptor(uint16_t* serial_str,
                               uint8_t max_num_chars) override {
-    return 0;
+    constexpr char kSerialDescriptor[] = "Display Keyboard";
+    if (!max_num_chars)
+      return 0;
+    uint8_t i = 0;
+    for (; i < sizeof(kSerialDescriptor) && i < max_num_chars; i++)
+      serial_str[i] = kSerialDescriptor[i];
+    return i - 1;
   }
 };
 
