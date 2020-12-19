@@ -1,10 +1,10 @@
 #include "usb_device.h"
 
 #include <Adafruit_USBD_Device.h>
-#include "hardware.h"
-#include <freertos/task.h>
 #include <esp_log.h>
+#include <freertos/task.h>
 #include <tusb.h>
+#include "hardware.h"
 
 namespace usb {
 
