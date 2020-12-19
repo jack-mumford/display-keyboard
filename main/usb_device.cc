@@ -15,7 +15,7 @@ class Port : public Adafruit_USBD_Device_Port {
  public:
   uint8_t getSerialDescriptor(uint16_t* serial_str,
                               uint8_t max_num_chars) override {
-    constexpr char kSerialDescriptor[] = "Display Keyboard";
+    constexpr char kSerialDescriptor[] = "00001A";
     if (!max_num_chars)
       return 0;
     uint8_t i = 0;
@@ -36,13 +36,16 @@ bool Device::Mounted() {
 }
 
 esp_err_t Device::Initialize() {
-  // device_.addInterface(); // Serial
   // TODO: These are from random.org. Need to get actual VID/PID numbers to
   //       avoid conflicts with other products.
   constexpr uint16_t kVendorID = 44699;
   constexpr uint16_t kProductID = 59002;
 
   device_.setID(kVendorID, kProductID);
+  device_.setManufacturerDescriptor("Awesome Keyboard Co.");
+  device_.setProductDescriptor("Super Display Keyboard");
+  device_.setVersion(1);
+  device_.setDeviceVersion(1);
   if (!device_.begin())
     return ESP_OK;
 

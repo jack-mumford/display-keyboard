@@ -93,10 +93,12 @@ esp_err_t App::CreateKeyboardSimulatorTask() {
 // static
 void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
   App* app = static_cast<App*>(arg);
-  ESP_LOGW(TAG, "In USB test task handler.");
+  ESP_LOGW(TAG, "In USB keyboard simulator task.");
   bool on = false;
+  const std::string kTypedString = "Super Display Keyboard. ";
+  int idx = 0;
   while (true) {
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(2000));
 
     if (app->usb_device_->Suspended()) {
       if (app->usb_device_->RemoteWakup() != ESP_OK)
@@ -111,7 +113,10 @@ void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
       gpio_set_direction(kActivityGPIO,
                          on ? GPIO_MODE_OUTPUT : GPIO_MODE_INPUT);
       on = !on;
-      app->usb_hid_->KeyboardPress(REPORT_ID_KEYBOARD, 'A');
+
+      app->usb_hid_->KeyboardPress(REPORT_ID_KEYBOARD, kTypedString[idx++]);
+      if (idx == kTypedString.length())
+        idx = 0;
 
       // For some reason a delay is required. Without one the keyboard release
       // doesn't seem to work and auto-repeats forever. 5ms was impirically
