@@ -36,8 +36,6 @@ bool Device::Mounted() {
 }
 
 esp_err_t Device::Initialize() {
-  //();
-
   // device_.addInterface(); // Serial
   // TODO: These are from random.org. Need to get actual VID/PID numbers to
   //       avoid conflicts with other products.
@@ -47,6 +45,8 @@ esp_err_t Device::Initialize() {
   device_.setID(kVendorID, kProductID);
   if (!device_.begin())
     return ESP_OK;
+
+  board_init();
 
   if (!tusb_init())
     return ESP_FAIL;

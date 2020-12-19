@@ -35,13 +35,11 @@
 #include <esp32s2/rom/gpio.h>
 #include <esp_log.h>
 #include <esp_rom_gpio.h>
-#include <freertos/task.h>
 #include <hal/gpio_ll.h>
 #include <hal/gpio_types.h>
 #include <hal/usb_hal.h>
 #include <soc/periph_defs.h>
 #include <soc/usb_periph.h>
-#include <tusb.h>
 
 // Copied from hw/bsp/esp32s2_saola_1/esp32s2_saola_1.c.
 const char TAG[] = "usb_hw";
