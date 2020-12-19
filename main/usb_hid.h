@@ -1,12 +1,15 @@
 
 #pragma once
 
-#include <Adafruit_USBD_HID.h>
 #include <esp_err.h>
+
+#include <Adafruit_USBD_Device.h>
+#include <class/hid/hid.h>
+#include <class/hid/hid_device.h>
 
 namespace usb {
 
-class HID {
+class HID : public Adafruit_USBD_Interface {
  public:
   HID();
   ~HID();
@@ -23,7 +26,7 @@ class HID {
    * @param modifier  // Keyboard modifier (KEYBOARD_MODIFIER_* masks).
    * @param keycode   // Key codes of the currently pressed keys.
    *
-   * @return esp_err_t
+   * @return ESP_OK on success, else other error code.
    */
   esp_err_t KeyboardReport(uint8_t report_id,
                            uint8_t modifier,
@@ -35,8 +38,10 @@ class HID {
 
   bool Ready();
 
- private:
-  Adafruit_USBD_HID usb_hid_;
+  // Adafruit_USBD_Interface:
+  uint16_t getDescriptor(uint8_t itfnum,
+                         uint8_t* buf,
+                         uint16_t bufsize) override;
 };
 
 }  // namespace usb

@@ -1,26 +1,50 @@
 #include "usb_hid.h"
 
-#include <class/hid/hid.h>
+#include <freertos/FreeRTOS.h>
+
+#include <Adafruit_USBD_Device.h>
 #include <class/hid/hid_device.h>
 #include <esp_log.h>
-#include <freertos/task.h>
 #include <tusb.h>
 
 namespace usb {
 
 namespace {
 
+constexpr uint8_t kEndpointInput = 0x80;
+constexpr char kUSBDescriptor[] = "Test Keyboard";
 constexpr uint8_t desc_hid_report[] = {
     TUD_HID_REPORT_DESC_KEYBOARD(HID_REPORT_ID(HID_PROTOCOL_KEYBOARD))};
 constexpr char TAG[] = "kbd_hid";
-constexpr char kUSBDescriptor[] = "Test Keyboard";
+constexpr uint8_t kASCII2KeyCode[128][2] = {HID_ASCII_TO_KEYCODE};
+constexpr uint8_t kEndpointIntervalMs = 2;
+constexpr uint8_t kBootProtocol = HID_PROTOCOL_NONE;
+
+extern "C" {
+
+// Invoked when received GET HID REPORT DESCRIPTOR
+// Application return pointer to descriptor, whose contents must exist long
+// enough for transfer to complete
+uint8_t const* tud_hid_descriptor_report_cb(void) {
+  return desc_hid_report;
+}
+
+// Invoked when received GET_REPORT control request
+// Application must fill buffer report's content and return its length.
+// Return zero will cause the stack to STALL request
+uint16_t tud_hid_get_report_cb(uint8_t report_id,
+                               hid_report_type_t report_type,
+                               uint8_t* buffer,
+                               uint16_t reqlen) {
+  return 0;
+}
 
 // Invoked when received SET_REPORT control request or
 // received data on OUT endpoint ( Report ID = 0, Type = 0 )
-void hid_set_report_cb(TU_ATTR_UNUSED uint8_t report_id,
-                       hid_report_type_t report_type,
-                       uint8_t const* buffer,
-                       uint16_t bufsize) {
+void tud_hid_set_report_cb(uint8_t report_id,
+                           hid_report_type_t report_type,
+                           uint8_t const* buffer,
+                           uint16_t bufsize) {
   if (report_type != HID_REPORT_TYPE_OUTPUT)
     return;
   if (bufsize < 1)
@@ -33,6 +57,8 @@ void hid_set_report_cb(TU_ATTR_UNUSED uint8_t report_id,
            caps_lock ? 'Y' : 'N');
 }
 
+}  // extern "C"
+
 }  // namespace
 
 HID::HID() = default;
@@ -40,36 +66,49 @@ HID::HID() = default;
 HID::~HID() = default;
 
 esp_err_t HID::Initialize() {
-  constexpr uint8_t kPollIntervalMs = 2;
-
-  usb_hid_.setPollInterval(kPollIntervalMs);
-  usb_hid_.setReportDescriptor(desc_hid_report, sizeof(desc_hid_report));
-  usb_hid_.setReportCallback(nullptr, hid_set_report_cb);
-  usb_hid_.setStringDescriptor(kUSBDescriptor);
-
-  if (!usb_hid_.begin())
-    return ESP_FAIL;
-
-  return ESP_OK;
+  setStringDescriptor(kUSBDescriptor);
+  return Adafruit_USBD_Device::Get()->addInterface(*this) ? ESP_OK : ESP_FAIL;
 }
 
 esp_err_t HID::KeyboardReport(uint8_t report_id,
                               uint8_t modifier,
                               uint8_t keycode[6]) {
-  return usb_hid_.keyboardReport(report_id, modifier, keycode) ? ESP_OK
+  return tud_hid_keyboard_report(report_id, modifier, keycode) ? ESP_OK
                                                                : ESP_FAIL;
 }
 
 esp_err_t HID::KeyboardPress(uint8_t report_id, char ch) {
-  return usb_hid_.keyboardPress(report_id, ch) ? ESP_OK : ESP_FAIL;
+  uint8_t keycode[6] = {HID_KEY_NONE};
+  uint8_t modifier = 0;
+
+  const int idx = static_cast<int>(ch);
+  if (kASCII2KeyCode[idx][0])
+    modifier = KEYBOARD_MODIFIER_LEFTSHIFT;
+  keycode[0] = kASCII2KeyCode[idx][1];
+
+  return tud_hid_keyboard_report(report_id, modifier, keycode) ? ESP_OK
+                                                               : ESP_FAIL;
 }
 
 esp_err_t HID::KeyboardRelease(uint8_t report_id) {
-  return usb_hid_.keyboardRelease(report_id) ? ESP_OK : ESP_FAIL;
+  return tud_hid_keyboard_report(report_id, 0, nullptr) ? ESP_OK : ESP_FAIL;
 }
 
 bool HID::Ready() {
-  return usb_hid_.ready();
+  return tud_hid_ready();
+}
+
+uint16_t HID::getDescriptor(uint8_t itfnum, uint8_t* buf, uint16_t bufsize) {
+  // usb core will automatically update endpoint number
+  const uint8_t desc_in_only[] = {TUD_HID_DESCRIPTOR(
+      itfnum, 0, kBootProtocol, sizeof(desc_hid_report), kEndpointInput,
+      CFG_TUD_HID_EP_BUFSIZE, kEndpointIntervalMs)};
+
+  if (bufsize < sizeof(desc_in_only))
+    return 0;
+
+  memcpy(buf, desc_in_only, sizeof(desc_in_only));
+  return sizeof(desc_in_only);
 }
 
 }  // namespace usb
