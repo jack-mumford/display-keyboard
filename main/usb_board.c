@@ -24,7 +24,7 @@
  *
  */
 
-#include "hardware.h"
+#include "usb_board.h"
 
 #include <freertos/FreeRTOS.h>
 

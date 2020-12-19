@@ -4,7 +4,7 @@
 #include <esp_log.h>
 #include <freertos/task.h>
 #include <tusb.h>
-#include "hardware.h"
+#include "usb_board.h"
 
 namespace usb {
 
