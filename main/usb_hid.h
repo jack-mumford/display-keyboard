@@ -1,16 +1,31 @@
-
 #pragma once
+
+#include <cstdint>
 
 #include <esp_err.h>
 
-#include <Adafruit_USBD_Device.h>
 #include <class/hid/hid.h>
 #include <class/hid/hid_device.h>
+#include <device/usbd.h>
 
 namespace usb {
 
-class HID : public Adafruit_USBD_Interface {
+class HID {
  public:
+  constexpr static uint8_t kEndpointInput = 0x80;
+  constexpr static uint8_t kBootProtocol = HID_PROTOCOL_NONE;
+  constexpr static uint8_t kEndpointIntervalMs = 2;
+  constexpr static uint8_t desc_hid_report[] = {
+      TUD_HID_REPORT_DESC_KEYBOARD(HID_REPORT_ID(HID_PROTOCOL_KEYBOARD))};
+  constexpr static tusb_desc_interface_t kHIDDescriptor = {
+      TUD_HID_DESCRIPTOR(1,
+                         0,
+                         kBootProtocol,
+                         sizeof(desc_hid_report),
+                         kEndpointInput,
+                         CFG_TUD_HID_EP_BUFSIZE,
+                         kEndpointIntervalMs)};
+
   HID();
   ~HID();
 

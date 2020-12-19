@@ -2,16 +2,17 @@
 
 #include <freertos/FreeRTOS.h>
 
-#include <Adafruit_USBD_Device.h>
 #include <class/hid/hid_device.h>
 #include <esp_log.h>
 #include <tusb.h>
+#include "usb_device.h"
 
 namespace usb {
 
 namespace {
 
 constexpr uint8_t kEndpointInput = 0x80;
+#if 0
 constexpr char kUSBDescriptor[] = "Test Keyboard";
 constexpr uint8_t desc_hid_report[] = {
     TUD_HID_REPORT_DESC_KEYBOARD(HID_REPORT_ID(HID_PROTOCOL_KEYBOARD))};
@@ -19,6 +20,7 @@ constexpr char TAG[] = "kbd_hid";
 constexpr uint8_t kASCII2KeyCode[128][2] = {HID_ASCII_TO_KEYCODE};
 constexpr uint8_t kEndpointIntervalMs = 2;
 constexpr uint8_t kBootProtocol = HID_PROTOCOL_NONE;
+#endif
 
 extern "C" {
 
@@ -67,7 +69,7 @@ HID::~HID() = default;
 
 esp_err_t HID::Initialize() {
   setStringDescriptor(kUSBDescriptor);
-  return Adafruit_USBD_Device::Get()->addInterface(*this) ? ESP_OK : ESP_FAIL;
+  return Device::AddInterface(this);
 }
 
 esp_err_t HID::KeyboardReport(uint8_t report_id,
