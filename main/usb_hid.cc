@@ -60,6 +60,10 @@ esp_err_t HID::KeyboardReport(uint8_t report_id,
                                                                : ESP_FAIL;
 }
 
+esp_err_t HID::KeyboardPress(uint8_t report_id, char ch) {
+  return usb_hid_.keyboardPress(report_id, ch) ? ESP_OK : ESP_FAIL;
+}
+
 esp_err_t HID::KeyboardRelease(uint8_t report_id) {
   return usb_hid_.keyboardRelease(report_id) ? ESP_OK : ESP_FAIL;
 }

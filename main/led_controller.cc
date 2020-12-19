@@ -25,6 +25,7 @@ constexpr uint64_t kLEDOffDelayUsec = 50000;
 
 LEDController::LEDController(gpio_num_t activity_gpio)
     : activity_gpio_(activity_gpio), led_off_timer_(nullptr) {
+#if 0
   const gpio_config_t config = {
       .pin_bit_mask = (1UL << activity_gpio_),
       .mode = GPIO_MODE_OUTPUT,
@@ -33,6 +34,7 @@ LEDController::LEDController(gpio_num_t activity_gpio)
       .intr_type = GPIO_INTR_DISABLE,
   };
   ESP_ERROR_CHECK_WITHOUT_ABORT(gpio_config(&config));
+#endif
   gpio_set_level(activity_gpio_, 0);
   ESP_ERROR_CHECK_WITHOUT_ABORT(CreateActivityTimer());
 }

@@ -53,11 +53,10 @@ App::~App() {
 }
 
 esp_err_t App::CreateWiFiStatusTask() {
-  constexpr char kTaskName[] = "wifi-status";
   // https://www.freertos.org/FAQMem.html#StackSize
   constexpr uint32_t kStackDepthWords = 2048;
 
-  BaseType_t task = xTaskCreate(WiFiTaskHandler, kTaskName, kStackDepthWords,
+  BaseType_t task = xTaskCreate(WiFiStatusTask, "wifi-status", kStackDepthWords,
                                 this, tskIDLE_PRIORITY, &main_task_);
   if (task != pdPASS)
     return ESP_FAIL;
@@ -65,7 +64,7 @@ esp_err_t App::CreateWiFiStatusTask() {
 }
 
 // static:
-void IRAM_ATTR App::WiFiTaskHandler(void* arg) {
+void IRAM_ATTR App::WiFiStatusTask(void* arg) {
   App* app = static_cast<App*>(arg);
   ESP_LOGW(TAG, "In Wi-Fi status task handler.");
   while (true) {
@@ -82,28 +81,22 @@ void IRAM_ATTR App::WiFiTaskHandler(void* arg) {
   }
 }
 
-esp_err_t App::CreateUSBTestTask() {
-  constexpr char kTaskName[] = "usb-test";
+esp_err_t App::CreateKeyboardSimulatorTask() {
   // https://www.freertos.org/FAQMem.html#StackSize
   constexpr uint32_t kStackDepthWords = 2048;
-
-  return xTaskCreate(USBTestTaskHandler, kTaskName, kStackDepthWords, this,
+  return xTaskCreate(KeyboardSimulatorTask, "usb-test", kStackDepthWords, this,
                      tskIDLE_PRIORITY, &main_task_) == pdPASS
              ? ESP_OK
              : ESP_FAIL;
 }
 
 // static
-void IRAM_ATTR App::USBTestTaskHandler(void* arg) {
+void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
   App* app = static_cast<App*>(arg);
   ESP_LOGW(TAG, "In USB test task handler.");
-  uint8_t keycodes[6] = {HID_KEY_A,    HID_KEY_NONE, HID_KEY_NONE,
-                         HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE};
   bool on = false;
   while (true) {
-    vTaskDelay(2000 / portTICK_PERIOD_MS);
-    gpio_set_direction(kActivityGPIO, on ? GPIO_MODE_OUTPUT : GPIO_MODE_INPUT);
-    on = !on;
+    vTaskDelay(pdMS_TO_TICKS(1000));
 
     if (app->usb_device_->Suspended()) {
       if (app->usb_device_->RemoteWakup() != ESP_OK)
@@ -115,8 +108,15 @@ void IRAM_ATTR App::USBTestTaskHandler(void* arg) {
       continue;
     }
     if (app->usb_device_->Mounted()) {
-      ESP_LOGI(TAG, "Sending 'A' key");
-      app->usb_hid_->KeyboardReport(REPORT_ID_KEYBOARD, 0, keycodes);
+      gpio_set_direction(kActivityGPIO,
+                         on ? GPIO_MODE_OUTPUT : GPIO_MODE_INPUT);
+      on = !on;
+      app->usb_hid_->KeyboardPress(REPORT_ID_KEYBOARD, 'A');
+
+      // For some reason a delay is required. Without one the keyboard release
+      // doesn't seem to work and auto-repeats forever. 5ms was impirically
+      // found to be short enough to prevent auto-repeat.
+      ets_delay_us(5000);
       app->usb_hid_->KeyboardRelease(REPORT_ID_KEYBOARD);
     } else {
       ESP_LOGD(TAG, "USB not mounted");
@@ -125,18 +125,17 @@ void IRAM_ATTR App::USBTestTaskHandler(void* arg) {
 }
 
 esp_err_t App::CreateUSBTask() {
-  constexpr char kTaskName[] = "usb-tick";
   // https://www.freertos.org/FAQMem.html#StackSize
   constexpr uint32_t kStackDepthWords = 2048;
 
-  return xTaskCreate(USBTaskHandler, kTaskName, kStackDepthWords, this,
+  return xTaskCreate(USBTask, "usb-tick", kStackDepthWords, this,
                      tskIDLE_PRIORITY, &main_task_) == pdPASS
              ? ESP_OK
              : ESP_FAIL;
 }
 
 // static
-void IRAM_ATTR App::USBTaskHandler(void* arg) {
+void IRAM_ATTR App::USBTask(void* arg) {
   App* app = static_cast<App*>(arg);
   while (true) {
     // Merely setting GPIO2 (built-in LED) to OUTPUT on the Cucumber ESP32-S2
@@ -198,7 +197,7 @@ esp_err_t App::Initialize() {
   if (!display_->Initialize())
     return ESP_FAIL;
 
-  CreateUSBTestTask();
+  CreateKeyboardSimulatorTask();
 
   return ESP_OK;
 }

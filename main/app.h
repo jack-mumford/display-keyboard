@@ -27,12 +27,12 @@ class App {
   bool is_initialized() const { return wifi_event_group_ != nullptr; }
 
  private:
-  static void IRAM_ATTR WiFiTaskHandler(void*);
-  static void IRAM_ATTR USBTestTaskHandler(void* arg);
-  static void IRAM_ATTR USBTaskHandler(void* arg);
+  static void IRAM_ATTR WiFiStatusTask(void*);
+  static void IRAM_ATTR KeyboardSimulatorTask(void* arg);
+  static void IRAM_ATTR USBTask(void* arg);
 
   esp_err_t CreateWiFiStatusTask();
-  esp_err_t CreateUSBTestTask();
+  esp_err_t CreateKeyboardSimulatorTask();
   esp_err_t CreateUSBTask();
 
   std::unique_ptr<Config> config_;
