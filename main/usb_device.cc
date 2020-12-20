@@ -34,7 +34,7 @@ constexpr char kDeviceSerialNumber[] = "00001A";
 constexpr char kDeviceManufacturer[] = "Awesome Keyboard Co.";
 constexpr char kProduct[] = "Super Display Keyboard";
 constexpr uint16_t kLanguage = 0x0409;  // = English
-constexpr uint8_t kMaxPower = 100;
+constexpr uint8_t kMaxPower = 150;      // 2 mA units (i.e., 50 = 100 mA).
 constexpr tusb_desc_device_t kDeviceDescriptor = {
     .bLength = sizeof(tusb_desc_device_t),
     .bDescriptorType = TUSB_DESC_DEVICE,
