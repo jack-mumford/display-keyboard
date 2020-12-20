@@ -59,14 +59,7 @@ void tud_hid_set_report_cb(uint8_t report_id,
 
 }  // namespace
 
-HID::HID() = default;
-
-HID::~HID() = default;
-
-esp_err_t HID::Initialize() {
-  return ESP_OK;
-}
-
+// static
 esp_err_t HID::KeyboardReport(uint8_t report_id,
                               uint8_t modifier,
                               uint8_t keycode[6]) {
@@ -74,6 +67,7 @@ esp_err_t HID::KeyboardReport(uint8_t report_id,
                                                                : ESP_FAIL;
 }
 
+// static
 esp_err_t HID::KeyboardPress(uint8_t report_id, char ch) {
   uint8_t keycode[6] = {HID_KEY_NONE};
   uint8_t modifier = 0;
@@ -87,10 +81,12 @@ esp_err_t HID::KeyboardPress(uint8_t report_id, char ch) {
                                                                : ESP_FAIL;
 }
 
+// static
 esp_err_t HID::KeyboardRelease(uint8_t report_id) {
   return tud_hid_keyboard_report(report_id, 0, nullptr) ? ESP_OK : ESP_FAIL;
 }
 
+// static
 bool HID::Ready() {
   return tud_hid_ready();
 }

@@ -105,7 +105,7 @@ void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
         ESP_LOGE(TAG, "Error waking up");
       continue;
     }
-    if (!app->usb_hid_->Ready()) {
+    if (!usb::HID::Ready()) {
       ESP_LOGW(TAG, "USB not ready.");
       continue;
     }
@@ -114,7 +114,7 @@ void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
                          on ? GPIO_MODE_OUTPUT : GPIO_MODE_INPUT);
       on = !on;
 
-      app->usb_hid_->KeyboardPress(REPORT_ID_KEYBOARD, kTypedString[idx++]);
+      usb::HID::KeyboardPress(REPORT_ID_KEYBOARD, kTypedString[idx++]);
       if (idx == kTypedString.length())
         idx = 0;
 
@@ -122,7 +122,7 @@ void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
       // doesn't seem to work and auto-repeats forever. 5ms was impirically
       // found to be short enough to prevent auto-repeat.
       ets_delay_us(5000);
-      app->usb_hid_->KeyboardRelease(REPORT_ID_KEYBOARD);
+      usb::HID::KeyboardRelease(REPORT_ID_KEYBOARD);
     } else {
       ESP_LOGD(TAG, "USB not mounted");
     }
@@ -191,10 +191,6 @@ esp_err_t App::Initialize() {
 
   usb_device_.reset(new usb::Device());
   err = usb_device_->Initialize();
-  if (err != ESP_OK)
-    return err;
-  usb_hid_.reset(new usb::HID());
-  err = usb_hid_->Initialize();
   if (err != ESP_OK)
     return err;
 

@@ -31,13 +31,13 @@ class HID {
                          CFG_TUD_HID_EP_BUFSIZE,
                          kEndpointIntervalMs)};
 
-  HID();
-  ~HID();
+  HID() = delete;
+  ~HID() = delete;
 
   /**
    * Initialize the USB instance.
    */
-  esp_err_t Initialize();
+  static esp_err_t Initialize();
 
   /**
    * Standard HID Boot Protocol Keyboard Report.
@@ -48,15 +48,15 @@ class HID {
    *
    * @return ESP_OK on success, else other error code.
    */
-  esp_err_t KeyboardReport(uint8_t report_id,
-                           uint8_t modifier,
-                           uint8_t keycode[6]);
+  static esp_err_t KeyboardReport(uint8_t report_id,
+                                  uint8_t modifier,
+                                  uint8_t keycode[6]);
 
-  esp_err_t KeyboardPress(uint8_t report_id, char ch);
+  static esp_err_t KeyboardPress(uint8_t report_id, char ch);
 
-  esp_err_t KeyboardRelease(uint8_t report_id);
+  static esp_err_t KeyboardRelease(uint8_t report_id);
 
-  bool Ready();
+  static bool Ready();
 };
 
 }  // namespace usb
