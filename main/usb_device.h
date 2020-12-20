@@ -34,6 +34,10 @@ class Device {
    */
   static bool Suspended();
 
+  static esp_err_t Connect();
+
+  static esp_err_t Disconnect();
+
   /**
    * Give time to the USB stack to do work.
    */
