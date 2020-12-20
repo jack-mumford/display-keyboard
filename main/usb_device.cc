@@ -8,7 +8,7 @@
 #include "usb_board.h"
 #include "usb_hid.h"
 #include "usb_misc.h"
-#include "usb_strings.h"
+#include "usb_string_ids.h"
 
 namespace usb {
 

@@ -7,7 +7,7 @@
 #include <class/hid/hid.h>
 #include <class/hid/hid_device.h>
 #include <device/usbd.h>
-#include "usb_strings.h"
+#include "usb_string_ids.h"
 
 namespace usb {
 
