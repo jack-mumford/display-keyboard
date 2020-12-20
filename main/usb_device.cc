@@ -183,6 +183,16 @@ bool Device::Suspended() {
 }
 
 // static
+esp_err_t Device::Connect() {
+  return tud_connect() ? ESP_OK : ESP_FAIL;
+}
+
+// static
+esp_err_t Device::Disconnect() {
+  return tud_disconnect() ? ESP_OK : ESP_FAIL;
+}
+
+// static
 void Device::Tick() {
   tud_task();
 }
