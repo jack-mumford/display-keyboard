@@ -1,23 +1,25 @@
 # Display Keyboard
 
 This project is the hardware design and software for a USB keyboard with an
-integrated display.
+integrated touch display.
 
 Hardware features:
 
 * Mechanical keys.
 * ESP32-S2 ([datasheet](https://www.espressif.com/sites/default/files/documentation/esp32-s2_datasheet_en.pdf)).
 * 2.8" LCD capacitive [touch display](https://www.adafruit.com/product/2770).
+* 0.91" vertical [OLED display](https://www.aliexpress.com/item/32672229793.html)
+  for volume display.
 * Volume control knob.
 
 ## Hardware Design
 
 Design is done in [KeyCad](https://kicad.org/). Files are located in
-[pcb](pcb)
+the [pcb](pcb) directory.
 
 ## Software Requirements
 
-* [ESP-IDF](https://docs.espressif.com/).
+* [ESP-IDF](https://docs.espressif.com/)
 * [VS Code extensions](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/vscode-setup.html)
   (optional)
 
