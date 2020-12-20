@@ -7,6 +7,3 @@
 [submodule "components/inih"]
 	path = components/inih
 	url = https://github.com/benhoyt/inih
-[submodule "components/Adafruit_TinyUSB_ArduinoCore"]
-	path = components/Adafruit_TinyUSB_ArduinoCore
-	url = git@github.com:cmumford/Adafruit_TinyUSB_ArduinoCore.git
