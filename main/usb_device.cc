@@ -29,7 +29,7 @@ constexpr char TAG[] = "kbd_usb";
 constexpr uint16_t kVendorID = 0xae9b;
 constexpr uint16_t kProductID = 0xe67a;
 constexpr uint16_t kDeviceVersion = 0x0100;  // BCD.
-constexpr uint16_t kVersion = 0x0101;        // BCD.
+constexpr uint16_t kVersion = 0x0100;        // BCD.
 constexpr char kDeviceSerialNumber[] = "00001A";
 constexpr char kDeviceManufacturer[] = "Awesome Keyboard Co.";
 constexpr char kProduct[] = "Super Display Keyboard";
@@ -39,23 +39,21 @@ constexpr tusb_desc_device_t kDeviceDescriptor = {
     .bLength = sizeof(tusb_desc_device_t),
     .bDescriptorType = TUSB_DESC_DEVICE,
     .bcdUSB = kVersion,
-
     // Use Interface Association Descriptor (IAD) for CDC
     // As required by USB Specs IAD's subclass must be common class (2) and
     // protocol must be IAD (1)
     .bDeviceClass = TUSB_CLASS_MISC,
     .bDeviceSubClass = MISC_SUBCLASS_COMMON,
     .bDeviceProtocol = MISC_PROTOCOL_IAD,
-
     .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
-
     .idVendor = kVendorID,
     .idProduct = kProductID,
     .bcdDevice = kDeviceVersion,
     .iManufacturer = STRID_MANUFACTURER,
     .iProduct = STRID_PRODUCT,
     .iSerialNumber = STRID_SERIAL,
-    .bNumConfigurations = 0x01};
+    .bNumConfigurations = 0x01,
+};
 constexpr tusb_desc_configuration_t kConfigurationDescriptor = {
     .bLength = sizeof(tusb_desc_configuration_t),
     .bDescriptorType = TUSB_DESC_CONFIGURATION,
@@ -64,7 +62,8 @@ constexpr tusb_desc_configuration_t kConfigurationDescriptor = {
     .bConfigurationValue = 1,
     .iConfiguration = 0x00,
     .bmAttributes = TU_BIT(7) | TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP,
-    .bMaxPower = TUSB_DESC_CONFIG_POWER_MA(kMaxPower)};
+    .bMaxPower = TUSB_DESC_CONFIG_POWER_MA(kMaxPower),
+};
 
 AllDescriptors g_descriptors;
 
