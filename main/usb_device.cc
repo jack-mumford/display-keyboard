@@ -1,5 +1,7 @@
 #include "usb_device.h"
 
+#include <cstring>
+
 #include <esp_log.h>
 #include <freertos/task.h>
 #include <tusb.h>
@@ -56,12 +58,22 @@ constexpr tusb_desc_configuration_t kConfigurationDescriptor = {
     .bmAttributes = TU_BIT(7) | TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP,
     .bMaxPower = TUSB_DESC_CONFIG_POWER_MA(kMaxPower)};
 
+struct AllDescriptors {
+  tusb_desc_configuration_t config_descriptor;
+  uint8_t hid_descriptor[sizeof(HID::kHIDDescriptor)];
+};
+
+static_assert(sizeof(AllDescriptors) ==
+              sizeof(tusb_desc_configuration_t) + sizeof(HID::kHIDDescriptor));
+
+AllDescriptors g_descriptors;
+
 extern "C" {
 
 // Invoked when received GET DEVICE DESCRIPTOR
 // Application return pointer to descriptor
 uint8_t const* tud_descriptor_device_cb(void) {
-  return reinterpret_cast<uint8_t const*>(&kDeviceDescriptor);
+  return reinterpret_cast<uint8_t const*>(&g_descriptors);
 }
 
 // Invoked when received GET CONFIGURATION DESCRIPTOR
@@ -100,7 +112,8 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
           strcpy_utf16(_desc_str + 1, kDeviceSerialNumber, kMaxDescriptorLen);
       break;
     case STRID_HID:
-      chr_count = strcpy_utf16(_desc_str + 1, "<Kbd>", kMaxDescriptorLen);
+      chr_count = strcpy_utf16(_desc_str + 1, HID::kStringDescriptor,
+                               kMaxDescriptorLen);
       break;
     default:
       chr_count = strcpy_utf16(_desc_str + 1, "<Unknown>", kMaxDescriptorLen);
@@ -123,10 +136,13 @@ Device::~Device() = default;
 
 bool Device::Mounted() {
   return tud_mounted();
-  ;
 }
 
 esp_err_t Device::Initialize() {
+  g_descriptors.config_descriptor = kConfigurationDescriptor;
+  std::memcpy(g_descriptors.hid_descriptor, HID::kHIDDescriptor,
+              sizeof(HID::kHIDDescriptor));
+
   board_init();
 
   if (!tusb_init())

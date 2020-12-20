@@ -11,8 +11,6 @@ namespace usb {
 
 class Device {
  public:
-  // static esp_err_t AddInterface(const Interface* ifname);
-
   Device();
   ~Device();
 
@@ -37,9 +35,6 @@ class Device {
   bool Suspended();
 
   void Tick();
-
- private:
-  // esp_err_t addInterface(const Interface* ifname);
 };
 
 }  // namespace usb
