@@ -137,7 +137,7 @@ esp_err_t App::CreateUSBTask() {
   constexpr uint32_t kStackDepthWords = 2048;
 
   return xTaskCreate(USBTask, "usb-tick", kStackDepthWords, this,
-                     tskIDLE_PRIORITY, &main_task_) == pdPASS
+                     tskIDLE_PRIORITY + 5, &main_task_) == pdPASS
              ? ESP_OK
              : ESP_FAIL;
 }
