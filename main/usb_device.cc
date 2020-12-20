@@ -19,6 +19,11 @@ struct AllDescriptors {
   uint8_t hid_descriptor[sizeof(HID::kHIDDescriptor)];
 };
 
+// Character 1 = (length) + (string type).
+// Characters 2..n = descriptor string (not null terminated).
+constexpr uint8_t kMaxDescriptorStringLen = 32;
+typedef uint16_t DescriptorString[1 + kMaxDescriptorStringLen];
+
 // Make sure compiler didn't pack any space in between the members.
 static_assert(sizeof(AllDescriptors) ==
               sizeof(tusb_desc_configuration_t) + sizeof(HID::kHIDDescriptor));
@@ -65,7 +70,47 @@ constexpr tusb_desc_configuration_t kConfigurationDescriptor = {
     .bMaxPower = TUSB_DESC_CONFIG_POWER_MA(kMaxPower),
 };
 
+static_assert(sizeof(kDeviceManufacturer) <= kMaxDescriptorStringLen);
+static_assert(sizeof(kProduct) <= kMaxDescriptorStringLen);
+static_assert(sizeof(kDeviceSerialNumber) <= kMaxDescriptorStringLen);
+static_assert(sizeof(HID::kInterfaceName) <= kMaxDescriptorStringLen);
+
 AllDescriptors g_descriptors;
+DescriptorString g_descriptor_strings[STRID_NUM];
+DescriptorString g_unknown_descriptor_string;
+
+const char* GetDescriptorString(StringID id) {
+  switch (id) {
+    case STRID_MANUFACTURER:
+      return kDeviceManufacturer;
+    case STRID_PRODUCT:
+      return kProduct;
+    case STRID_SERIAL:
+      return kDeviceSerialNumber;
+    case STRID_HID:
+      return HID::kInterfaceName;
+    case STRID_LANGUAGE:
+      // fallthrough - handled differently.
+    case STRID_NUM:
+      // fallthrough
+      break;
+  }
+  return nullptr;
+}
+
+uint16_t CreateDecStringHeader(uint8_t num_chars) {
+  // Byte #1 = length. Byte #2 = string type.
+  return (TUSB_DESC_STRING << 8) | (2 + 2 * num_chars);
+}
+
+void InitializeDescriptorString(DescriptorString dst, const char* src) {
+  const int num_chars = strcpy_utf16(dst + 1, src, kMaxDescriptorStringLen);
+  dst[0] = CreateDecStringHeader(num_chars);
+}
+
+void InitializeDescriptorString(StringID id) {
+  InitializeDescriptorString(g_descriptor_strings[id], GetDescriptorString(id));
+}
 
 extern "C" {
 
@@ -88,45 +133,9 @@ uint8_t const* tud_descriptor_configuration_cb(uint8_t /*index*/) {
 // OS 1.0 Descriptors.
 // https://docs.microsoft.com/en-us/windows-hardware/drivers/usbcon/microsoft-defined-usb-descriptors
 uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t /*langid*/) {
-  // Pointer needs to outlive function call - hence static.
-  constexpr uint8_t kMaxDescriptorLen = 32;
-  static uint16_t _desc_str[1 + kMaxDescriptorLen];  // String header + string.
-  uint8_t num_chars;
-
-  static_assert(sizeof(kDeviceManufacturer) <= kMaxDescriptorLen);
-  static_assert(sizeof(kProduct) <= kMaxDescriptorLen);
-  static_assert(sizeof(kDeviceSerialNumber) <= kMaxDescriptorLen);
-  static_assert(sizeof(HID::kInterfaceName) <= kMaxDescriptorLen);
-
-  switch (index) {
-    case STRID_LANGUAGE:
-      _desc_str[1] = ((uint16_t)((uint32_t)kLanguage));
-      num_chars = 1;
-      break;
-    case STRID_MANUFACTURER:
-      num_chars =
-          strcpy_utf16(_desc_str + 1, kDeviceManufacturer, kMaxDescriptorLen);
-      break;
-    case STRID_PRODUCT:
-      num_chars = strcpy_utf16(_desc_str + 1, kProduct, kMaxDescriptorLen);
-      break;
-    case STRID_SERIAL:
-      num_chars =
-          strcpy_utf16(_desc_str + 1, kDeviceSerialNumber, kMaxDescriptorLen);
-      break;
-    case STRID_HID:
-      num_chars =
-          strcpy_utf16(_desc_str + 1, HID::kInterfaceName, kMaxDescriptorLen);
-      break;
-    default:
-      num_chars = strcpy_utf16(_desc_str + 1, "<Unknown>", kMaxDescriptorLen);
-      break;
-  }
-
-  // Byte #1 = length. Byte #2 = string type.
-  _desc_str[0] = (TUSB_DESC_STRING << 8) | (2 + 2 * num_chars);
-
-  return _desc_str;
+  if (index < STRID_NUM)
+    return g_descriptor_strings[index];
+  return g_unknown_descriptor_string;
 }
 
 }  // extern C
@@ -146,6 +155,14 @@ esp_err_t Device::Initialize() {
   std::memcpy(g_descriptors.hid_descriptor, HID::kHIDDescriptor,
               sizeof(HID::kHIDDescriptor));
   static_assert(HID::kHIDDescriptor[1] == TUSB_DESC_INTERFACE);
+
+  for (int i = 0; i < STRID_NUM; i++) {
+    if (i != STRID_LANGUAGE)
+      InitializeDescriptorString(static_cast<StringID>(i));
+  }
+  g_descriptor_strings[STRID_LANGUAGE][1] = ((uint16_t)((uint32_t)kLanguage));
+  g_descriptor_strings[STRID_LANGUAGE][0] = CreateDecStringHeader(1);
+  InitializeDescriptorString(g_unknown_descriptor_string, "<unknown>");
 
   board_init();
 
