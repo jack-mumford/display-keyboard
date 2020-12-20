@@ -98,21 +98,22 @@ void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
   const std::string kTypedString = "Super Display Keyboard. ";
   int idx = 0;
   while (true) {
-    vTaskDelay(pdMS_TO_TICKS(2000));
-
     if (usb::Device::Suspended()) {
       if (usb::Device::RemoteWakup() != ESP_OK)
         ESP_LOGE(TAG, "Error waking up");
+      vTaskDelay(pdMS_TO_TICKS(500));
       continue;
     }
     if (!usb::HID::Ready()) {
       ESP_LOGW(TAG, "USB not ready.");
+      vTaskDelay(pdMS_TO_TICKS(1000));
       continue;
     }
     if (usb::Device::Mounted()) {
+      ESP_LOGD(TAG, "Mounted, sending keyboard event.");
       // Merely setting GPIO2 (built-in LED) to OUTPUT on the Cucumber ESP32-S2
-      // turns on the LED. Using gpio_set_level(_, 0) doesn't turn if off :-(.
-      // TODO: Figure this out later.
+      // turns on the LED. Using gpio_set_level(_, 0) doesn't turn it off :-(.
+      // TODO: Figure this out.
       gpio_set_direction(kActivityGPIO,
                          on ? GPIO_MODE_OUTPUT : GPIO_MODE_INPUT);
       on = !on;
@@ -126,8 +127,10 @@ void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
       // found to be short enough to prevent auto-repeat.
       ets_delay_us(5000);
       usb::HID::KeyboardRelease(REPORT_ID_KEYBOARD);
+      vTaskDelay(pdMS_TO_TICKS(2000));
     } else {
       ESP_LOGD(TAG, "USB not mounted");
+      vTaskDelay(pdMS_TO_TICKS(1000));
     }
   }
 }

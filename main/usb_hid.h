@@ -14,7 +14,7 @@ namespace usb {
 class HID {
  private:
   constexpr static uint8_t kBootProtocol = HID_PROTOCOL_NONE;
-  constexpr static uint8_t kEndpointAddress = 1;
+  constexpr static uint8_t kEndpointAddress = TUSB_DIR_IN_MASK + 1;
   constexpr static uint8_t kEndpointIntervalMs = 2;
   constexpr static uint8_t kInterfaceNumber = 0;  // IF #'s are zero based.
 
