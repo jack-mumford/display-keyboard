@@ -11,10 +11,6 @@ class Display;
 class Filesystem;
 class WiFi;
 
-namespace usb {
-class Device;
-}  // namespace usb
-
 class App {
  public:
   App();
@@ -37,7 +33,6 @@ class App {
   std::unique_ptr<Config> config_;
   std::unique_ptr<Display> display_;
   std::unique_ptr<Filesystem> fs_;
-  std::unique_ptr<usb::Device> usb_device_;
   std::unique_ptr<WiFi> wifi_;
   EventGroupHandle_t wifi_event_group_;
   TaskHandle_t main_task_;
