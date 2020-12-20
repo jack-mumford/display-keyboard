@@ -4,14 +4,14 @@ EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
-Title ""
-Date ""
-Rev ""
-Comp ""
-Comment1 ""
+Title "Keyboard Prototype Board"
+Date "12 Dec 2020"
+Rev "1"
+Comp "Prototype Schematic"
+Comment1 "Based on Adafruit Feather nRF52840 Express and TCA8418 keyboard IC"
 Comment2 ""
-Comment3 ""
-Comment4 ""
+Comment3 "License: MIT"
+Comment4 "Design: cmumford"
 $EndDescr
 $Comp
 L TCA8418:TCA8418 U2
