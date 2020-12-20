@@ -87,9 +87,7 @@ uint8_t const* tud_descriptor_configuration_cb(uint8_t /*index*/) {
 // enough for transfer to complete Note: the 0xEE index string is a Microsoft
 // OS 1.0 Descriptors.
 // https://docs.microsoft.com/en-us/windows-hardware/drivers/usbcon/microsoft-defined-usb-descriptors
-uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
-  (void)langid;
-
+uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t /*langid*/) {
   // Pointer needs to outlive function call - hence static.
   constexpr uint8_t kMaxDescriptorLen = 32;
   static uint16_t _desc_str[1 + kMaxDescriptorLen];  // String header + string.
@@ -112,8 +110,8 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
           strcpy_utf16(_desc_str + 1, kDeviceSerialNumber, kMaxDescriptorLen);
       break;
     case STRID_HID:
-      num_chars = strcpy_utf16(_desc_str + 1, HID::kStringDescriptor,
-                               kMaxDescriptorLen);
+      num_chars =
+          strcpy_utf16(_desc_str + 1, HID::kInterfaceName, kMaxDescriptorLen);
       break;
     default:
       num_chars = strcpy_utf16(_desc_str + 1, "<Unknown>", kMaxDescriptorLen);

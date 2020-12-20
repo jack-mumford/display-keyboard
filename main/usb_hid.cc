@@ -10,7 +10,7 @@
 namespace usb {
 
 constexpr uint8_t HID::kHIDReport[];
-constexpr char HID::kStringDescriptor[];
+constexpr char HID::kInterfaceName[];
 constexpr uint8_t HID::kHIDDescriptor[];
 
 namespace {
