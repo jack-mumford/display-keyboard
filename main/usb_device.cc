@@ -6,12 +6,11 @@
 #include "usb_board.h"
 #include "usb_hid.h"
 #include "usb_misc.h"
+#include "usb_strings.h"
 
 namespace usb {
 
 namespace {
-
-enum { STRID_LANGUAGE = 0, STRID_MANUFACTURER, STRID_PRODUCT, STRID_SERIAL };
 
 constexpr char TAG[] = "kbd_usb";
 // TODO: These are from random.org. Need to get actual VID/PID numbers to
@@ -99,6 +98,9 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
     case STRID_SERIAL:
       chr_count =
           strcpy_utf16(_desc_str + 1, kDeviceSerialNumber, kMaxDescriptorLen);
+      break;
+    case STRID_HID:
+      chr_count = strcpy_utf16(_desc_str + 1, "<Kbd>", kMaxDescriptorLen);
       break;
     default:
       chr_count = strcpy_utf16(_desc_str + 1, "<Unknown>", kMaxDescriptorLen);
