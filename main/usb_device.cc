@@ -93,6 +93,11 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t /*langid*/) {
   static uint16_t _desc_str[1 + kMaxDescriptorLen];  // String header + string.
   uint8_t num_chars;
 
+  static_assert(sizeof(kDeviceManufacturer) <= kMaxDescriptorLen);
+  static_assert(sizeof(kProduct) <= kMaxDescriptorLen);
+  static_assert(sizeof(kDeviceSerialNumber) <= kMaxDescriptorLen);
+  static_assert(sizeof(HID::kInterfaceName) <= kMaxDescriptorLen);
+
   switch (index) {
     case STRID_LANGUAGE:
       _desc_str[1] = ((uint16_t)((uint32_t)kLanguage));
