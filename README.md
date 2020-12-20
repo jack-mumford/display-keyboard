@@ -5,14 +5,15 @@ integrated display.
 
 Hardware features:
 
+* Mechanical keys.
 * ESP32-S2 ([datasheet](https://www.espressif.com/sites/default/files/documentation/esp32-s2_datasheet_en.pdf)).
-* 2.3" LCD touch display.
-* Volume control know.
+* 2.8" LCD capacitive [touch display](https://www.adafruit.com/product/2770).
+* Volume control knob.
 
 ## Hardware Design
 
 Design is done in [KeyCad](https://kicad.org/). Files are located in
-[pcb]()
+[pcb](pcb)
 
 ## Software Requirements
 
