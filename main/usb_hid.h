@@ -16,6 +16,7 @@ class HID {
   constexpr static uint8_t kEndpointInput = 0x80;
   constexpr static uint8_t kBootProtocol = HID_PROTOCOL_NONE;
   constexpr static uint8_t kEndpointIntervalMs = 2;
+  constexpr static char kStringDescriptor[] = "Test Keyboard";
   constexpr static uint8_t desc_hid_report[] = {
       TUD_HID_REPORT_DESC_KEYBOARD(HID_REPORT_ID(HID_PROTOCOL_KEYBOARD))};
   constexpr static uint8_t kHIDDescriptor[] = {

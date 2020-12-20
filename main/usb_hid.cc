@@ -10,6 +10,9 @@
 namespace usb {
 
 constexpr uint8_t HID::desc_hid_report[];
+constexpr char HID::kStringDescriptor[];
+constexpr uint8_t HID::kHIDDescriptor[];
+
 namespace {
 
 constexpr char TAG[] = "kbd_hid";
