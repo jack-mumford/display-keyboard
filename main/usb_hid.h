@@ -7,6 +7,7 @@
 #include <class/hid/hid.h>
 #include <class/hid/hid_device.h>
 #include <device/usbd.h>
+#include "usb_strings.h"
 
 namespace usb {
 
@@ -19,7 +20,7 @@ class HID {
       TUD_HID_REPORT_DESC_KEYBOARD(HID_REPORT_ID(HID_PROTOCOL_KEYBOARD))};
   constexpr static uint8_t kHIDDescriptor[] = {
       TUD_HID_DESCRIPTOR(1,
-                         0,
+                         STRID_HID,
                          kBootProtocol,
                          sizeof(desc_hid_report),
                          kEndpointInput,
