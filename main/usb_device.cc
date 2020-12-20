@@ -4,6 +4,7 @@
 #include <freertos/task.h>
 #include <tusb.h>
 #include "usb_board.h"
+#include "usb_hid.h"
 #include "usb_misc.h"
 
 namespace usb {
@@ -48,10 +49,9 @@ constexpr tusb_desc_device_t desc_dev = {
 constexpr tusb_desc_configuration_t dev_cfg = {
     .bLength = sizeof(tusb_desc_configuration_t),
     .bDescriptorType = TUSB_DESC_CONFIGURATION,
-
-    // Total Length & Interface Number will be updated later
-    .wTotalLength = 0,
-    .bNumInterfaces = 0,
+    .wTotalLength =
+        sizeof(tusb_desc_configuration_t) + sizeof(HID::kHIDDescriptor),
+    .bNumInterfaces = 1,
     .bConfigurationValue = 1,
     .iConfiguration = 0x00,
     .bmAttributes = TU_BIT(7) | TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP,
@@ -129,13 +129,6 @@ bool Device::Mounted() {
 }
 
 esp_err_t Device::Initialize() {
-#if 0
-  device_.setVersion(1);
-  device_.setDeviceVersion(1);
-  if (!device_.begin())
-    return ESP_OK;
-#endif
-
   board_init();
 
   if (!tusb_init())
@@ -157,64 +150,5 @@ bool Device::Suspended() {
 void Device::Tick() {
   tud_task();
 }
-
-#if 0
-// Add interface descriptor
-// - Interface number will be updated to match current count
-// - Endpoint number is updated to be unique
-esp_err_t Device::addInterface(const Interface* ifname) {
-  uint8_t* desc = _desc_cfg + _desc_cfg_len;
-  uint16_t const len =
-      itf->getDescriptor(_itf_count, desc, _desc_cfg_maxlen - _desc_cfg_len);
-  uint8_t* desc_end = desc + len;
-
-  const char* desc_str = itf->getStringDescriptor();
-
-  if (!len)
-    return ESP_ERR_INVALID_SIZE;
-
-  // Parse interface descriptor to update
-  // - Interface Number & string descrioptor
-  // - Endpoint address
-  while (desc < desc_end) {
-    if (desc[1] == TUSB_DESC_INTERFACE) {
-      tusb_desc_interface_t* desc_itf = (tusb_desc_interface_t*)desc;
-      if (desc_itf->bAlternateSetting == 0) {
-        _itf_count++;
-        if (desc_str && (_desc_str_count < STRING_DESCRIPTOR_MAX)) {
-          _desc_str_arr[_desc_str_count] = desc_str;
-          desc_itf->iInterface = _desc_str_count;
-          _desc_str_count++;
-
-          // only assign string index to first interface
-          desc_str = NULL;
-        }
-      }
-    } else if (desc[1] == TUSB_DESC_ENDPOINT) {
-      tusb_desc_endpoint_t* desc_ep = (tusb_desc_endpoint_t*)desc;
-      desc_ep->bEndpointAddress |=
-          (desc_ep->bEndpointAddress & 0x80) ? _epin_count++ : _epout_count++;
-    }
-
-    if (desc[0] == 0)
-      return ESP_FAIL;
-    desc += desc[0];  // next
-  }
-
-  _desc_cfg_len += len;
-
-  // Update configuration descriptor
-  tusb_desc_configuration_t* config = (tusb_desc_configuration_t*)_desc_cfg;
-  config->wTotalLength = _desc_cfg_len;
-  config->bNumInterfaces = _itf_count;
-
-  return ESP_OK;
-}
-
-// static
-esp_err_t Device::AddInterface(const Interface* ifname) {
-  g_device->addInterface(ifname);
-}
-#endif
 
 }  // namespace usb

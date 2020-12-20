@@ -17,7 +17,7 @@ class HID {
   constexpr static uint8_t kEndpointIntervalMs = 2;
   constexpr static uint8_t desc_hid_report[] = {
       TUD_HID_REPORT_DESC_KEYBOARD(HID_REPORT_ID(HID_PROTOCOL_KEYBOARD))};
-  constexpr static tusb_desc_interface_t kHIDDescriptor = {
+  constexpr static uint8_t kHIDDescriptor[] = {
       TUD_HID_DESCRIPTOR(1,
                          0,
                          kBootProtocol,
@@ -52,11 +52,6 @@ class HID {
   esp_err_t KeyboardRelease(uint8_t report_id);
 
   bool Ready();
-
-  // Adafruit_USBD_Interface:
-  uint16_t getDescriptor(uint8_t itfnum,
-                         uint8_t* buf,
-                         uint16_t bufsize) override;
 };
 
 }  // namespace usb

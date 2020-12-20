@@ -9,18 +9,11 @@
 
 namespace usb {
 
+constexpr uint8_t HID::desc_hid_report[];
 namespace {
 
-constexpr uint8_t kEndpointInput = 0x80;
-#if 0
-constexpr char kUSBDescriptor[] = "Test Keyboard";
-constexpr uint8_t desc_hid_report[] = {
-    TUD_HID_REPORT_DESC_KEYBOARD(HID_REPORT_ID(HID_PROTOCOL_KEYBOARD))};
 constexpr char TAG[] = "kbd_hid";
 constexpr uint8_t kASCII2KeyCode[128][2] = {HID_ASCII_TO_KEYCODE};
-constexpr uint8_t kEndpointIntervalMs = 2;
-constexpr uint8_t kBootProtocol = HID_PROTOCOL_NONE;
-#endif
 
 extern "C" {
 
@@ -28,7 +21,7 @@ extern "C" {
 // Application return pointer to descriptor, whose contents must exist long
 // enough for transfer to complete
 uint8_t const* tud_hid_descriptor_report_cb(void) {
-  return desc_hid_report;
+  return HID::desc_hid_report;
 }
 
 // Invoked when received GET_REPORT control request
@@ -68,8 +61,7 @@ HID::HID() = default;
 HID::~HID() = default;
 
 esp_err_t HID::Initialize() {
-  setStringDescriptor(kUSBDescriptor);
-  return Device::AddInterface(this);
+  return ESP_OK;
 }
 
 esp_err_t HID::KeyboardReport(uint8_t report_id,
@@ -98,19 +90,6 @@ esp_err_t HID::KeyboardRelease(uint8_t report_id) {
 
 bool HID::Ready() {
   return tud_hid_ready();
-}
-
-uint16_t HID::getDescriptor(uint8_t itfnum, uint8_t* buf, uint16_t bufsize) {
-  // usb core will automatically update endpoint number
-  const uint8_t desc_in_only[] = {TUD_HID_DESCRIPTOR(
-      itfnum, 0, kBootProtocol, sizeof(desc_hid_report), kEndpointInput,
-      CFG_TUD_HID_EP_BUFSIZE, kEndpointIntervalMs)};
-
-  if (bufsize < sizeof(desc_in_only))
-    return 0;
-
-  memcpy(buf, desc_in_only, sizeof(desc_in_only));
-  return sizeof(desc_in_only);
 }
 
 }  // namespace usb
