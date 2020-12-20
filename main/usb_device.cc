@@ -142,14 +142,12 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t /*langid*/) {
 
 }  // namespace
 
-Device::Device() = default;
-
-Device::~Device() = default;
-
+// static
 bool Device::Mounted() {
   return tud_mounted();
 }
 
+// static
 esp_err_t Device::Initialize() {
   g_descriptors.config_descriptor = kConfigurationDescriptor;
   std::memcpy(g_descriptors.hid_descriptor, HID::kHIDDescriptor,
@@ -173,14 +171,17 @@ esp_err_t Device::Initialize() {
   return ESP_OK;
 }
 
+// static
 esp_err_t Device::RemoteWakup() {
   return tud_remote_wakeup() ? ESP_OK : ESP_FAIL;
 }
 
+// static
 bool Device::Suspended() {
   return tud_suspended();
 }
 
+// static
 void Device::Tick() {
   tud_task();
 }

@@ -11,30 +11,33 @@ namespace usb {
 
 class Device {
  public:
-  Device();
-  ~Device();
+  Device() = delete;
+  ~Device() = delete;
 
   /**
    * Initialize the USB device.
    */
-  esp_err_t Initialize();
+  static esp_err_t Initialize();
 
   /**
    * Is the device connected and configured.
    */
-  bool Mounted();
+  static bool Mounted();
 
   /**
    * Remote wake up host, only if suspended and enabled by host.
    */
-  esp_err_t RemoteWakup();
+  static esp_err_t RemoteWakup();
 
   /**
    * Check if device is suspended.
    */
-  bool Suspended();
+  static bool Suspended();
 
-  void Tick();
+  /**
+   * Give time to the USB stack to do work.
+   */
+  static void Tick();
 };
 
 }  // namespace usb
