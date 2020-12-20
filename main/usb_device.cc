@@ -14,9 +14,9 @@ namespace usb {
 
 namespace {
 
-struct AllDescriptors {
-  tusb_desc_configuration_t config_descriptor;
-  uint8_t hid_descriptor[sizeof(HID::kHIDDescriptor)];
+struct ConfigDescriptors {
+  tusb_desc_configuration_t device;
+  uint8_t hid[sizeof(HID::kHIDDescriptorConfig)];
 };
 
 // Character 1 = (length) + (string type).
@@ -25,8 +25,9 @@ constexpr uint8_t kMaxDescriptorStringLen = 32;
 typedef uint16_t DescriptorString[1 + kMaxDescriptorStringLen];
 
 // Make sure compiler didn't pack any space in between the members.
-static_assert(sizeof(AllDescriptors) ==
-              sizeof(tusb_desc_configuration_t) + sizeof(HID::kHIDDescriptor));
+static_assert(sizeof(ConfigDescriptors) ==
+              sizeof(tusb_desc_configuration_t) +
+                  sizeof(HID::kHIDDescriptorConfig));
 
 constexpr char TAG[] = "kbd_usb";
 // TODO: These are from random.org. Need to get actual VID/PID numbers to
@@ -59,10 +60,10 @@ constexpr tusb_desc_device_t kDeviceDescriptor = {
     .iSerialNumber = STRID_SERIAL,
     .bNumConfigurations = 0x01,
 };
-constexpr tusb_desc_configuration_t kConfigurationDescriptor = {
+constexpr tusb_desc_configuration_t kDeviceDescriptorConfig = {
     .bLength = sizeof(tusb_desc_configuration_t),
     .bDescriptorType = TUSB_DESC_CONFIGURATION,
-    .wTotalLength = sizeof(AllDescriptors),
+    .wTotalLength = sizeof(ConfigDescriptors),
     .bNumInterfaces = 1,
     .bConfigurationValue = 1,
     .iConfiguration = 0x00,
@@ -75,7 +76,7 @@ static_assert(sizeof(kProduct) <= kMaxDescriptorStringLen);
 static_assert(sizeof(kDeviceSerialNumber) <= kMaxDescriptorStringLen);
 static_assert(sizeof(HID::kInterfaceName) <= kMaxDescriptorStringLen);
 
-AllDescriptors g_descriptors;
+ConfigDescriptors g_config_descriptors;
 DescriptorString g_descriptor_strings[STRID_NUM];
 DescriptorString g_unknown_descriptor_string;
 
@@ -124,7 +125,7 @@ uint8_t const* tud_descriptor_device_cb(void) {
 // Application return pointer to descriptor, whose contents must exist long
 // enough for transfer to complete
 uint8_t const* tud_descriptor_configuration_cb(uint8_t /*index*/) {
-  return reinterpret_cast<uint8_t const*>(&g_descriptors);
+  return reinterpret_cast<uint8_t const*>(&g_config_descriptors);
 }
 
 // Invoked when received GET STRING DESCRIPTOR request
@@ -149,10 +150,10 @@ bool Device::Mounted() {
 
 // static
 esp_err_t Device::Initialize() {
-  g_descriptors.config_descriptor = kConfigurationDescriptor;
-  std::memcpy(g_descriptors.hid_descriptor, HID::kHIDDescriptor,
-              sizeof(HID::kHIDDescriptor));
-  static_assert(HID::kHIDDescriptor[1] == TUSB_DESC_INTERFACE);
+  g_config_descriptors.device = kDeviceDescriptorConfig;
+  std::memcpy(g_config_descriptors.hid, HID::kHIDDescriptorConfig,
+              sizeof(HID::kHIDDescriptorConfig));
+  static_assert(HID::kHIDDescriptorConfig[1] == TUSB_DESC_INTERFACE);
 
   for (int i = 0; i < STRID_NUM; i++) {
     if (i != STRID_LANGUAGE)

@@ -9,9 +9,9 @@
 
 namespace usb {
 
-constexpr uint8_t HID::kHIDReport[];
+constexpr uint8_t HID::kHIDDescriptorReport[];
 constexpr char HID::kInterfaceName[];
-constexpr uint8_t HID::kHIDDescriptor[];
+constexpr uint8_t HID::kHIDDescriptorConfig[];
 
 namespace {
 
@@ -24,7 +24,7 @@ extern "C" {
 // Application return pointer to descriptor, whose contents must exist long
 // enough for transfer to complete
 uint8_t const* tud_hid_descriptor_report_cb() {
-  return HID::kHIDReport;
+  return HID::kHIDDescriptorReport;
 }
 
 // Invoked when received GET_REPORT control request

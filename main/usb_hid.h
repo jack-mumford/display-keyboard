@@ -16,17 +16,17 @@ class HID {
   constexpr static uint8_t kBootProtocol = HID_PROTOCOL_NONE;
   constexpr static uint8_t kEndpointAddress = 1;
   constexpr static uint8_t kEndpointIntervalMs = 2;
-  constexpr static uint8_t kInterfaceNumber = 0;
+  constexpr static uint8_t kInterfaceNumber = 0;  // IF #'s are zero based.
 
  public:
   constexpr static char kInterfaceName[] = "Keyboard HID";
-  constexpr static uint8_t kHIDReport[] = {
+  constexpr static uint8_t kHIDDescriptorReport[] = {
       TUD_HID_REPORT_DESC_KEYBOARD(HID_REPORT_ID(HID_PROTOCOL_KEYBOARD))};
-  constexpr static uint8_t kHIDDescriptor[] = {
+  constexpr static uint8_t kHIDDescriptorConfig[] = {
       TUD_HID_DESCRIPTOR(kInterfaceNumber,
                          STRID_HID,
                          kBootProtocol,
-                         sizeof(kHIDReport),
+                         sizeof(kHIDDescriptorReport),
                          kEndpointAddress,
                          CFG_TUD_HID_EP_BUFSIZE,
                          kEndpointIntervalMs)};

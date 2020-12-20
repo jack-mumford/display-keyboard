@@ -92,7 +92,7 @@ esp_err_t App::CreateKeyboardSimulatorTask() {
 
 // static
 void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
-  //App* app = static_cast<App*>(arg);
+  // App* app = static_cast<App*>(arg);
   ESP_LOGW(TAG, "In USB keyboard simulator task.");
   bool on = false;
   const std::string kTypedString = "Super Display Keyboard. ";
@@ -110,9 +110,9 @@ void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
       continue;
     }
     if (usb::Device::Mounted()) {
-          // Merely setting GPIO2 (built-in LED) to OUTPUT on the Cucumber ESP32-S2
-    // turns on the LED. Using gpio_set_level(_, 0) doesn't turn if off :-(.
-    // TODO: Figure this out later.
+      // Merely setting GPIO2 (built-in LED) to OUTPUT on the Cucumber ESP32-S2
+      // turns on the LED. Using gpio_set_level(_, 0) doesn't turn if off :-(.
+      // TODO: Figure this out later.
       gpio_set_direction(kActivityGPIO,
                          on ? GPIO_MODE_OUTPUT : GPIO_MODE_INPUT);
       on = !on;
@@ -144,7 +144,7 @@ esp_err_t App::CreateUSBTask() {
 
 // static
 void IRAM_ATTR App::USBTask(void* arg) {
-  //App* app = static_cast<App*>(arg);
+  // App* app = static_cast<App*>(arg);
   while (true) {
     usb::Device::Tick();
     vTaskDelay(pdMS_TO_TICKS(1));
