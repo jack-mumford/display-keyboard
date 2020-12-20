@@ -13,18 +13,18 @@ namespace usb {
 
 class HID {
  public:
-  constexpr static uint8_t kEndpointInput = 0x80;
   constexpr static uint8_t kBootProtocol = HID_PROTOCOL_NONE;
+  constexpr static uint8_t kEndpointAddress = 1;
   constexpr static uint8_t kEndpointIntervalMs = 2;
   constexpr static char kStringDescriptor[] = "Test Keyboard";
-  constexpr static uint8_t desc_hid_report[] = {
+  constexpr static uint8_t kHIDReport[] = {
       TUD_HID_REPORT_DESC_KEYBOARD(HID_REPORT_ID(HID_PROTOCOL_KEYBOARD))};
   constexpr static uint8_t kHIDDescriptor[] = {
       TUD_HID_DESCRIPTOR(1,
                          STRID_HID,
                          kBootProtocol,
-                         sizeof(desc_hid_report),
-                         kEndpointInput,
+                         sizeof(kHIDReport),
+                         kEndpointAddress,
                          CFG_TUD_HID_EP_BUFSIZE,
                          kEndpointIntervalMs)};
 
