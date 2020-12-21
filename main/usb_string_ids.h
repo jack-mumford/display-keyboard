@@ -1,5 +1,7 @@
 #pragma once
 
+namespace usb {
+
 enum StringID {
   STRID_LANGUAGE = 0,
   STRID_MANUFACTURER = 1,
@@ -8,3 +10,5 @@ enum StringID {
   STRID_HID = 4,
   STRID_NUM = 5,
 };
+
+}  // namespace usb

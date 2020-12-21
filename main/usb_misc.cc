@@ -189,6 +189,8 @@ TU_ATTR_WEAK int32_t tud_msc_scsi_cb(uint8_t lun,
 
 }  // extern "C"
 
+namespace usb {
+
 int strcpy_utf16(uint16_t* buf, const char* s, int bufsize) {
   int i = 0;
   int buflen = 0;
@@ -224,3 +226,5 @@ int strcpy_utf16(uint16_t* buf, const char* s, int bufsize) {
 
   return buflen;
 }
+
+}  // namespace usb
