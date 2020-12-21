@@ -23,6 +23,13 @@ the [pcb](pcb) directory.
 * [VS Code extensions](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/vscode-setup.html)
   (optional)
 
+## Getting Code
+
+```sh
+git clone https://github.com/BigMumf/display-keyboard.git
+./make.sh submodules-update
+```
+
 ## Building
 
 Configuration (GPIO pins, etc.) is stored in the sdkconfig file. This is

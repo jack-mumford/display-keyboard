@@ -16,6 +16,10 @@ FS_PAGE_SIZE=256
 FS_IMAGE_SIZE=0x100000
 PARTITION_OFFSET=0x110000
 
+GIT_SUBMODULES=components/tinyusb \
+               components/lv_port_esp32 \
+							 components/inih
+
 .PHONY: format clean target build flash config flash-spiffs monitor
 
 format:
@@ -44,3 +48,8 @@ spiffs.bin: Makefile-build fs/*
 
 flash-spiffs: spiffs.bin
 	${ESPTOOL} --chip esp32s2 --port ${PORT} --baud ${BAUD} write_flash -z ${PARTITION_OFFSET} spiffs.bin
+
+.PHONY: submodules-update
+submodules-update:
+	git submodule update --init ${GIT_SUBMODULES}
+	git -C components/lv_port_esp32 submodule update --init components/lvgl/lvgl
