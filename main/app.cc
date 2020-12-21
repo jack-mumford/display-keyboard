@@ -14,6 +14,7 @@
 #include "display.h"
 #include "filesystem.h"
 #include "led_controller.h"
+#include "spotify.h"
 #include "usb_device.h"
 #include "usb_hid.h"
 #include "wifi.h"
@@ -74,6 +75,7 @@ void IRAM_ATTR App::WiFiStatusTask(void* arg) {
     xEventGroupClearBits(app->wifi_event_group_, WiFi::EVENT_ALL);
     if (bits & WiFi::EVENT_CONNECTED) {
       ESP_LOGI(TAG, "Wi-Fi is connected.");
+      app->spotify_->DoTest();
     } else if (bits & WiFi::EVENT_CONNECTION_FAILED) {
       ESP_LOGW(TAG, "Wi-Fi connection failed.");
       // TODO: Set a timer so that we can retry in a little while.
@@ -199,6 +201,8 @@ esp_err_t App::Initialize() {
   display_.reset(new Display(320, 240));
   if (!display_->Initialize())
     return ESP_FAIL;
+
+  spotify_.reset(new Spotify());
 
   CreateKeyboardSimulatorTask();
 

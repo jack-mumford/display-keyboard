@@ -9,6 +9,7 @@
 class Config;
 class Display;
 class Filesystem;
+class Spotify;
 class WiFi;
 
 class App {
@@ -34,6 +35,7 @@ class App {
   std::unique_ptr<Display> display_;
   std::unique_ptr<Filesystem> fs_;
   std::unique_ptr<WiFi> wifi_;
+  std::unique_ptr<Spotify> spotify_;
   EventGroupHandle_t wifi_event_group_;
   TaskHandle_t main_task_;
 };
