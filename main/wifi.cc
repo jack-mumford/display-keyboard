@@ -211,8 +211,13 @@ esp_err_t WiFi::Connect(const std::string& ssid, const std::string& key) {
               .pmf_cfg = {.capable = true, .required = false},
           },
   };
-  std::strcpy(reinterpret_cast<char*>(wifi_config.sta.ssid), ssid.c_str());
-  std::strcpy(reinterpret_cast<char*>(wifi_config.sta.password), key.c_str());
+  std::strncpy(reinterpret_cast<char*>(wifi_config.sta.ssid), ssid.c_str(),
+               sizeof(wifi_config.sta.ssid));
+  wifi_config.sta.ssid[sizeof(wifi_config.sta.ssid) - 1] = '\0';
+  std::strncpy(reinterpret_cast<char*>(wifi_config.sta.password), key.c_str(),
+               sizeof(wifi_config.sta.password));
+  wifi_config.sta.password[sizeof(wifi_config.sta.password) - 1] = '\0';
+  
   err = esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config);
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "Failure to set config: %s", esp_err_to_name(err));
