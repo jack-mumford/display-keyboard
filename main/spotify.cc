@@ -13,7 +13,6 @@ namespace {
 constexpr char TAG[] = "kbd_spotify";
 
 #define WEB_SERVER "www.howsmyssl.com"
-#define WEB_PORT "443"
 #define WEB_URL "https://www.howsmyssl.com/a/check"
 
 constexpr char REQUEST[] = "GET " WEB_URL
@@ -22,6 +21,7 @@ constexpr char REQUEST[] = "GET " WEB_URL
                            "\r\n"
                            "User-Agent: esp-idf/1.0 esp32\r\n"
                            "\r\n";
+constexpr size_t kRequestLen = sizeof(REQUEST) - sizeof('\0');
 
 }  // namespace
 
@@ -29,26 +29,26 @@ Spotify::Spotify() = default;
 
 Spotify::~Spotify() = default;
 
-void Spotify::DoTest() {
+esp_err_t Spotify::DoTest() {
   char buffer[512];
   int ret, len;
   size_t bytes_written = 0;
 
+  ESP_LOGI(TAG, "Spotify::DoTest: %p", esp_crt_bundle_attach);
   const esp_tls_cfg_t cfg = {
       .crt_bundle_attach = esp_crt_bundle_attach,
   };
 
   struct esp_tls* tls = esp_tls_conn_http_new(WEB_URL, &cfg);
-  if (tls != NULL) {
-    ESP_LOGI(TAG, "Connection established...");
-  } else {
+  if (tls == nullptr) {
     ESP_LOGE(TAG, "Connection failed...");
-    goto exit;
+    return ESP_FAIL;
   }
 
+  ESP_LOGI(TAG, "Connection established, sending request...");
   do {
     ret = esp_tls_conn_write(tls, REQUEST + bytes_written,
-                             strlen(REQUEST) - bytes_written);
+                             kRequestLen - bytes_written);
     if (ret >= 0) {
       ESP_LOGI(TAG, "%d bytes written", ret);
       bytes_written += ret;
@@ -57,14 +57,16 @@ void Spotify::DoTest() {
       ESP_LOGE(TAG, "esp_tls_conn_write  returned 0x%x", ret);
       goto exit;
     }
-  } while (bytes_written < strlen(REQUEST));
+  } while (bytes_written < kRequestLen);
 
+  ESP_LOGI(TAG, "Leaving early");
+#if 0
   ESP_LOGI(TAG, "Reading HTTP response...");
 
   do {
     len = sizeof(buffer) - 1;
     bzero(buffer, sizeof(buffer));
-    ret = esp_tls_conn_read(tls, (char*)buffer, len);
+    ret = esp_tls_conn_read(tls, buffer, len);
 
     if (ret == ESP_TLS_ERR_SSL_WANT_WRITE || ret == ESP_TLS_ERR_SSL_WANT_READ)
       continue;
@@ -86,17 +88,13 @@ void Spotify::DoTest() {
       putchar(buffer[i]);
     }
   } while (true);
+#endif
 
 exit:
   esp_tls_conn_delete(tls);
-  putchar('\n');  // JSON output doesn't have a newline at end
+  putchar('\n');  // JSON output doesn't have a newline at end.
 
   static int request_count;
   ESP_LOGI(TAG, "Completed %d requests", ++request_count);
-
-  for (int countdown = 10; countdown >= 0; countdown--) {
-    ESP_LOGI(TAG, "%d...", countdown);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-  }
-  ESP_LOGI(TAG, "Starting again!");
+  return ESP_OK;
 }

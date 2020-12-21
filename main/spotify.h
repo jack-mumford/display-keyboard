@@ -1,9 +1,11 @@
 #pragma once
 
+#include <esp_err.h>
+
 class Spotify {
  public:
   Spotify();
   ~Spotify();
 
-  void DoTest();
+  esp_err_t DoTest();
 };

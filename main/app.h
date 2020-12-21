@@ -31,11 +31,13 @@ class App {
   esp_err_t CreateKeyboardSimulatorTask();
   esp_err_t CreateUSBTask();
 
-  std::unique_ptr<Config> config_;
-  std::unique_ptr<Display> display_;
-  std::unique_ptr<Filesystem> fs_;
-  std::unique_ptr<WiFi> wifi_;
-  std::unique_ptr<Spotify> spotify_;
-  EventGroupHandle_t wifi_event_group_;
-  TaskHandle_t main_task_;
+  std::unique_ptr<Config> config_;       // Application config data.
+  std::unique_ptr<Display> display_;     // Object owning main display.
+  std::unique_ptr<Filesystem> fs_;       // Filesystem object.
+  std::unique_ptr<WiFi> wifi_;           // Controls WiFi.
+  std::unique_ptr<Spotify> spotify_;     // All network interraction w/Spotify.
+  EventGroupHandle_t wifi_event_group_;  // WiFi events.
+  TaskHandle_t main_task_;               // Event task.
+  bool online_;                          // Is this device on the network?
+  bool did_spotify_test_;
 };

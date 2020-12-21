@@ -46,7 +46,11 @@ esp_err_t InitNVRAM() {
 }  // namespace
 
 App::App()
-    : config_(new Config()), wifi_event_group_(nullptr), main_task_(nullptr) {}
+    : config_(new Config()),
+      wifi_event_group_(nullptr),
+      main_task_(nullptr),
+      online_(false),
+      did_spotify_test_(false) {}
 
 App::~App() {
   if (wifi_event_group_)
@@ -55,6 +59,7 @@ App::~App() {
 
 esp_err_t App::CreateWiFiStatusTask() {
   // https://www.freertos.org/FAQMem.html#StackSize
+  // TODO: Reduce this size and take the HTTPS requtest out of this task.
   constexpr uint32_t kStackDepthWords = 2048;
 
   BaseType_t task = xTaskCreate(WiFiStatusTask, "wifi-status", kStackDepthWords,
@@ -75,9 +80,10 @@ void IRAM_ATTR App::WiFiStatusTask(void* arg) {
     xEventGroupClearBits(app->wifi_event_group_, WiFi::EVENT_ALL);
     if (bits & WiFi::EVENT_CONNECTED) {
       ESP_LOGI(TAG, "Wi-Fi is connected.");
-      app->spotify_->DoTest();
+      app->online_ = true;
     } else if (bits & WiFi::EVENT_CONNECTION_FAILED) {
       ESP_LOGW(TAG, "Wi-Fi connection failed.");
+      app->online_ = false;
       // TODO: Set a timer so that we can retry in a little while.
     }
   }
@@ -217,8 +223,13 @@ void App::Run() {
       wait_msecs = kMinMainLoopWaitMSecs;
     else if (wait_msecs > kMaxMainLoopWaitMSecs)
       wait_msecs = kMaxMainLoopWaitMSecs;
+
+    if (online_ && !did_spotify_test_) {
+      did_spotify_test_ = true;
+      ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->DoTest());
+    }
     // Need to use vTaskDelay to avoid triggering the task WDT.
     vTaskDelay(pdMS_TO_TICKS(wait_msecs));
-    taskYIELD();
+    taskYIELD();  // Not sure if this is necessary.
   }
 }
