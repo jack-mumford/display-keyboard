@@ -21,6 +21,12 @@ idf_component_register(
     "${IDF_PATH}/components/nvs_flash/include"
     "${IDF_PATH}/components/soc/esp32s2/include"
     "${IDF_PATH}/components/spiffs/include"
+    "${IDF_PATH}/components/esp_http_client/include"
+    "${IDF_PATH}/components/nghttp/port/include"
+    "${IDF_PATH}/components/mbedtls/esp_crt_bundle/include"
+    "${IDF_PATH}/components/mbedtls/mbedtls/include"
+    "${IDF_PATH}/components/esp-tls"
+    "${IDF_PATH}/components/mbedtls/port/include"
   REQUIRES
     lvgl_esp32_drivers
     lvgl_tft
