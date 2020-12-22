@@ -4,6 +4,9 @@
 
 #include <esp_err.h>
 
+// Needs to be included early.
+#include <mbedtls/esp_config.h>
+
 #include <esp_crt_bundle.h>
 #include <esp_http_client.h>
 #include <esp_log.h>
