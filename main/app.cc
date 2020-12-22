@@ -82,10 +82,10 @@ void IRAM_ATTR App::WiFiStatusTask(void* arg) {
         xEventGroupWaitBits(app->wifi_event_group_, WiFi::EVENT_ALL, pdFALSE,
                             pdFALSE, portMAX_DELAY);
     xEventGroupClearBits(app->wifi_event_group_, WiFi::EVENT_ALL);
-    if (bits & WiFi::EVENT_CONNECTED) {
+    if (bits & WiFi::EVENT_NETWORK_GOT_IP) {
       ESP_LOGI(TAG, "Wi-Fi is connected.");
       app->online_ = true;
-    } else if (bits & WiFi::EVENT_CONNECTION_FAILED) {
+    } else if (bits & WiFi::EVENT_NETWORK_DISCONNECTED) {
       ESP_LOGW(TAG, "Wi-Fi connection failed.");
       app->online_ = false;
       // TODO: Set a timer so that we can retry in a little while.

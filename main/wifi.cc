@@ -99,7 +99,7 @@ void WiFi::HandleWiFiEvent(wifi_event_t event_id, void* event_data) {
         retry_num_++;
       } else {
         ESP_LOGW(TAG, "Connection failed");
-        xEventGroupSetBits(wifi_event_group_, EVENT_CONNECTION_FAILED);
+        xEventGroupSetBits(wifi_event_group_, EVENT_NETWORK_DISCONNECTED);
       }
       break;
     default:
@@ -115,7 +115,7 @@ void WiFi::HandleIPEvent(ip_event_t event_id, void* event_data) {
           static_cast<ip_event_got_ip_t*>(event_data);
       ESP_LOGI(TAG, "Got ip:" IPSTR, IP2STR(&event->ip_info.ip));
       retry_num_ = 0;
-      xEventGroupSetBits(wifi_event_group_, EVENT_CONNECTED);
+      xEventGroupSetBits(wifi_event_group_, EVENT_NETWORK_GOT_IP);
     } break;
     default:
       break;

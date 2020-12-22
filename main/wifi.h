@@ -9,8 +9,8 @@
 
 class WiFi {
  public:
-  constexpr static EventBits_t EVENT_CONNECTED = BIT0;
-  constexpr static EventBits_t EVENT_CONNECTION_FAILED = BIT1;
+  constexpr static EventBits_t EVENT_NETWORK_GOT_IP = BIT0;
+  constexpr static EventBits_t EVENT_NETWORK_DISCONNECTED = BIT1;
   constexpr static EventBits_t EVENT_ALL = BIT0 | BIT1;
 
   WiFi(EventGroupHandle_t wifi_event_group);
