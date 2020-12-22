@@ -31,4 +31,5 @@ class WiFi {
   esp_event_handler_instance_t instance_any_id_;
   esp_event_handler_instance_t instance_got_ip_;
   int retry_num_;
+  esp_netif_t* netif_;
 };

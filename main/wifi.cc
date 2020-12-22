@@ -79,6 +79,11 @@ const char* ip_event_name(ip_event_t event) {
   }
 }
 
+void SafeStrCopy(char* dst, const char* src, size_t len) {
+  std::strncpy(dst, src, len);
+  dst[len - 1] = '\0';
+}
+
 }  // namespace
 
 void WiFi::HandleWiFiEvent(wifi_event_t event_id, void* event_data) {
@@ -135,7 +140,8 @@ WiFi::WiFi(EventGroupHandle_t wifi_event_group)
     : wifi_event_group_(wifi_event_group),
       instance_any_id_(nullptr),
       instance_got_ip_(nullptr),
-      retry_num_(0) {}
+      retry_num_(0),
+      netif_(nullptr) {}
 
 WiFi::~WiFi() {
   if (instance_got_ip_) {
@@ -155,7 +161,9 @@ esp_err_t WiFi::Inititialize() {
     return err;
   }
 
-  esp_netif_create_default_wifi_sta();
+  esp_netif_t* netif_ = esp_netif_create_default_wifi_sta();
+  if (!netif_)
+    return ESP_FAIL;
 
   const wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   err = esp_wifi_init(&cfg);
@@ -211,12 +219,10 @@ esp_err_t WiFi::Connect(const std::string& ssid, const std::string& key) {
               .pmf_cfg = {.capable = true, .required = false},
           },
   };
-  std::strncpy(reinterpret_cast<char*>(wifi_config.sta.ssid), ssid.c_str(),
-               sizeof(wifi_config.sta.ssid));
-  wifi_config.sta.ssid[sizeof(wifi_config.sta.ssid) - 1] = '\0';
-  std::strncpy(reinterpret_cast<char*>(wifi_config.sta.password), key.c_str(),
-               sizeof(wifi_config.sta.password));
-  wifi_config.sta.password[sizeof(wifi_config.sta.password) - 1] = '\0';
+  SafeStrCopy(reinterpret_cast<char*>(wifi_config.sta.ssid), ssid.c_str(),
+              sizeof(wifi_config.sta.ssid) - 1);
+  SafeStrCopy(reinterpret_cast<char*>(wifi_config.sta.password), key.c_str(),
+              sizeof(wifi_config.sta.password) - 1);
 
   err = esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config);
   if (err != ESP_OK) {
