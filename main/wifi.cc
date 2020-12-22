@@ -157,7 +157,7 @@ esp_err_t WiFi::Inititialize() {
 
   esp_netif_create_default_wifi_sta();
 
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  const wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   err = esp_wifi_init(&cfg);
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "esp_wifi_init failed: %s", esp_err_to_name(err));
