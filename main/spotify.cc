@@ -39,11 +39,28 @@ esp_err_t Spotify::DoTest() {
 
   ESP_LOGI(TAG, "Spotify::DoTest: %p", esp_crt_bundle_attach);
   const esp_tls_cfg_t cfg = {
+      .alpn_protos = nullptr,
+      .cacert_buf = nullptr,
+      .cacert_bytes = 0,
+      .clientcert_buf = nullptr,
+      .clientcert_bytes = 0,
+      .clientkey_buf = nullptr,
+      .clientkey_bytes = 0,
+      .clientkey_password = nullptr,
+      .clientkey_password_len = 0,
+      .non_block = false,
+      .use_secure_element = false,
+      .timeout_ms = 0,
+      .use_global_ca_store = false,
+      .common_name = nullptr,
+      .skip_common_name = false,
+      .psk_hint_key = nullptr,
       .crt_bundle_attach = esp_crt_bundle_attach,
+      .ds_data = nullptr,
   };
 
-  struct esp_tls* tls = esp_tls_conn_http_new(WEB_URL, &cfg);
-  if (tls == nullptr) {
+  esp_tls_t* tls = esp_tls_conn_http_new(WEB_URL, &cfg);
+  if (!tls) {
     ESP_LOGE(TAG, "Connection failed...");
     return ESP_FAIL;
   }
@@ -62,8 +79,6 @@ esp_err_t Spotify::DoTest() {
     }
   } while (bytes_written < kRequestLen);
 
-  ESP_LOGI(TAG, "Leaving early");
-#if 0
   ESP_LOGI(TAG, "Reading HTTP response...");
 
   do {
@@ -91,7 +106,6 @@ esp_err_t Spotify::DoTest() {
       putchar(buffer[i]);
     }
   } while (true);
-#endif
 
 exit:
   esp_tls_conn_delete(tls);
