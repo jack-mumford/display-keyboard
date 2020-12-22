@@ -1,5 +1,7 @@
 #include "app.h"
 
+#include <utility>
+
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
 #include <class/hid/hid.h>
@@ -7,12 +9,14 @@
 #include <esp_spi_flash.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <i2clib/master.h>
 #include <nvs_flash.h>
 
 #include "config.h"
 #include "config_reader.h"
 #include "display.h"
 #include "filesystem.h"
+#include "keyboard.h"
 #include "led_controller.h"
 #include "spotify.h"
 #include "usb_device.h"
@@ -189,6 +193,23 @@ esp_err_t App::Initialize() {
     return err;
 
   err = CreateUSBTask();
+  if (err != ESP_OK)
+    return err;
+
+  const i2c::Master::InitParams i2c_config = {
+      .i2c_bus = 0,
+      .sda_gpio = 0,
+      .scl_gpio = 0,
+      .clk_speed = 0,
+      .sda_pullup_enable = true,
+      .scl_pullup_enable = true,
+  };
+  i2c::Master i2c_master(I2C_NUM_0, /*mutex=*/nullptr);
+  if (!i2c_master.Initialize(i2c_config))
+    return ESP_FAIL;
+  keyboard_.reset(new Keyboard(std::move(i2c_master)));
+
+  err = keyboard_->Initialize();
   if (err != ESP_OK)
     return err;
 

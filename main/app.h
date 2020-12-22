@@ -9,6 +9,7 @@
 class Config;
 class Display;
 class Filesystem;
+class Keyboard;
 class Spotify;
 class WiFi;
 
@@ -36,6 +37,7 @@ class App {
   std::unique_ptr<Filesystem> fs_;       // Filesystem object.
   std::unique_ptr<WiFi> wifi_;           // Controls WiFi.
   std::unique_ptr<Spotify> spotify_;     // All network interraction w/Spotify.
+  std::unique_ptr<Keyboard> keyboard_;   // All interaction with keyboard.
   EventGroupHandle_t wifi_event_group_;  // WiFi events.
   TaskHandle_t main_task_;               // Event task.
   bool online_;                          // Is this device on the network?

@@ -7,3 +7,6 @@
 [submodule "components/inih"]
 	path = components/inih
 	url = https://github.com/benhoyt/inih
+[submodule "components/i2clib"]
+	path = components/i2clib
+	url = https://github.com/cmumford/i2clib.git

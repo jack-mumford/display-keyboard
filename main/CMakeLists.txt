@@ -9,7 +9,10 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src/portable/espressif/esp32s2/dcd_esp32s2.c"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src/class/hid/hid_device.c"
     "${CMAKE_SOURCE_DIR}/components/inih/ini.c"
+    "${CMAKE_SOURCE_DIR}/components/i2clib/src/master.cc"
+    "${CMAKE_SOURCE_DIR}/components/i2clib/src/operation.cc"
   INCLUDE_DIRS
+    "${CMAKE_SOURCE_DIR}/components/i2clib/include"
     "${CMAKE_SOURCE_DIR}/components/inih"
     "${CMAKE_SOURCE_DIR}/components/lv_port_esp32/components/lvgl/lvgl/src"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src"
@@ -28,6 +31,7 @@ idf_component_register(
     "${IDF_PATH}/components/soc/esp32s2/include"
     "${IDF_PATH}/components/spiffs/include"
   REQUIRES
+    i2clib
     lvgl_esp32_drivers
     lvgl_tft
     lvgl_touch

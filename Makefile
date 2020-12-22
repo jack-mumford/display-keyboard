@@ -8,6 +8,7 @@ PROJECT_NAME := keyboard
 include $(IDF_PATH)/make/project.mk
 
 EXTRA_COMPONENT_DIRS := \
+	components/i2clib \
 	components/lv_port_esp32/components/lvgl_esp32_drivers \
 	components/lv_port_esp32/components/lvgl_esp32_drivers/lvgl_tft \
 	components/lv_port_esp32/components/lvgl_esp32_drivers/lvgl_touch
