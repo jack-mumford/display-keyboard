@@ -197,10 +197,10 @@ esp_err_t App::Initialize() {
     return err;
 
   const i2c::Master::InitParams i2c_config = {
-      .i2c_bus = 0,
-      .sda_gpio = 0,
-      .scl_gpio = 0,
-      .clk_speed = 0,
+      .i2c_bus = I2C_NUM_0,
+      .sda_gpio = 41,
+      .scl_gpio = 40,
+      .clk_speed = 400000,
       .sda_pullup_enable = true,
       .scl_pullup_enable = true,
   };
