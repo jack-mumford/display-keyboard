@@ -30,6 +30,10 @@ git clone https://github.com/BigMumf/display-keyboard.git
 ./make.sh submodules-update
 ```
 
+**Note**: Because this project makes use of new features (USB) of the ESP32-S2
+          it requires a version of ESP-IDF more recent than v4.2. At present
+          this means the "master" branch of esp-idf.
+
 ## Building
 
 Configuration (GPIO pins, etc.) is stored in the sdkconfig file. This is
