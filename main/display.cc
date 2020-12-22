@@ -2,6 +2,7 @@
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
+#include <esp_idf_version.h>
 #include <esp_log.h>
 #include <lvgl.h>
 #include <lvgl_helpers.h>
@@ -51,10 +52,13 @@ void Display::TickTimerCb(void* arg) {
 
 esp_err_t Display::CreateTickTimer() {
   const esp_timer_create_args_t timer_args = {
-      .callback = TickTimerCb,
-      .arg = this,
-      .dispatch_method = ESP_TIMER_TASK,
-      .name = "RadioDisplay::TickTimer",
+    .callback = TickTimerCb,
+    .arg = this,
+    .dispatch_method = ESP_TIMER_TASK,
+    .name = "RadioDisplay::TickTimer",
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
+    .skip_unhandled_events = true,
+#endif
   };
   esp_err_t err = esp_timer_create(&timer_args, &tick_timer_);
   if (err != ESP_OK) {

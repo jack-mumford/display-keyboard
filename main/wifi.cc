@@ -217,6 +217,11 @@ esp_err_t WiFi::Connect(const std::string& ssid, const std::string& key) {
                   .authmode = WIFI_AUTH_WPA2_PSK,
               },
               .pmf_cfg = {.capable = true, .required = false},
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
+              .rm_enabled = false,
+              .btm_enabled = false,
+              .reserved = 0,
+#endif
           },
   };
   SafeStrCopy(reinterpret_cast<char*>(wifi_config.sta.ssid), ssid.c_str(),

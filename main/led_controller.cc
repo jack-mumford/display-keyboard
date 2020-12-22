@@ -11,9 +11,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include <led_controller.h>
+#include "led_controller.h"
 
 #include <driver/gpio.h>
+#include <esp_idf_version.h>
 #include <esp_timer.h>
 
 namespace {
@@ -51,10 +52,13 @@ void IRAM_ATTR LEDController::ActivityTimerCb(void* param) {
 
 esp_err_t LEDController::CreateActivityTimer() {
   const esp_timer_create_args_t timer_args = {
-      .callback = ActivityTimerCb,
-      .arg = this,
-      .dispatch_method = ESP_TIMER_TASK,
-      .name = "ActivityTimer",
+    .callback = ActivityTimerCb,
+    .arg = this,
+    .dispatch_method = ESP_TIMER_TASK,
+    .name = "ActivityTimer",
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
+    .skip_unhandled_events = true,
+#endif
   };
   return esp_timer_create(&timer_args, &led_off_timer_);
 }
