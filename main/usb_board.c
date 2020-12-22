@@ -42,7 +42,7 @@
 #include <soc/usb_periph.h>
 
 // Copied from hw/bsp/esp32s2_saola_1/esp32s2_saola_1.c.
-const char TAG[] = "usb_hw";
+const static char TAG[] = "usb_hw";
 
 static void configure_pins(usb_hal_context_t* usb) {
   /* usb_periph_iopins currently configures USB_OTG as USB Device.
