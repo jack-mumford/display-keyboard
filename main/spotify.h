@@ -13,7 +13,7 @@ class Spotify {
   Spotify(const Config* config);
   ~Spotify();
 
-  esp_err_t DoTest();
+  esp_err_t DoSSLCheck();
 
  private:
   std::string CreateCurrentlyPlayingRequest() const;

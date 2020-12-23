@@ -247,7 +247,7 @@ void App::Run() {
 
     if (online_ && !did_spotify_test_) {
       did_spotify_test_ = true;
-      ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->DoTest());
+      ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->DoSSLCheck());
     }
     // Need to use vTaskDelay to avoid triggering the task WDT.
     vTaskDelay(pdMS_TO_TICKS(wait_msecs));
