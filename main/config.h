@@ -8,5 +8,6 @@ struct Config {
   } wifi;
   struct {
     std::string client_id;
+    std::string client_secret;
   } spotify;
 };

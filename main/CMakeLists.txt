@@ -20,6 +20,7 @@ idf_component_register(
     "${IDF_PATH}/components/driver/include"
     "${IDF_PATH}/components/esp-tls"
     "${IDF_PATH}/components/esp_http_client/include"
+    "${IDF_PATH}/components/esp_http_server/include"
     "${IDF_PATH}/components/freertos/include/freertos"
     "${IDF_PATH}/components/hal/esp32s2/include"
     "${IDF_PATH}/components/hal/include"

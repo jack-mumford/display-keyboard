@@ -16,6 +16,7 @@
 #include "config_reader.h"
 #include "display.h"
 #include "filesystem.h"
+#include "https_server.h"
 #include "keyboard.h"
 #include "led_controller.h"
 #include "spotify.h"
@@ -225,11 +226,13 @@ esp_err_t App::Initialize() {
   if (err != ESP_OK)
     return err;
 
+  https_server_.reset(new HTTPSServer());  // Initialize once online.
+
   display_.reset(new Display(320, 240));
   if (!display_->Initialize())
     return ESP_FAIL;
 
-  spotify_.reset(new Spotify(config_.get()));
+  spotify_.reset(new Spotify(config_.get(), https_server_.get()));
 
   CreateKeyboardSimulatorTask();
 
@@ -247,7 +250,7 @@ void App::Run() {
 
     if (online_ && !did_spotify_test_) {
       did_spotify_test_ = true;
-      ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->DoSSLCheck());
+      ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->Initialize());
     }
     // Need to use vTaskDelay to avoid triggering the task WDT.
     vTaskDelay(pdMS_TO_TICKS(wait_msecs));
