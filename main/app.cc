@@ -229,7 +229,7 @@ esp_err_t App::Initialize() {
   if (!display_->Initialize())
     return ESP_FAIL;
 
-  spotify_.reset(new Spotify());
+  spotify_.reset(new Spotify(config_.get()));
 
   CreateKeyboardSimulatorTask();
 

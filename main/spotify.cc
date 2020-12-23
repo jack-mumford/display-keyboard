@@ -1,5 +1,7 @@
 #include "spotify.h"
 
+#include <cstring>
+
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
 #include <esp_err.h>
@@ -12,8 +14,40 @@
 #include <esp_log.h>
 #include <esp_tls.h>
 
+#include "config.h"
+
+using std::string;
+
 namespace {
+
+struct AuthData {
+  string access_token;
+  string token_type;
+  uint16_t expires_in;
+  string refresh_token;
+  string scope;
+};
+
+struct RequestData {
+  struct {
+    uint32_t progress_ms;
+    uint32_t duration_ms;
+  } times;
+  bool is_playing;
+  bool is_player_active;
+  string artist_name;
+  string song_title;
+  struct {
+    string url_640;
+    string url_300;
+    string url_64;
+  } image;
+};
+
 constexpr char TAG[] = "kbd_spotify";
+constexpr char kApiHost[] = "api.spotify.com";
+constexpr char kCurrentlyPlayingResource[] = "/v1/me/player/currently-playing";
+constexpr char kUserAgent[] = "esp-idf/1.0 esp32";
 
 #define WEB_SERVER "www.howsmyssl.com"
 #define WEB_URL "https://www.howsmyssl.com/a/check"
@@ -28,7 +62,10 @@ constexpr size_t kRequestLen = sizeof(REQUEST) - sizeof('\0');
 
 }  // namespace
 
-Spotify::Spotify() = default;
+Spotify::Spotify(const Config* config)
+    : https_client_(kUserAgent), config_(config) {
+  assert(config != nullptr);
+}
 
 Spotify::~Spotify() = default;
 
@@ -114,4 +151,24 @@ exit:
   static int request_count;
   ESP_LOGI(TAG, "Completed %d requests", ++request_count);
   return ESP_OK;
+}
+
+string Spotify::CreateCurrentlyPlayingRequest() const {
+  AuthData auth_data;
+
+  char* buffer;
+  int len = ::asprintf(&buffer,
+                       "GET https://%s%s HTTP/1.0/\r\n"
+                       "Host: %s\r\n"
+                       "Authorization: Bearer %s\r\n"
+                       "User-Agent: %s\r\n"
+                       "\r\n",
+                       kApiHost, kCurrentlyPlayingResource, kApiHost,
+                       auth_data.access_token.c_str(), kUserAgent);
+
+  if (len == -1)
+    return string();
+  string url(buffer, len);
+  ::free(buffer);
+  return url;
 }
