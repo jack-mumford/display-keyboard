@@ -255,37 +255,21 @@ esp_err_t Spotify::GetRedirectURL(string* url) const {
   return ESP_OK;
 }
 
-esp_err_t Spotify::RequestAuthToken() {
-  return GetAccessToken("authorization_code",
-                        std::move(auth_data_.one_time_code));
-}
+esp_err_t Spotify::GetCurrentlyPlaying() {
+  constexpr char kCurrentlyPlayingURL[] =
+      "https://api.spotify.com/v1/me/player/currently-playing";
 
-esp_err_t Spotify::GetAccessToken(const string& grant_type,
-                                  const string& code) {
-  if (grant_type != "authorization_code" && grant_type != "refresh_token")
-    return ESP_ERR_INVALID_ARG;
   const std::vector<HTTPSClient::HeaderValue> header_values = {
-      {"Authorization",
-       "Basic " + Base64Encode(config_->spotify.client_id + ":" +
-                               config_->spotify.client_secret)},
-      {"Content-Type", "application/x-www-form-urlencoded"},
+      {"Authorization", "Bearer " + auth_data_.access_token},
       {"Connection", "close"},
   };
 
-  const string code_param =
-      grant_type == "refresh_token" ? "refresh_token" : "code";
+  std::string json_response;
+  esp_err_t err =
+      https_client_.DoGET(kCurrentlyPlayingURL, header_values, &json_response);
 
-  string redirect_url;
-  esp_err_t err = GetRedirectURL(&redirect_url);
-  const string content = "grant_type=" + grant_type + "&" + code_param + "=" +
-                         code + "&redirect_uri=" + EntityEncode(redirect_url);
-
-  string json_response;
-  const string kGetAccessTokenURL("https://accounts.spotify.com/api/token");
-  err = https_client_.DoPOST(kGetAccessTokenURL, content, header_values,
-                             &json_response);
   if (err != ESP_OK)
-    return err;
+    return ESP_FAIL;
 
   if (json_response.empty()) {
     ESP_LOGE(TAG, "Got empty response.");
@@ -297,15 +281,79 @@ esp_err_t Spotify::GetAccessToken(const string& grant_type,
     return ESP_FAIL;
   }
 
+  cJSON_Delete(json);
+
+  ESP_LOGI(TAG, "Got currently-playing response.");
+  ESP_LOGI(TAG, "currently playing: %s", json_response.c_str());
+  return ESP_OK;
+}
+
+esp_err_t Spotify::RequestAuthToken() {
+  return GetAccessToken("authorization_code",
+                        std::move(auth_data_.one_time_code));
+}
+
+esp_err_t Spotify::GetAccessToken(const string& grant_type,
+                                  const string& code) {
+  esp_err_t err = ESP_OK;
+  cJSON* json = nullptr;
+  const string code_param =
+      grant_type == "refresh_token" ? "refresh_token" : "code";
+  string redirect_url;
+  string json_response;
+  const string kGetAccessTokenURL("https://accounts.spotify.com/api/token");
+  const std::vector<HTTPSClient::HeaderValue> header_values = {
+      {"Authorization",
+       "Basic " + Base64Encode(config_->spotify.client_id + ":" +
+                               config_->spotify.client_secret)},
+      {"Content-Type", "application/x-www-form-urlencoded"},
+      {"Connection", "close"},
+  };
+  string content;
+
+  if (grant_type != "authorization_code" && grant_type != "refresh_token") {
+    err = ESP_ERR_INVALID_ARG;
+    goto exit;
+  }
+
+  err = GetRedirectURL(&redirect_url);
+  if (err != ESP_OK)
+    goto exit;
+  content = "grant_type=" + grant_type + "&" + code_param + "=" + code +
+            "&redirect_uri=" + EntityEncode(redirect_url);
+
+  err = https_client_.DoPOST(kGetAccessTokenURL, content, header_values,
+                             &json_response);
+  if (err != ESP_OK)
+    goto exit;
+
+  if (json_response.empty()) {
+    ESP_LOGE(TAG, "Got empty response.");
+    err = ESP_FAIL;
+    goto exit;
+  }
+  json = cJSON_Parse(json_response.c_str());
+  if (!json) {
+    ESP_LOGE(TAG, "Failure parsing JSON response.");
+    err = ESP_FAIL;
+    goto exit;
+  }
+
   auth_data_.access_token = GetJSONString(json, "access_token");
   auth_data_.token_type = GetJSONString(json, "token_type");
   auth_data_.refresh_token = GetJSONString(json, "refresh_token");
   auth_data_.scope = GetJSONString(json, "scope");
-  auth_data_.expires_in = GetJSONNumber(json, "expires_in");
+  auth_data_.expires_in_secs = GetJSONNumber(json, "expires_in");
 
   cJSON_Delete(json);
 
-  return ESP_OK;
+  auth_data_.one_time_code.clear();
+
+exit:
+  xEventGroupSetBits(event_group_, err == ESP_OK
+                                       ? EVENT_SPOTIFY_ACCESS_TOKEN_GOOD
+                                       : EVENT_SPOTIFY_ACCESS_TOKEN_FAILURE);
+  return err;
 }
 
 esp_err_t Spotify::GetHostname(string* host) const {

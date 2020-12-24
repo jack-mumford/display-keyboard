@@ -23,6 +23,7 @@ class Spotify {
 
   esp_err_t Initialize();
   esp_err_t RequestAuthToken();
+  esp_err_t GetCurrentlyPlaying();
 
   // Was this instance *successfully* initialized?
   bool initialized() const { return initialized_; }
@@ -33,12 +34,12 @@ class Spotify {
 
  private:
   struct AuthData {
-    std::string access_token;
-    std::string token_type;
-    uint16_t expires_in;
-    std::string refresh_token;
-    std::string scope;
-    std::string one_time_code;
+    std::string access_token;   // Access token used for all API calls.
+    std::string token_type;     // Access token type. Always "Bearer".
+    uint32_t expires_in_secs;   // Number of seconds until access_token expires.
+    std::string refresh_token;  // The refresh token used to get access_token.
+    std::string scope;          // Privilege scope.
+    std::string one_time_code;  // Code used when fully authenticating.
   };
 
   static esp_err_t RootHandler(httpd_req_t* request);

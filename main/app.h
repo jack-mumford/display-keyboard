@@ -40,9 +40,11 @@ class App {
   std::unique_ptr<WiFi> wifi_;                 // Controls WiFi.
   std::unique_ptr<Spotify> spotify_;           // All interracitons w/Spotify.
   std::unique_ptr<Keyboard> keyboard_;         // All interaction with keyboard.
-  EventGroupHandle_t event_group_;             // Application events.
-  TaskHandle_t main_task_;                     // Event task.
-  bool online_;                                // Is this device on the network?
-  bool did_spotify_test_;
-  bool got_spotify_one_time_code_;
+  EventGroupHandle_t event_group_ = nullptr;   // Application events.
+  TaskHandle_t main_task_ = nullptr;           // Event task.
+  bool online_ = false;                        // Is this device on the network?
+  bool did_spotify_test_ = false;
+  bool got_spotify_one_time_code_ = false;
+  bool got_spotify_access_token_ = false;
+  bool started_spotify_currently_playing_ = false;
 };
