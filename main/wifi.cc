@@ -189,7 +189,11 @@ esp_err_t WiFi::Connect(const std::string& ssid, const std::string& key) {
   ESP_LOGI(TAG, "Attempting connection to WiFi network: \"%s\"", ssid.c_str());
 
   esp_wifi_stop();
-  xEventGroupClearBits(wifi_event_group_, EVENT_ALL);
+  // TODO: Is clearing events necessary, or is this done automatically?
+  constexpr EventBits_t kAllNetworkEvents =
+      EVENT_NETWORK_GOT_IP | EVENT_NETWORK_DISCONNECTED;
+  xEventGroupClearBits(wifi_event_group_, kAllNetworkEvents);
+
   retry_num_ = 0;
 
   if (ssid.length() > kMaxSSIDLen || key.length() > kMaxKeyLen)

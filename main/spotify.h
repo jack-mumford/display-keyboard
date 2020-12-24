@@ -5,18 +5,24 @@
 
 #include <esp_err.h>
 #include <esp_http_server.h>
+#include <event_groups.h>
 
-#include <https_client.h>
+#include "https_client.h"
 
 class Config;
 class HTTPSServer;
 
 class Spotify {
  public:
-  Spotify(const Config* config, HTTPSServer* https_server);
+  Spotify(const Config* config,
+          HTTPSServer* https_server,
+          EventGroupHandle_t event_group);
   ~Spotify();
 
   esp_err_t Initialize();
+
+  // Was this instance *successfully* initialized?
+  bool initialized() const { return initialized_; }
 
  private:
   struct AuthData {
@@ -25,6 +31,7 @@ class Spotify {
     uint16_t expires_in;
     std::string refresh_token;
     std::string scope;
+    std::string one_way_code;
   };
 
   static esp_err_t RootHandler(httpd_req_t* request);
@@ -37,9 +44,12 @@ class Spotify {
                      const std::string& grant_type,
                      std::string code);
   esp_err_t RequestAuthorization(AuthData* auth);
+  std::string GetRedirectURL() const;
 
   HTTPSClient https_client_;
   AuthData auth_data_;
   const Config* config_;  // Application config data.
   HTTPSServer* https_server_;
+  EventGroupHandle_t event_group_;
+  bool initialized_;
 };

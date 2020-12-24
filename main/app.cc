@@ -15,6 +15,7 @@
 #include "config.h"
 #include "config_reader.h"
 #include "display.h"
+#include "event_ids.h"
 #include "filesystem.h"
 #include "https_server.h"
 #include "keyboard.h"
@@ -52,14 +53,15 @@ esp_err_t InitNVRAM() {
 
 App::App()
     : config_(new Config()),
-      wifi_event_group_(nullptr),
+      event_group_(nullptr),
       main_task_(nullptr),
       online_(false),
-      did_spotify_test_(false) {}
+      did_spotify_test_(false),
+      got_spotify_code_(false) {}
 
 App::~App() {
-  if (wifi_event_group_)
-    vEventGroupDelete(wifi_event_group_);
+  if (event_group_)
+    vEventGroupDelete(event_group_);
 }
 
 esp_err_t App::CreateWiFiStatusTask() {
@@ -79,17 +81,19 @@ void IRAM_ATTR App::WiFiStatusTask(void* arg) {
   App* app = static_cast<App*>(arg);
   ESP_LOGW(TAG, "In Wi-Fi status task handler.");
   while (true) {
-    EventBits_t bits =
-        xEventGroupWaitBits(app->wifi_event_group_, WiFi::EVENT_ALL, pdFALSE,
-                            pdFALSE, portMAX_DELAY);
-    xEventGroupClearBits(app->wifi_event_group_, WiFi::EVENT_ALL);
-    if (bits & WiFi::EVENT_NETWORK_GOT_IP) {
+    EventBits_t bits = xEventGroupWaitBits(app->event_group_, WiFi::EVENT_ALL,
+                                           pdFALSE, pdFALSE, portMAX_DELAY);
+    xEventGroupClearBits(app->event_group_, WiFi::EVENT_ALL);
+    if (bits & EVENT_NETWORK_GOT_IP) {
       ESP_LOGI(TAG, "Wi-Fi is connected.");
       app->online_ = true;
-    } else if (bits & WiFi::EVENT_NETWORK_DISCONNECTED) {
+    } else if (bits & EVENT_NETWORK_DISCONNECTED) {
       ESP_LOGW(TAG, "Wi-Fi connection failed.");
       app->online_ = false;
       // TODO: Set a timer so that we can retry in a little while.
+    }
+    if (bits & EVENT_SPOTIFY_GOT_ONE_WAY_CODE) {
+      app->got_spotify_code_ = true;
     }
   }
 }
@@ -187,8 +191,8 @@ esp_err_t App::Initialize() {
     return err;
 
   ESP_LOGI(TAG, "Wi-Fi SSID: \"%s\"", config_->wifi.ssid.c_str());
-  wifi_event_group_ = xEventGroupCreate();
-  wifi_.reset(new WiFi(wifi_event_group_));
+  event_group_ = xEventGroupCreate();
+  wifi_.reset(new WiFi(event_group_));
   err = CreateWiFiStatusTask();
   if (err != ESP_OK)
     return err;
@@ -232,7 +236,7 @@ esp_err_t App::Initialize() {
   if (!display_->Initialize())
     return ESP_FAIL;
 
-  spotify_.reset(new Spotify(config_.get(), https_server_.get()));
+  spotify_.reset(new Spotify(config_.get(), https_server_.get(), event_group_));
 
   CreateKeyboardSimulatorTask();
 
@@ -248,9 +252,12 @@ void App::Run() {
     else if (wait_msecs > kMaxMainLoopWaitMSecs)
       wait_msecs = kMaxMainLoopWaitMSecs;
 
-    if (online_ && !did_spotify_test_) {
-      did_spotify_test_ = true;
+    if (online_) {
       ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->Initialize());
+
+      if (got_spotify_code_) {
+        got_spotify_code_ = false;
+      }
     }
     // Need to use vTaskDelay to avoid triggering the task WDT.
     vTaskDelay(pdMS_TO_TICKS(wait_msecs));

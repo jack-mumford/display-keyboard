@@ -22,7 +22,7 @@ class App {
   esp_err_t Initialize();
   void Run();
 
-  bool is_initialized() const { return wifi_event_group_ != nullptr; }
+  bool is_initialized() const { return event_group_ != nullptr; }
 
  private:
   static void IRAM_ATTR WiFiStatusTask(void*);
@@ -40,8 +40,9 @@ class App {
   std::unique_ptr<WiFi> wifi_;                 // Controls WiFi.
   std::unique_ptr<Spotify> spotify_;           // All interracitons w/Spotify.
   std::unique_ptr<Keyboard> keyboard_;         // All interaction with keyboard.
-  EventGroupHandle_t wifi_event_group_;        // WiFi events.
+  EventGroupHandle_t event_group_;             // Application events.
   TaskHandle_t main_task_;                     // Event task.
   bool online_;                                // Is this device on the network?
   bool did_spotify_test_;
+  bool got_spotify_code_;
 };
