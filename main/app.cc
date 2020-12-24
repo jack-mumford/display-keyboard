@@ -2,7 +2,7 @@
 
 #include <utility>
 
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+#define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
 
 #include <class/hid/hid.h>
 #include <esp_log.h>
@@ -81,9 +81,9 @@ void IRAM_ATTR App::WiFiStatusTask(void* arg) {
   App* app = static_cast<App*>(arg);
   ESP_LOGW(TAG, "In Wi-Fi status task handler.");
   while (true) {
-    EventBits_t bits = xEventGroupWaitBits(app->event_group_, WiFi::EVENT_ALL,
+    EventBits_t bits = xEventGroupWaitBits(app->event_group_, EVENT_ALL,
                                            pdFALSE, pdFALSE, portMAX_DELAY);
-    xEventGroupClearBits(app->event_group_, WiFi::EVENT_ALL);
+    xEventGroupClearBits(app->event_group_, EVENT_ALL);
     if (bits & EVENT_NETWORK_GOT_IP) {
       ESP_LOGI(TAG, "Wi-Fi is connected.");
       app->online_ = true;
@@ -122,7 +122,7 @@ void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
       continue;
     }
     if (!usb::HID::Ready()) {
-      ESP_LOGW(TAG, "USB not ready.");
+      ESP_LOGV(TAG, "USB not ready.");
       vTaskDelay(pdMS_TO_TICKS(1000));
       continue;
     }
@@ -236,7 +236,8 @@ esp_err_t App::Initialize() {
   if (!display_->Initialize())
     return ESP_FAIL;
 
-  spotify_.reset(new Spotify(config_.get(), https_server_.get(), event_group_));
+  spotify_.reset(new Spotify(config_.get(), https_server_.get(), wifi_.get(),
+                             event_group_));
 
   CreateKeyboardSimulatorTask();
 
@@ -253,9 +254,15 @@ void App::Run() {
       wait_msecs = kMaxMainLoopWaitMSecs;
 
     if (online_) {
-      ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->Initialize());
+      if (!spotify_->initialized()) {
+        ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->Initialize());
+        std::string auth_start_url = spotify_->GetAuthStartURL();
+        ESP_LOGI(TAG, "To login to Spotify navigate to %s",
+                 auth_start_url.c_str());
+      }
 
       if (got_spotify_one_time_code_) {
+        ESP_LOGD(TAG, "Got one-time-code, getting token.");
         got_spotify_one_time_code_ = false;
         ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->RequestAuthToken());
       }

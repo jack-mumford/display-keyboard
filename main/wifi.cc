@@ -7,6 +7,8 @@
 #include <esp_log.h>
 #include <esp_wifi.h>
 
+#include "event_ids.h"
+
 namespace {
 constexpr char TAG[] = "kbd_wifi";
 constexpr size_t kMaxSSIDLen = 31;
@@ -84,6 +86,28 @@ void SafeStrCopy(char* dst, const char* src, size_t len) {
   dst[len - 1] = '\0';
 }
 
+esp_err_t GetHostname(esp_netif_t* netif, std::string* hostname) {
+  const char* name(nullptr);
+  const esp_err_t err = esp_netif_get_hostname(netif, &name);
+  if (err != ESP_OK) {
+    ESP_LOGD(TAG, "Can't get hostname: %s", esp_err_to_name(err));
+    return err;
+  }
+  *hostname = name ? name : "";
+  return ESP_OK;
+}
+
+esp_err_t GetIPAddress(esp_netif_t* netif, esp_ip4_addr_t* addr) {
+  esp_netif_ip_info_t info;
+  const esp_err_t err = esp_netif_get_ip_info(netif, &info);
+  if (err != ESP_OK) {
+    ESP_LOGD(TAG, "Can't get assigned IP address: %s", esp_err_to_name(err));
+    return err;
+  }
+  *addr = info.ip;
+  return ESP_OK;
+}
+
 }  // namespace
 
 void WiFi::HandleWiFiEvent(wifi_event_t event_id, void* event_data) {
@@ -114,6 +138,10 @@ void WiFi::HandleIPEvent(ip_event_t event_id, void* event_data) {
       const ip_event_got_ip_t* event =
           static_cast<ip_event_got_ip_t*>(event_data);
       ESP_LOGI(TAG, "Got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+      std::string hostname = "?";
+      ::GetHostname(event->esp_netif, &hostname);
+      ESP_LOGI(TAG, "Hostname: \"%s\"", hostname.c_str());
+
       retry_num_ = 0;
       xEventGroupSetBits(wifi_event_group_, EVENT_NETWORK_GOT_IP);
     } break;
@@ -244,4 +272,12 @@ esp_err_t WiFi::Connect(const std::string& ssid, const std::string& key) {
     ESP_LOGE(TAG, "Start failed: %s", esp_err_to_name(err));
 
   return err;
+}
+
+esp_err_t WiFi::GetHostname(std::string* hostname) const {
+  return ::GetHostname(netif_, hostname);
+}
+
+esp_err_t WiFi::GetIPAddress(esp_ip4_addr_t* addr) const {
+  return ::GetIPAddress(netif_, addr);
 }
