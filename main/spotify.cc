@@ -239,7 +239,12 @@ esp_err_t Spotify::GetToken(const string& grant_type, const string& code) {
                          "&redirect_uri=" + EntityEncode(GetRedirectURL());
 
   ESP_LOGD(TAG, "content: \"%s\"", content.c_str());
+  string json_response;
   esp_err_t err = https_client_.DoPOST("accounts.spotify.com", "/api/token",
-                                       content, header_values);
+                                       content, header_values, &json_response);
+  if (err != ESP_OK)
+    return err;
+
+  ESP_LOGI(TAG, "Got AuthToken response \"%s\"", json_response.c_str());
   return err;
 }

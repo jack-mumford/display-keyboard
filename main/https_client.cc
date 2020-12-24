@@ -59,6 +59,28 @@ esp_err_t WriteData(esp_tls_t* tls, const void* data, size_t num_bytes) {
   return ESP_OK;
 }
 
+esp_err_t ReadData(esp_tls_t* tls, std::string* response) {
+  char buffer[512];
+  do {
+    int len = sizeof(buffer) - 1;
+    bzero(buffer, sizeof(buffer));
+    len = esp_tls_conn_read(tls, buffer, len);
+    if (len == ESP_TLS_ERR_SSL_WANT_WRITE || len == ESP_TLS_ERR_SSL_WANT_READ)
+      continue;
+    if (len < 0) {
+      ESP_LOGE(TAG, "esp_tls_conn_read  returned -0x%x", -len);
+      break;
+    }
+    if (len == 0) {
+      ESP_LOGI(TAG, "connection closed");
+      break;
+    }
+    ESP_LOGD(TAG, "%d bytes read", len);
+    response->append(buffer, len);
+  } while (true);
+  return ESP_OK;
+}
+
 }  // namespace
 
 HTTPSClient::HTTPSClient(std::string user_agent)
@@ -67,7 +89,9 @@ HTTPSClient::HTTPSClient(std::string user_agent)
 HTTPSClient::~HTTPSClient() = default;
 
 esp_err_t HTTPSClient::DoSSLCheck() {
-  return DoGET("www.howsmyssl.com", "/a/check", std::vector<std::string>());
+  std::string response;
+  return DoGET("www.howsmyssl.com", "/a/check", std::vector<std::string>(),
+               &response);
 }
 
 std::string HTTPSClient::CreateRequestString(
@@ -96,7 +120,8 @@ std::string HTTPSClient::CreateRequestString(
 
 esp_err_t HTTPSClient::DoGET(const std::string& host,
                              const std::string& resource,
-                             const std::vector<std::string>& header_values) {
+                             const std::vector<std::string>& header_values,
+                             std::string* response) {
   const std::string request = CreateRequestString(
       "GET", host, resource, /*content=*/std::string(), header_values);
   if (request.empty())
@@ -111,53 +136,24 @@ esp_err_t HTTPSClient::DoGET(const std::string& host,
 
   ESP_LOGI(TAG, "Connection established, sending request...");
   esp_err_t err = WriteData(tls, request.c_str(), request.length());
-  if (err != ESP_OK) {
-    esp_tls_conn_delete(tls);
-    return err;
-  }
+  if (err != ESP_OK)
+    goto exit;
 
   ESP_LOGI(TAG, "Reading HTTPS response...");
-  char buffer[512];
-  int ret, len;
+  err = ReadData(tls, response);
+  if (err != ESP_OK)
+    goto exit;
 
-  do {
-    len = sizeof(buffer) - 1;
-    bzero(buffer, sizeof(buffer));
-    ret = esp_tls_conn_read(tls, buffer, len);
-
-    if (ret == ESP_TLS_ERR_SSL_WANT_WRITE || ret == ESP_TLS_ERR_SSL_WANT_READ)
-      continue;
-
-    if (ret < 0) {
-      ESP_LOGE(TAG, "esp_tls_conn_read  returned -0x%x", -ret);
-      break;
-    }
-
-    if (ret == 0) {
-      ESP_LOGI(TAG, "connection closed");
-      break;
-    }
-
-    len = ret;
-    ESP_LOGD(TAG, "%d bytes read", len);
-    /* Print response directly to stdout as it is read */
-    for (int i = 0; i < len; i++) {
-      putchar(buffer[i]);
-    }
-  } while (true);
-
+exit:
   esp_tls_conn_delete(tls);
-  putchar('\n');  // JSON output doesn't have a newline at end.
-
-  static int request_count;
-  ESP_LOGI(TAG, "Completed %d requests", ++request_count);
   return ESP_OK;
 }
 
 esp_err_t HTTPSClient::DoPOST(const std::string& host,
                               const std::string& resource,
                               const std::string& content,
-                              const std::vector<std::string>& header_values) {
+                              const std::vector<std::string>& header_values,
+                              std::string* response) {
   const std::string request =
       CreateRequestString("POST", host, resource, content, header_values);
   if (request.empty())

@@ -12,12 +12,14 @@ class HTTPSClient {
 
   esp_err_t DoGET(const std::string& host,
                   const std::string& resource,
-                  const std::vector<std::string>& header_values);
+                  const std::vector<std::string>& header_values,
+                  std::string* response);
 
   esp_err_t DoPOST(const std::string& host,
                    const std::string& resource,
                    const std::string& content,
-                   const std::vector<std::string>& header_values);
+                   const std::vector<std::string>& header_values,
+                   std::string* response);
 
   esp_err_t DoSSLCheck();
 
