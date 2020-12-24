@@ -217,6 +217,12 @@ esp_err_t Spotify::RequestAuthToken() {
   return GetToken("authorization_code", std::move(auth_data_.one_way_code));
 }
 
+/**
+ * Get the authentication token.
+ *
+ * @param grant_type Either "refresh_token" or "authorization_code". The latter
+ *                   is used as part of the user authorization flow.
+ */
 esp_err_t Spotify::GetToken(const string& grant_type, const string& code) {
   if (grant_type != "authorization_code" && grant_type != "refresh_token")
     return ESP_ERR_INVALID_ARG;

@@ -57,7 +57,7 @@ App::App()
       main_task_(nullptr),
       online_(false),
       did_spotify_test_(false),
-      got_spotify_code_(false) {}
+      got_spotify_one_time_code_(false) {}
 
 App::~App() {
   if (event_group_)
@@ -93,7 +93,7 @@ void IRAM_ATTR App::WiFiStatusTask(void* arg) {
       // TODO: Set a timer so that we can retry in a little while.
     }
     if (bits & EVENT_SPOTIFY_GOT_ONE_WAY_CODE) {
-      app->got_spotify_code_ = true;
+      app->got_spotify_one_time_code_ = true;
     }
   }
 }
@@ -255,8 +255,8 @@ void App::Run() {
     if (online_) {
       ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->Initialize());
 
-      if (got_spotify_code_) {
-        got_spotify_code_ = false;
+      if (got_spotify_one_time_code_) {
+        got_spotify_one_time_code_ = false;
         ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->RequestAuthToken());
       }
     }

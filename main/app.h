@@ -44,5 +44,5 @@ class App {
   TaskHandle_t main_task_;                     // Event task.
   bool online_;                                // Is this device on the network?
   bool did_spotify_test_;
-  bool got_spotify_code_;
+  bool got_spotify_one_time_code_;
 };
