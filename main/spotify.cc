@@ -127,22 +127,20 @@ Spotify::Spotify(const Config* config,
 }
 
 Spotify::~Spotify() {
-  https_server_->UnregisterURIHandler(kRootURI, HTTP_GET);
-  https_server_->UnregisterURIHandler(kCallbackURI, HTTP_GET);
+  ESP_ERROR_CHECK_WITHOUT_ABORT(
+      https_server_->UnregisterURIHandler(kCallbackURI, HTTP_GET));
+  ESP_ERROR_CHECK_WITHOUT_ABORT(
+      https_server_->UnregisterURIHandler(kRootURI, HTTP_GET));
 };
 
 esp_err_t Spotify::Initialize() {
-  esp_err_t err = https_client_.DoSSLCheck();
-  if (err != ESP_OK)
-    return err;
-
   const httpd_uri_t root_handler_info{
       .uri = kRootURI,
       .method = HTTP_GET,
       .handler = Spotify::RootHandler,
       .user_ctx = this,
   };
-  err = https_server_->RegisterURIHandler(&root_handler_info);
+  esp_err_t err = https_server_->RegisterURIHandler(&root_handler_info);
   if (err != ESP_OK)
     return err;
   const httpd_uri_t callback_handler_info{
@@ -181,7 +179,7 @@ esp_err_t Spotify::HandleRootRequest(httpd_req_t* request) {
   httpd_resp_set_hdr(request, "Location", location.c_str());
 
   constexpr char kRedirectText[] =
-      "<html><head></head><body>Please authenticate on Spotify</body></html>";
+      "<html><head></head><body>Please authenticate on Spotify.</body></html>";
   return httpd_send(request, kRedirectText, sizeof(kRedirectText) - 1);
 }
 
@@ -215,9 +213,11 @@ string Spotify::GetRedirectURL() const {
   return "http://" + hostname + kCallbackURI;
 }
 
-esp_err_t Spotify::GetToken(AuthData* auth,
-                            const string& grant_type,
-                            string code) {
+esp_err_t Spotify::RequestAuthToken() {
+  return GetToken("authorization_code", std::move(auth_data_.one_way_code));
+}
+
+esp_err_t Spotify::GetToken(const string& grant_type, const string& code) {
   if (grant_type != "authorization_code" && grant_type != "refresh_token")
     return ESP_ERR_INVALID_ARG;
   const std::vector<string> header_values = {

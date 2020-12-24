@@ -257,6 +257,7 @@ void App::Run() {
 
       if (got_spotify_code_) {
         got_spotify_code_ = false;
+        ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->RequestAuthToken());
       }
     }
     // Need to use vTaskDelay to avoid triggering the task WDT.

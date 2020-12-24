@@ -20,6 +20,7 @@ class Spotify {
   ~Spotify();
 
   esp_err_t Initialize();
+  esp_err_t RequestAuthToken();
 
   // Was this instance *successfully* initialized?
   bool initialized() const { return initialized_; }
@@ -40,9 +41,7 @@ class Spotify {
   esp_err_t HandleRootRequest(httpd_req_t* request);
   esp_err_t HandleCallbackRequest(httpd_req_t* request);
 
-  esp_err_t GetToken(AuthData* auth,
-                     const std::string& grant_type,
-                     std::string code);
+  esp_err_t GetToken(const std::string& grant_type, const std::string& code);
   esp_err_t RequestAuthorization(AuthData* auth);
   std::string GetRedirectURL() const;
 
