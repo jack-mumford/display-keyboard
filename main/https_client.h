@@ -14,8 +14,7 @@ class HTTPSClient {
   HTTPSClient(std::string user_agent);
   ~HTTPSClient();
 
-  esp_err_t DoGET(const std::string& host,
-                  const std::string& resource,
+  esp_err_t DoGET(const std::string& url,
                   const std::vector<HeaderValue>& header_values,
                   std::string* response);
 
