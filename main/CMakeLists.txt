@@ -24,6 +24,7 @@ idf_component_register(
     "${IDF_PATH}/components/freertos/include/freertos"
     "${IDF_PATH}/components/hal/esp32s2/include"
     "${IDF_PATH}/components/hal/include"
+    "${IDF_PATH}/components/json"
     "${IDF_PATH}/components/mbedtls/esp_crt_bundle/include"
     "${IDF_PATH}/components/mbedtls/mbedtls/include"
     "${IDF_PATH}/components/mbedtls/port/include"

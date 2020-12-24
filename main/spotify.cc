@@ -1,11 +1,13 @@
 #include "spotify.h"
 
+#include <cstdlib>
 #include <cstring>
 #include <memory>
 #include <string>
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
+#include <cJSON/cJSON.h>
 #include <esp_err.h>
 #include <esp_log.h>
 #include <mbedtls/base64.h>
@@ -102,6 +104,30 @@ string GetQueryString(httpd_req_t* request, const char* key) {
   return string(value.get());
 }
 
+std::string GetJSONString(const cJSON* json, const char* key) {
+  cJSON* value = cJSON_GetObjectItem(json, key);
+  if (!value)
+    return string();
+
+  string str_value;
+  if (cJSON_IsString(value))
+    str_value = cJSON_GetStringValue(value);
+
+  return str_value;
+}
+
+int GetJSONNumber(const cJSON* json, const char* key) {
+  cJSON* value = cJSON_GetObjectItem(json, key);
+  if (!value)
+    return 0;
+
+  int num_val = 0;
+  if (cJSON_IsNumber(value))
+    num_val = value->valueint;
+
+  return num_val;
+}
+
 }  // namespace
 
 // static
@@ -167,7 +193,7 @@ esp_err_t Spotify::Initialize() {
 
 // Redirect the user agent to Spotify to authenticate. After successful
 // authentication Spotify will redirect the user agent to a second URL
-// that will contain our one-way code.
+// that will contain our one-time code.
 esp_err_t Spotify::HandleRootRequest(httpd_req_t* request) {
   ESP_LOGD(TAG, "In HandleRootRequest");
   esp_err_t err = httpd_resp_set_status(request, "302 Found");
@@ -200,18 +226,18 @@ esp_err_t Spotify::HandleRootRequest(httpd_req_t* request) {
 }
 
 // The handler for the second part of the user authenticaton where
-// Spotify delivers the one-way code.
+// Spotify delivers the one-time code.
 esp_err_t Spotify::HandleCallbackRequest(httpd_req_t* request) {
   ESP_LOGD(TAG, "In HandleCallbackRequest");
-  auth_data_.one_way_code = GetQueryString(request, "code");
-  if (auth_data_.one_way_code.empty())
+  auth_data_.one_time_code = GetQueryString(request, "code");
+  if (auth_data_.one_time_code.empty())
     return httpd_resp_send_500(request);
-  ESP_LOGD(TAG, "One-way code \"%s\"", auth_data_.one_way_code.c_str());
+  ESP_LOGD(TAG, "Got one time code \"%s\"", auth_data_.one_time_code.c_str());
 
-  // Now that we have the one-way code, notify the application so that
+  // Now that we have the one-time code, notify the application so that
   // it can update any UI (if desired) and continue the process of connecting
   // to Spotify.
-  xEventGroupSetBits(event_group_, EVENT_SPOTIFY_GOT_ONE_WAY_CODE);
+  xEventGroupSetBits(event_group_, EVENT_SPOTIFY_GOT_ONE_TIME_CODE);
 
   constexpr char kCallbackSuccess[] =
       "<html><head></head><body>Succesfully authentiated this device with "
@@ -231,17 +257,20 @@ esp_err_t Spotify::GetRedirectURL(string* url) const {
 
 esp_err_t Spotify::RequestAuthToken() {
   return GetAccessToken("authorization_code",
-                        std::move(auth_data_.one_way_code));
+                        std::move(auth_data_.one_time_code));
 }
 
 esp_err_t Spotify::GetAccessToken(const string& grant_type,
                                   const string& code) {
   if (grant_type != "authorization_code" && grant_type != "refresh_token")
     return ESP_ERR_INVALID_ARG;
-  const std::vector<string> header_values = {
-      "Authorization: Basic " + Base64Encode(config_->spotify.client_id + ":" +
-                                             config_->spotify.client_secret),
-      "Content-Type: application/x-www-form-urlencoded", "Connection: close"};
+  const std::vector<HTTPSClient::HeaderValue> header_values = {
+      {"Authorization",
+       "Basic " + Base64Encode(config_->spotify.client_id + ":" +
+                               config_->spotify.client_secret)},
+      {"Content-Type", "application/x-www-form-urlencoded"},
+      {"Connection", "close"},
+  };
 
   const string code_param =
       grant_type == "refresh_token" ? "refresh_token" : "code";
@@ -251,15 +280,32 @@ esp_err_t Spotify::GetAccessToken(const string& grant_type,
   const string content = "grant_type=" + grant_type + "&" + code_param + "=" +
                          code + "&redirect_uri=" + EntityEncode(redirect_url);
 
-  ESP_LOGD(TAG, "content: \"%s\"", content.c_str());
   string json_response;
-  err = https_client_.DoPOST("accounts.spotify.com", "/api/token", content,
-                             header_values, &json_response);
+  const string kGetAccessTokenURL("https://accounts.spotify.com/api/token");
+  err = https_client_.DoPOST(kGetAccessTokenURL, content, header_values,
+                             &json_response);
   if (err != ESP_OK)
     return err;
 
-  ESP_LOGI(TAG, "Got AuthToken response \"%s\"", json_response.c_str());
-  return err;
+  if (json_response.empty()) {
+    ESP_LOGE(TAG, "Got empty response.");
+    return ESP_FAIL;
+  }
+  cJSON* json = cJSON_Parse(json_response.c_str());
+  if (!json) {
+    ESP_LOGE(TAG, "Failure parsing JSON response.");
+    return ESP_FAIL;
+  }
+
+  auth_data_.access_token = GetJSONString(json, "access_token");
+  auth_data_.token_type = GetJSONString(json, "token_type");
+  auth_data_.refresh_token = GetJSONString(json, "refresh_token");
+  auth_data_.scope = GetJSONString(json, "scope");
+  auth_data_.expires_in = GetJSONNumber(json, "expires_in");
+
+  cJSON_Delete(json);
+
+  return ESP_OK;
 }
 
 esp_err_t Spotify::GetHostname(string* host) const {

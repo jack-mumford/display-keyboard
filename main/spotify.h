@@ -38,7 +38,7 @@ class Spotify {
     uint16_t expires_in;
     std::string refresh_token;
     std::string scope;
-    std::string one_way_code;
+    std::string one_time_code;
   };
 
   static esp_err_t RootHandler(httpd_req_t* request);

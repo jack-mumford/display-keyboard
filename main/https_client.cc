@@ -54,12 +54,13 @@ esp_err_t WriteData(esp_tls_t* tls, const void* data, size_t num_bytes) {
       ESP_LOGE(TAG, "esp_tls_conn_write  returned 0x%x", ret);
       return ESP_FAIL;
     }
+    taskYIELD();
   } while (bytes_written < num_bytes);
 
   return ESP_OK;
 }
 
-esp_err_t ReadData(esp_tls_t* tls, std::string* response) {
+esp_err_t ReadData(esp_tls_t* tls) {
   char buffer[512];
   do {
     int len = sizeof(buffer) - 1;
@@ -68,20 +69,43 @@ esp_err_t ReadData(esp_tls_t* tls, std::string* response) {
     if (len == ESP_TLS_ERR_SSL_WANT_WRITE || len == ESP_TLS_ERR_SSL_WANT_READ)
       continue;
     if (len < 0) {
-      ESP_LOGE(TAG, "esp_tls_conn_read  returned -0x%x", -len);
+      ESP_LOGE(TAG, "esp_tls_conn_read returned -0x%x", -len);
       break;
     }
     if (len == 0) {
-      ESP_LOGI(TAG, "connection closed");
+      ESP_LOGD(TAG, "connection closed");
       break;
     }
     ESP_LOGD(TAG, "%d bytes read", len);
-    response->append(buffer, len);
+    taskYIELD();
   } while (true);
   return ESP_OK;
 }
 
 }  // namespace
+
+// static
+esp_err_t HTTPSClient::EventHandler(esp_http_client_event_t* evt) {
+  HTTPSClient* client = static_cast<HTTPSClient*>(evt->user_data);
+
+  switch (evt->event_id) {
+    case HTTP_EVENT_ERROR:
+      client->last_request_data_.clear();
+      break;
+    case HTTP_EVENT_ON_CONNECTED:
+      client->last_request_data_.clear();
+      break;
+    case HTTP_EVENT_ON_DATA:
+      ESP_LOGI(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
+      client->last_request_data_.append(static_cast<const char*>(evt->data),
+                                        evt->data_len);
+      break;
+    default:
+      // fallthrough
+      break;
+  }
+  return ESP_OK;
+}
 
 HTTPSClient::HTTPSClient(std::string user_agent)
     : user_agent_(std::move(user_agent)) {}
@@ -90,7 +114,7 @@ HTTPSClient::~HTTPSClient() = default;
 
 esp_err_t HTTPSClient::DoSSLCheck() {
   std::string response;
-  return DoGET("www.howsmyssl.com", "/a/check", std::vector<std::string>(),
+  return DoGET("www.howsmyssl.com", "/a/check", std::vector<HeaderValue>(),
                &response);
 }
 
@@ -99,13 +123,13 @@ std::string HTTPSClient::CreateRequestString(
     const std::string& host,
     const std::string& resource,
     const std::string& content,
-    const std::vector<std::string>& header_values) const {
+    const std::vector<HeaderValue>& header_values) const {
   std::string request = request_type + " https://" + host + resource +
                         " HTTP/1.1\r\nHost: " + host +
                         "\r\nUser-Agent: " + user_agent_ + "\r\n";
 
-  for (const std::string& value : header_values)
-    request += value + "\r\n";
+  for (const HeaderValue& value : header_values)
+    request += value.first + ": " + value.second + "\r\n";
 
   if (!content.empty()) {
     char buff[40];
@@ -120,7 +144,7 @@ std::string HTTPSClient::CreateRequestString(
 
 esp_err_t HTTPSClient::DoGET(const std::string& host,
                              const std::string& resource,
-                             const std::vector<std::string>& header_values,
+                             const std::vector<HeaderValue>& header_values,
                              std::string* response) {
   const std::string request = CreateRequestString(
       "GET", host, resource, /*content=*/std::string(), header_values);
@@ -134,85 +158,54 @@ esp_err_t HTTPSClient::DoGET(const std::string& host,
     return ESP_FAIL;
   }
 
-  ESP_LOGI(TAG, "Connection established, sending request...");
+  ESP_LOGD(TAG, "Connection established, sending request...");
   esp_err_t err = WriteData(tls, request.c_str(), request.length());
   if (err != ESP_OK)
     goto exit;
 
-  ESP_LOGI(TAG, "Reading HTTPS response...");
-  err = ReadData(tls, response);
-  if (err != ESP_OK)
-    goto exit;
+  err = ReadData(tls);
+  *response = std::move(last_request_data_);
 
 exit:
   esp_tls_conn_delete(tls);
-  return ESP_OK;
+  return err;
 }
 
-esp_err_t HTTPSClient::DoPOST(const std::string& host,
-                              const std::string& resource,
+esp_err_t HTTPSClient::DoPOST(const std::string& url,
                               const std::string& content,
-                              const std::vector<std::string>& header_values,
+                              const std::vector<HeaderValue>& header_values,
                               std::string* response) {
-  const std::string request =
-      CreateRequestString("POST", host, resource, content, header_values);
-  if (request.empty())
-    return ESP_ERR_NO_MEM;
-
-  const std::string url = "https://" + host + resource;
-  esp_tls_t* tls = CreateConnection(url);
-  if (!tls) {
-    ESP_LOGE(TAG, "Connection failed...");
+  esp_http_client_config_t config = {
+      .url = url.c_str(),
+      .auth_type = HTTP_AUTH_TYPE_BASIC,
+      //.cert_pem = howsmyssl_com_root_cert_pem_start,
+      .method = HTTP_METHOD_POST,
+      .event_handler = HTTPSClient::EventHandler,
+      .user_data = this,
+  };
+  esp_http_client_handle_t client = esp_http_client_init(&config);
+  if (!client)
     return ESP_FAIL;
+  esp_err_t err = ESP_OK;
+  for (const auto& value : header_values) {
+    err = esp_http_client_set_header(client, value.first.c_str(),
+                                     value.second.c_str());
+    if (err != ESP_OK)
+      goto exit;
   }
+  err =
+      esp_http_client_set_post_field(client, content.data(), content.length());
+  if (err != ESP_OK)
+    goto exit;
+  err = esp_http_client_perform(client);
 
-  ESP_LOGI(TAG, "Connection established, sending request...");
-  ESP_LOGD(TAG, "REQUEST: %s", request.c_str());
-  esp_err_t err = WriteData(tls, request.c_str(), request.length());
-  if (err != ESP_OK) {
-    esp_tls_conn_delete(tls);
-    return err;
+exit:
+  esp_http_client_cleanup(client);
+  if (err == ESP_OK) {
+    *response = std::move(last_request_data_);
+    ESP_LOGI(TAG, "Status = %d, content_length = %d",
+             esp_http_client_get_status_code(client),
+             esp_http_client_get_content_length(client));
   }
-  err = WriteData(tls, content.c_str(), content.length());
-  if (err != ESP_OK) {
-    esp_tls_conn_delete(tls);
-    return err;
-  }
-
-  ESP_LOGI(TAG, "Reading HTTPS response...");
-  char buffer[512];
-  int ret, len;
-
-  do {
-    len = sizeof(buffer) - 1;
-    bzero(buffer, sizeof(buffer));
-    ret = esp_tls_conn_read(tls, buffer, len);
-
-    if (ret == ESP_TLS_ERR_SSL_WANT_WRITE || ret == ESP_TLS_ERR_SSL_WANT_READ)
-      continue;
-
-    if (ret < 0) {
-      ESP_LOGE(TAG, "esp_tls_conn_read  returned -0x%x", -ret);
-      break;
-    }
-
-    if (ret == 0) {
-      ESP_LOGI(TAG, "connection closed");
-      break;
-    }
-
-    len = ret;
-    ESP_LOGD(TAG, "%d bytes read", len);
-    /* Print response directly to stdout as it is read */
-    for (int i = 0; i < len; i++) {
-      putchar(buffer[i]);
-    }
-  } while (true);
-
-  esp_tls_conn_delete(tls);
-  putchar('\n');  // JSON output doesn't have a newline at end.
-
-  static int request_count;
-  ESP_LOGI(TAG, "Completed %d requests", ++request_count);
-  return ESP_OK;
+  return err;
 }

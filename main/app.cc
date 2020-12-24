@@ -92,7 +92,7 @@ void IRAM_ATTR App::WiFiStatusTask(void* arg) {
       app->online_ = false;
       // TODO: Set a timer so that we can retry in a little while.
     }
-    if (bits & EVENT_SPOTIFY_GOT_ONE_WAY_CODE) {
+    if (bits & EVENT_SPOTIFY_GOT_ONE_TIME_CODE) {
       app->got_spotify_one_time_code_ = true;
     }
   }
