@@ -37,13 +37,16 @@ HTTPClient::HTTPClient() = default;
 HTTPClient::~HTTPClient() = default;
 
 esp_err_t HTTPClient::DoSSLCheck() {
-  return DoGET("https://www.howsmyssl.com/a/check", std::vector<HeaderValue>(),
-               [](const void*, int) { return ESP_OK; });
+  int status;
+  return DoGET(
+      "https://www.howsmyssl.com/a/check", std::vector<HeaderValue>(),
+      [](const void*, int) { return ESP_OK; }, &status);
 }
 
 esp_err_t HTTPClient::DoGET(const std::string& url,
                             const std::vector<HeaderValue>& header_values,
-                            DataCallback data_callback) {
+                            DataCallback data_callback,
+                            int* status_code) {
   data_callback_ = data_callback;
   const esp_http_client_config_t config = {
       .url = url.c_str(),
@@ -68,18 +71,16 @@ esp_err_t HTTPClient::DoGET(const std::string& url,
 exit:
   data_callback_ = nullptr;
   esp_http_client_cleanup(client);
-  if (err == ESP_OK) {
-    ESP_LOGI(TAG, "Status = %d, content_length = %d",
-             esp_http_client_get_status_code(client),
-             esp_http_client_get_content_length(client));
-  }
+  if (err == ESP_OK)
+    *status_code = esp_http_client_get_status_code(client);
   return err;
 }
 
 esp_err_t HTTPClient::DoPOST(const std::string& url,
                              const std::string& content,
                              const std::vector<HeaderValue>& header_values,
-                             DataCallback data_callback) {
+                             DataCallback data_callback,
+                             int* status_code) {
   data_callback_ = data_callback;
   const esp_http_client_config_t config = {
       .url = url.c_str(),
@@ -108,10 +109,7 @@ esp_err_t HTTPClient::DoPOST(const std::string& url,
 exit:
   data_callback_ = nullptr;
   esp_http_client_cleanup(client);
-  if (err == ESP_OK) {
-    ESP_LOGI(TAG, "Status = %d, content_length = %d",
-             esp_http_client_get_status_code(client),
-             esp_http_client_get_content_length(client));
-  }
+  if (err == ESP_OK)
+    *status_code = esp_http_client_get_status_code(client);
   return err;
 }

@@ -306,23 +306,30 @@ esp_err_t Spotify::GetCurrentlyPlaying() {
   if (give_mutex)
     xSemaphoreGive(mutex_);
 
-  std::string json_response;
+  std::string response;
   HTTPClient https_client;
+  int status_code(0);
   esp_err_t err = https_client.DoGET(
       kCurrentlyPlayingURL, header_values,
-      [&json_response](const void* data, int data_len) {
-        json_response.append(static_cast<const char*>(data), data_len);
+      [&response](const void* data, int data_len) {
+        response.append(static_cast<const char*>(data), data_len);
         return ESP_OK;
-      });
+      },
+      &status_code);
 
   if (err != ESP_OK)
     return ESP_FAIL;
 
-  if (json_response.empty()) {
+  if (status_code != HttpStatus_Ok) {
+    ESP_LOGE(TAG, "Request error: %d", status_code);
+    return ESP_FAIL;
+  }
+
+  if (response.empty()) {
     ESP_LOGE(TAG, "Got empty response.");
     return ESP_FAIL;
   }
-  cJSON* json = cJSON_Parse(json_response.c_str());
+  cJSON* json = cJSON_Parse(response.c_str());
   if (!json) {
     ESP_LOGE(TAG, "Failure parsing JSON response.");
     return ESP_FAIL;
@@ -352,10 +359,13 @@ esp_err_t Spotify::RefreshAccessToken() {
 }
 
 esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
+  // How long does it take to do a refresh?
+  constexpr uint32_t kMaxTokenRefreshDurationSecs = 120;
+
   esp_err_t err = ESP_OK;
   cJSON* json = nullptr;
   string redirect_url;
-  string json_response;
+  string response;
   bool give_mutex = false;
   uint32_t expires_in_secs = 0;
   const string kGetAccessTokenURL("https://accounts.spotify.com/api/token");
@@ -368,6 +378,7 @@ esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
   };
   string content;
   HTTPClient http_client;
+  int status_code(0);
 
   err = GetRedirectURL(&redirect_url);
   if (err != ESP_OK)
@@ -376,21 +387,25 @@ esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
                 ? CreateAccessTokenAuthorizationContent(code, redirect_url)
                 : CreateAccessTokenRefreshContent(code, redirect_url);
 
-  err = http_client.DoPOST(kGetAccessTokenURL, content, header_values,
-                           [&json_response](const void* data, int data_len) {
-                             json_response.append(
-                                 static_cast<const char*>(data), data_len);
-                             return ESP_OK;
-                           });
+  err = http_client.DoPOST(
+      kGetAccessTokenURL, content, header_values,
+      [&response](const void* data, int data_len) {
+        response.append(static_cast<const char*>(data), data_len);
+        return ESP_OK;
+      },
+      &status_code);
   if (err != ESP_OK)
     goto exit;
-
-  if (json_response.empty()) {
+  if (status_code != HttpStatus_Ok) {
+    ESP_LOGE(TAG, "Invalid status: %d", status_code);
+    goto exit;
+  }
+  if (response.empty()) {
     ESP_LOGE(TAG, "Got empty response.");
     err = ESP_FAIL;
     goto exit;
   }
-  json = cJSON_Parse(json_response.c_str());
+  json = cJSON_Parse(response.c_str());
   if (!json) {
     ESP_LOGE(TAG, "Failure parsing JSON response.");
     err = ESP_FAIL;
@@ -406,6 +421,8 @@ esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
   if (give_mutex)
     xSemaphoreGive(mutex_);
   expires_in_secs = GetJSONNumber(json, "expires_in");
+  if (expires_in_secs > kMaxTokenRefreshDurationSecs)
+    expires_in_secs -= kMaxTokenRefreshDurationSecs;
 
   cJSON_Delete(json);
 

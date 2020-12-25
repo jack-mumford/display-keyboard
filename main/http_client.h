@@ -18,12 +18,14 @@ class HTTPClient {
 
   esp_err_t DoGET(const std::string& url,
                   const std::vector<HeaderValue>& header_values,
-                  DataCallback data_callback);
+                  DataCallback data_callback,
+                  int* status_code);
 
   esp_err_t DoPOST(const std::string& url,
                    const std::string& content,
                    const std::vector<HeaderValue>& header_values,
-                   DataCallback data_callback);
+                   DataCallback data_callback,
+                   int* status_code);
 
   esp_err_t DoSSLCheck();
 
