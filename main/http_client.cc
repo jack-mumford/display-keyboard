@@ -17,15 +17,15 @@ esp_err_t HTTPClient::EventHandler(esp_http_client_event_t* evt) {
 
   switch (evt->event_id) {
     case HTTP_EVENT_ERROR:
-      client->last_request_data_.clear();
+      client->last_response_data_.clear();
       break;
     case HTTP_EVENT_ON_CONNECTED:
-      client->last_request_data_.clear();
+      client->last_response_data_.clear();
       break;
     case HTTP_EVENT_ON_DATA:
       ESP_LOGI(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
-      client->last_request_data_.append(static_cast<const char*>(evt->data),
-                                        evt->data_len);
+      client->last_response_data_.append(static_cast<const char*>(evt->data),
+                                         evt->data_len);
       break;
     default:
       // fallthrough
@@ -70,7 +70,7 @@ esp_err_t HTTPClient::DoGET(const std::string& url,
 exit:
   esp_http_client_cleanup(client);
   if (err == ESP_OK) {
-    *response = std::move(last_request_data_);
+    *response = std::move(last_response_data_);
     ESP_LOGI(TAG, "Status = %d, content_length = %d",
              esp_http_client_get_status_code(client),
              esp_http_client_get_content_length(client));
@@ -109,7 +109,7 @@ esp_err_t HTTPClient::DoPOST(const std::string& url,
 exit:
   esp_http_client_cleanup(client);
   if (err == ESP_OK) {
-    *response = std::move(last_request_data_);
+    *response = std::move(last_response_data_);
     ESP_LOGI(TAG, "Status = %d, content_length = %d",
              esp_http_client_get_status_code(client),
              esp_http_client_get_content_length(client));

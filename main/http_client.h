@@ -35,5 +35,5 @@ class HTTPClient {
       const std::string& content,
       const std::vector<HeaderValue>& header_values) const;
 
-  std::string last_request_data_;
+  std::string last_response_data_;  // contents of the current request data.
 };
