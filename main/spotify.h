@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <string>
 
-#include <esp_err.h>
 #include <esp_http_server.h>
+#include <esp_timer.h>
 #include <event_groups.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -66,6 +66,7 @@ class Spotify {
 
   static esp_err_t RootHandler(httpd_req_t* request);
   static esp_err_t CallbackHandler(httpd_req_t* request);
+  static void TokenRenewCb(void* arg);
 
   /**
    * HTTPD request handler for "/".
@@ -76,7 +77,7 @@ class Spotify {
   esp_err_t HandleRootRequest(httpd_req_t* request);
 
   /**
-   * HTTPD request handler for "/callback/".
+   * HTTPD request handler for "/callback/" resource.
    *
    * @param request
    * @return ESP_OK if successful.
@@ -86,11 +87,19 @@ class Spotify {
   /**
    * Get or renew the Spotify API access token.
    *
+   * @note Can be called on any task.
+   *
    * @param grant_type Either "refresh_token" or "authorization_code". The
    * latter is used as part of the user authorization flow.
    */
-  esp_err_t GetAccessToken(const std::string& grant_type,
-                           const std::string& code);
+  esp_err_t GetAccessToken(const std::string& grant_type, std::string code);
+
+  /**
+   * Renew the access token.
+   *
+   * Called on another task.
+   */
+  esp_err_t RenewAccessToken();
 
   /**
    * Create the URL to have Spotify redirect to after user successfully
@@ -115,6 +124,7 @@ class Spotify {
   EventGroupHandle_t event_group_;  // Used to inform owner of events.
   WiFi* wifi_;                      // Object used to controll Wi-Fi network.
   bool initialized_;                // Is this instance initialized?
-  SemaphoreHandle_t mutex_;         // Synchronize access to following members.
-  AuthData auth_data_;              // Current user auth data.
+  esp_timer_handle_t token_renew_timer_;  // Used to renew timer.
+  SemaphoreHandle_t mutex_;  // Synchronize access to following members.
+  AuthData auth_data_;       // Current user auth data.
 };

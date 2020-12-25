@@ -150,6 +150,7 @@ Spotify::Spotify(const Config* config,
       event_group_(event_group),
       wifi_(wifi),
       initialized_(false),
+      token_renew_timer_(nullptr),
       mutex_(xSemaphoreCreateMutex()) {
   assert(config != nullptr);
   assert(https_server != nullptr);
@@ -158,11 +159,18 @@ Spotify::Spotify(const Config* config,
 }
 
 Spotify::~Spotify() {
+  if (token_renew_timer_)
+    esp_timer_delete(token_renew_timer_);
   ESP_ERROR_CHECK_WITHOUT_ABORT(
       https_server_->UnregisterURIHandler(kCallbackURI, HTTP_GET));
   ESP_ERROR_CHECK_WITHOUT_ABORT(
       https_server_->UnregisterURIHandler(kRootURI, HTTP_GET));
 };
+
+// static:
+void Spotify::TokenRenewCb(void* arg) {
+  static_cast<Spotify*>(arg)->RenewAccessToken();
+}
 
 esp_err_t Spotify::Initialize() {
   esp_err_t err = https_server_->Initialize();
@@ -184,6 +192,17 @@ esp_err_t Spotify::Initialize() {
       .user_ctx = this,
   };
   err = https_server_->RegisterURIHandler(&callback_handler_info);
+  if (err != ESP_OK)
+    return err;
+
+  const esp_timer_create_args_t timer_args = {
+      .callback = TokenRenewCb,
+      .arg = this,
+      .dispatch_method = ESP_TIMER_TASK,
+      .name = "AccessTokenRenew",
+      .skip_unhandled_events = true,
+  };
+  err = esp_timer_create(&timer_args, &token_renew_timer_);
   if (err != ESP_OK)
     return err;
 
@@ -300,12 +319,22 @@ esp_err_t Spotify::GetCurrentlyPlaying() {
 }
 
 esp_err_t Spotify::RequestAccessToken() {
-  return GetAccessToken("authorization_code",
-                        std::move(auth_data_.one_time_code));
+  bool give_mutex = xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE;
+  std::string one_time_code = std::move(auth_data_.one_time_code);
+  if (give_mutex)
+    xSemaphoreGive(mutex_);
+  return GetAccessToken("authorization_code", std::move(one_time_code));
 }
 
-esp_err_t Spotify::GetAccessToken(const string& grant_type,
-                                  const string& code) {
+esp_err_t Spotify::RenewAccessToken() {
+  bool give_mutex = xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE;
+  std::string refresh_token = auth_data_.refresh_token;
+  if (give_mutex)
+    xSemaphoreGive(mutex_);
+  return GetAccessToken("refresh_token", std::move(refresh_token));
+}
+
+esp_err_t Spotify::GetAccessToken(const string& grant_type, string code) {
   esp_err_t err = ESP_OK;
   cJSON* json = nullptr;
   const string code_param =
