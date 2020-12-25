@@ -34,8 +34,7 @@ esp_err_t HTTPClient::EventHandler(esp_http_client_event_t* evt) {
   return ESP_OK;
 }
 
-HTTPClient::HTTPClient(std::string user_agent)
-    : user_agent_(std::move(user_agent)) {}
+HTTPClient::HTTPClient() = default;
 
 HTTPClient::~HTTPClient() = default;
 

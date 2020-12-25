@@ -11,7 +11,7 @@ class HTTPClient {
  public:
   using HeaderValue = std::pair<std::string, std::string>;
 
-  HTTPClient(std::string user_agent);
+  HTTPClient();
   ~HTTPClient();
 
   esp_err_t DoGET(const std::string& url,
@@ -35,6 +35,5 @@ class HTTPClient {
       const std::string& content,
       const std::vector<HeaderValue>& header_values) const;
 
-  const std::string user_agent_;
   std::string last_request_data_;
 };

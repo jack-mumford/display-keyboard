@@ -40,7 +40,6 @@ struct RequestData {
 constexpr char TAG[] = "kbd_spotify";
 constexpr char kApiHost[] = "api.spotify.com";
 constexpr char kCurrentlyPlayingResource[] = "/v1/me/player/currently-playing";
-constexpr char kUserAgent[] = "esp-idf/1.0 esp32";
 constexpr char kRootURI[] = "/";
 constexpr char kCallbackURI[] = "/callback/";
 
@@ -145,8 +144,7 @@ Spotify::Spotify(const Config* config,
                  HTTPServer* https_server,
                  WiFi* wifi,
                  EventGroupHandle_t event_group)
-    : https_client_(kUserAgent),
-      config_(config),
+    : config_(config),
       https_server_(https_server),
       event_group_(event_group),
       wifi_(wifi),
