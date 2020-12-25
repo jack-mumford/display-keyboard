@@ -259,7 +259,7 @@ esp_err_t Spotify::GetCurrentlyPlaying() {
   constexpr char kCurrentlyPlayingURL[] =
       "https://api.spotify.com/v1/me/player/currently-playing";
 
-  const std::vector<HTTPSClient::HeaderValue> header_values = {
+  const std::vector<HTTPClient::HeaderValue> header_values = {
       {"Authorization", "Bearer " + auth_data_.access_token},
       {"Connection", "close"},
   };
@@ -302,7 +302,7 @@ esp_err_t Spotify::GetAccessToken(const string& grant_type,
   string redirect_url;
   string json_response;
   const string kGetAccessTokenURL("https://accounts.spotify.com/api/token");
-  const std::vector<HTTPSClient::HeaderValue> header_values = {
+  const std::vector<HTTPClient::HeaderValue> header_values = {
       {"Authorization",
        "Basic " + Base64Encode(config_->spotify.client_id + ":" +
                                config_->spotify.client_secret)},

@@ -7,12 +7,12 @@
 #include <esp_err.h>
 #include <esp_http_client.h>
 
-class HTTPSClient {
+class HTTPClient {
  public:
   using HeaderValue = std::pair<std::string, std::string>;
 
-  HTTPSClient(std::string user_agent);
-  ~HTTPSClient();
+  HTTPClient(std::string user_agent);
+  ~HTTPClient();
 
   esp_err_t DoGET(const std::string& url,
                   const std::vector<HeaderValue>& header_values,

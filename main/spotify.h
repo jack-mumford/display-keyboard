@@ -7,7 +7,7 @@
 #include <esp_http_server.h>
 #include <event_groups.h>
 
-#include "https_client.h"
+#include "http_client.h"
 
 class Config;
 class HTTPSServer;
@@ -88,7 +88,7 @@ class Spotify {
    */
   esp_err_t GetHostname(std::string* host) const;
 
-  HTTPSClient https_client_;
+  HTTPClient https_client_;
   AuthData auth_data_;
   const Config* config_;  // Application config data.
   HTTPSServer* https_server_;

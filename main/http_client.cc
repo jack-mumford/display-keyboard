@@ -1,6 +1,6 @@
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
-#include "https_client.h"
+#include "http_client.h"
 
 #include <esp_crt_bundle.h>
 #include <esp_http_client.h>
@@ -12,8 +12,8 @@ constexpr char TAG[] = "kbd_httpc";
 }  // namespace
 
 // static
-esp_err_t HTTPSClient::EventHandler(esp_http_client_event_t* evt) {
-  HTTPSClient* client = static_cast<HTTPSClient*>(evt->user_data);
+esp_err_t HTTPClient::EventHandler(esp_http_client_event_t* evt) {
+  HTTPClient* client = static_cast<HTTPClient*>(evt->user_data);
 
   switch (evt->event_id) {
     case HTTP_EVENT_ERROR:
@@ -34,26 +34,26 @@ esp_err_t HTTPSClient::EventHandler(esp_http_client_event_t* evt) {
   return ESP_OK;
 }
 
-HTTPSClient::HTTPSClient(std::string user_agent)
+HTTPClient::HTTPClient(std::string user_agent)
     : user_agent_(std::move(user_agent)) {}
 
-HTTPSClient::~HTTPSClient() = default;
+HTTPClient::~HTTPClient() = default;
 
-esp_err_t HTTPSClient::DoSSLCheck() {
+esp_err_t HTTPClient::DoSSLCheck() {
   std::string response;
   return DoGET("https://www.howsmyssl.com/a/check", std::vector<HeaderValue>(),
                &response);
 }
 
-esp_err_t HTTPSClient::DoGET(const std::string& url,
-                             const std::vector<HeaderValue>& header_values,
-                             std::string* response) {
+esp_err_t HTTPClient::DoGET(const std::string& url,
+                            const std::vector<HeaderValue>& header_values,
+                            std::string* response) {
   const esp_http_client_config_t config = {
       .url = url.c_str(),
       .auth_type = HTTP_AUTH_TYPE_BASIC,
       //.cert_pem = howsmyssl_com_root_cert_pem_start,
       .method = HTTP_METHOD_GET,
-      .event_handler = HTTPSClient::EventHandler,
+      .event_handler = HTTPClient::EventHandler,
       .user_data = this,
   };
   esp_http_client_handle_t client = esp_http_client_init(&config);
@@ -79,16 +79,16 @@ exit:
   return err;
 }
 
-esp_err_t HTTPSClient::DoPOST(const std::string& url,
-                              const std::string& content,
-                              const std::vector<HeaderValue>& header_values,
-                              std::string* response) {
+esp_err_t HTTPClient::DoPOST(const std::string& url,
+                             const std::string& content,
+                             const std::vector<HeaderValue>& header_values,
+                             std::string* response) {
   const esp_http_client_config_t config = {
       .url = url.c_str(),
       .auth_type = HTTP_AUTH_TYPE_BASIC,
       //.cert_pem = howsmyssl_com_root_cert_pem_start,
       .method = HTTP_METHOD_POST,
-      .event_handler = HTTPSClient::EventHandler,
+      .event_handler = HTTPClient::EventHandler,
       .user_data = this,
   };
   esp_http_client_handle_t client = esp_http_client_init(&config);
