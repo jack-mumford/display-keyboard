@@ -52,6 +52,11 @@ class Spotify {
   bool HaveAccessToken() const;
 
  private:
+  enum class TokenGrantType {
+    Refresh,
+    OneTime,
+  };
+
   /**
    * Contains authentication values for the current Spotify user.
    */
@@ -89,10 +94,10 @@ class Spotify {
    *
    * @note Can be called on any task.
    *
-   * @param grant_type Either "refresh_token" or "authorization_code". The
-   * latter is used as part of the user authorization flow.
+   * @param grant_type The type of code grant being renewed.
+   * @param code The code (one-time or renew) used.
    */
-  esp_err_t GetAccessToken(const std::string& grant_type, std::string code);
+  esp_err_t GetAccessToken(TokenGrantType grant_type, std::string code);
 
   /**
    * Renew the access token.

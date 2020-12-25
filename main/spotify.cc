@@ -128,6 +128,18 @@ int GetJSONNumber(const cJSON* json, const char* key) {
   return num_val;
 }
 
+std::string CreateAccessTokenOneTimeContent(const std::string& code,
+                                            const std::string& redirect_url) {
+  return "grant_type=authorization_code&code=" + code +
+         "&redirect_uri=" + EntityEncode(redirect_url);
+}
+
+std::string CreateAccessTokenRefreshContent(const std::string& code,
+                                            const std::string& redirect_url) {
+  return "grant_type=refresh_token&refresh_token=" + code +
+         "&redirect_uri=" + EntityEncode(redirect_url);
+}
+
 }  // namespace
 
 // static
@@ -323,7 +335,7 @@ esp_err_t Spotify::RequestAccessToken() {
   std::string one_time_code = std::move(auth_data_.one_time_code);
   if (give_mutex)
     xSemaphoreGive(mutex_);
-  return GetAccessToken("authorization_code", std::move(one_time_code));
+  return GetAccessToken(TokenGrantType::OneTime, std::move(one_time_code));
 }
 
 esp_err_t Spotify::RenewAccessToken() {
@@ -331,14 +343,12 @@ esp_err_t Spotify::RenewAccessToken() {
   std::string refresh_token = auth_data_.refresh_token;
   if (give_mutex)
     xSemaphoreGive(mutex_);
-  return GetAccessToken("refresh_token", std::move(refresh_token));
+  return GetAccessToken(TokenGrantType::Refresh, std::move(refresh_token));
 }
 
-esp_err_t Spotify::GetAccessToken(const string& grant_type, string code) {
+esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
   esp_err_t err = ESP_OK;
   cJSON* json = nullptr;
-  const string code_param =
-      grant_type == "refresh_token" ? "refresh_token" : "code";
   string redirect_url;
   string json_response;
   bool give_mutex = false;
@@ -353,16 +363,12 @@ esp_err_t Spotify::GetAccessToken(const string& grant_type, string code) {
   string content;
   HTTPClient http_client;
 
-  if (grant_type != "authorization_code" && grant_type != "refresh_token") {
-    err = ESP_ERR_INVALID_ARG;
-    goto exit;
-  }
-
   err = GetRedirectURL(&redirect_url);
   if (err != ESP_OK)
     goto exit;
-  content = "grant_type=" + grant_type + "&" + code_param + "=" + code +
-            "&redirect_uri=" + EntityEncode(redirect_url);
+  content = grant_type == TokenGrantType::OneTime
+                ? CreateAccessTokenOneTimeContent(code, redirect_url)
+                : CreateAccessTokenRefreshContent(code, redirect_url);
 
   err = http_client.DoPOST(kGetAccessTokenURL, content, header_values,
                            [&json_response](const void* data, int data_len) {
