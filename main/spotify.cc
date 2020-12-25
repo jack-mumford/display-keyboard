@@ -208,11 +208,13 @@ esp_err_t Spotify::Initialize() {
     return err;
 
   const esp_timer_create_args_t timer_args = {
-      .callback = TokenRefreshCb,
-      .arg = this,
-      .dispatch_method = ESP_TIMER_TASK,
-      .name = "AccessTokenRefresh",
-      .skip_unhandled_events = true,
+    .callback = TokenRefreshCb,
+    .arg = this,
+    .dispatch_method = ESP_TIMER_TASK,
+    .name = "AccessTokenRefresh",
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
+    .skip_unhandled_events = true,
+#endif
   };
   err = esp_timer_create(&timer_args, &token_refresh_timer_);
   if (err != ESP_OK)
