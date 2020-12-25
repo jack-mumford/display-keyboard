@@ -149,7 +149,8 @@ Spotify::Spotify(const Config* config,
       https_server_(https_server),
       event_group_(event_group),
       wifi_(wifi),
-      initialized_(false) {
+      initialized_(false),
+      mutex_(xSemaphoreCreateMutex()) {
   assert(config != nullptr);
   assert(https_server != nullptr);
   assert(wifi != nullptr);
@@ -228,10 +229,13 @@ esp_err_t Spotify::HandleRootRequest(httpd_req_t* request) {
 // Spotify delivers the one-time code.
 esp_err_t Spotify::HandleCallbackRequest(httpd_req_t* request) {
   ESP_LOGD(TAG, "In HandleCallbackRequest");
+  bool give_mutex = xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE;
   auth_data_.one_time_code = GetQueryString(request, "code");
-  if (auth_data_.one_time_code.empty())
+  bool is_empty = auth_data_.one_time_code.empty();
+  if (give_mutex)
+    xSemaphoreGive(give_mutex);
+  if (is_empty)
     return httpd_resp_send_500(request);
-  ESP_LOGD(TAG, "Got one time code \"%s\"", auth_data_.one_time_code.c_str());
 
   // Now that we have the one-time code, notify the application so that
   // it can update any UI (if desired) and continue the process of connecting
@@ -258,10 +262,13 @@ esp_err_t Spotify::GetCurrentlyPlaying() {
   constexpr char kCurrentlyPlayingURL[] =
       "https://api.spotify.com/v1/me/player/currently-playing";
 
+  bool give_mutex = xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE;
   const std::vector<HTTPClient::HeaderValue> header_values = {
       {"Authorization", "Bearer " + auth_data_.access_token},
       {"Connection", "close"},
   };
+  if (give_mutex)
+    xSemaphoreGive(give_mutex);
 
   std::string json_response;
   HTTPClient https_client;
@@ -305,6 +312,7 @@ esp_err_t Spotify::GetAccessToken(const string& grant_type,
       grant_type == "refresh_token" ? "refresh_token" : "code";
   string redirect_url;
   string json_response;
+  bool give_mutex = false;
   const string kGetAccessTokenURL("https://accounts.spotify.com/api/token");
   const std::vector<HTTPClient::HeaderValue> header_values = {
       {"Authorization",
@@ -348,15 +356,17 @@ esp_err_t Spotify::GetAccessToken(const string& grant_type,
     goto exit;
   }
 
+  give_mutex = xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE;
   auth_data_.access_token = GetJSONString(json, "access_token");
   auth_data_.token_type = GetJSONString(json, "token_type");
   auth_data_.refresh_token = GetJSONString(json, "refresh_token");
   auth_data_.scope = GetJSONString(json, "scope");
   auth_data_.expires_in_secs = GetJSONNumber(json, "expires_in");
+  auth_data_.one_time_code.clear();
+  if (give_mutex)
+    xSemaphoreGive(mutex_);
 
   cJSON_Delete(json);
-
-  auth_data_.one_time_code.clear();
 
 exit:
   xEventGroupSetBits(event_group_, err == ESP_OK
@@ -386,4 +396,20 @@ string Spotify::GetAuthStartURL() const {
   if (GetHostname(&host) != ESP_OK)
     return string();
   return "http://" + host + '/';
+}
+
+bool Spotify::HaveOneTimeCode() const {
+  if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
+    return false;
+  const bool have_it = auth_data_.one_time_code.empty();
+  xSemaphoreGive(mutex_);
+  return have_it;
+}
+
+bool Spotify::HaveAccessToken() const {
+  if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
+    return false;
+  const bool have_it = auth_data_.access_token.empty();
+  xSemaphoreGive(mutex_);
+  return have_it;
 }

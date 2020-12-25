@@ -87,10 +87,10 @@ void IRAM_ATTR App::WiFiStatusTask(void* arg) {
       // TODO: Set a timer so that we can retry in a little while.
     }
     if (bits & EVENT_SPOTIFY_GOT_ONE_TIME_CODE) {
-      app->got_spotify_one_time_code_ = true;
+      ESP_LOGI(TAG, "Have one-time code");
     }
     if (bits & EVENT_SPOTIFY_ACCESS_TOKEN_GOOD) {
-      app->got_spotify_access_token_ = true;
+      ESP_LOGI(TAG, "Have access token");
     }
   }
 }
@@ -258,13 +258,12 @@ void App::Run() {
                  auth_start_url.c_str());
       }
 
-      if (got_spotify_one_time_code_) {
+      if (spotify_->HaveOneTimeCode()) {
         ESP_LOGD(TAG, "Got one-time-code, getting token.");
-        got_spotify_one_time_code_ = false;
         ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->RequestAccessToken());
       }
 
-      if (got_spotify_access_token_ && !started_spotify_currently_playing_) {
+      if (!started_spotify_currently_playing_ && spotify_->HaveAccessToken()) {
         ESP_LOGD(TAG, "Getting Spotify currently playing info.");
         started_spotify_currently_playing_ = true;
         ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->GetCurrentlyPlaying());

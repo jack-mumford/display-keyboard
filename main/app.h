@@ -43,7 +43,5 @@ class App {
   EventGroupHandle_t event_group_ = nullptr;  // Application events.
   TaskHandle_t main_task_ = nullptr;          // Event task.
   bool online_ = false;                       // Is this device on the network?
-  bool got_spotify_one_time_code_ = false;
-  bool got_spotify_access_token_ = false;
   bool started_spotify_currently_playing_ = false;
 };

@@ -6,6 +6,8 @@
 #include <esp_err.h>
 #include <esp_http_server.h>
 #include <event_groups.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 
 class Config;
 class HTTPServer;
@@ -44,6 +46,10 @@ class Spotify {
   // The the URL (hosted by this device) to start the Spotify authentication
   // process.
   std::string GetAuthStartURL() const;
+
+  bool HaveOneTimeCode() const;
+
+  bool HaveAccessToken() const;
 
  private:
   /**
@@ -104,10 +110,11 @@ class Spotify {
    */
   esp_err_t GetHostname(std::string* host) const;
 
-  AuthData auth_data_;              // Current user auth data.
   const Config* config_;            // Application config data.
   HTTPServer* https_server_;        // Accept inbound requests for auth.
   EventGroupHandle_t event_group_;  // Used to inform owner of events.
   WiFi* wifi_;                      // Object used to controll Wi-Fi network.
   bool initialized_;                // Is this instance initialized?
+  SemaphoreHandle_t mutex_;         // Synchronize access to following members.
+  AuthData auth_data_;              // Current user auth data.
 };
