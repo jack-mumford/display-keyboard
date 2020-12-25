@@ -135,10 +135,8 @@ std::string CreateAccessTokenAuthorizationContent(
          "&redirect_uri=" + EntityEncode(redirect_url);
 }
 
-std::string CreateAccessTokenRefreshContent(const std::string& code,
-                                            const std::string& redirect_url) {
-  return "grant_type=refresh_token&refresh_token=" + code +
-         "&redirect_uri=" + EntityEncode(redirect_url);
+std::string CreateAccessTokenRefreshContent(const std::string& code) {
+  return "grant_type=refresh_token&refresh_token=" + code;
 }
 
 }  // namespace
@@ -377,6 +375,10 @@ esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
       {"Connection", "close"},
   };
   string content;
+  std::string access_token;
+  std::string refresh_token;
+  std::string token_type;
+  std::string scope;
   HTTPClient http_client;
   int status_code(0);
 
@@ -385,7 +387,7 @@ esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
     goto exit;
   content = grant_type == TokenGrantType::AuthorizationCode
                 ? CreateAccessTokenAuthorizationContent(code, redirect_url)
-                : CreateAccessTokenRefreshContent(code, redirect_url);
+                : CreateAccessTokenRefreshContent(code);
 
   err = http_client.DoPOST(
       kGetAccessTokenURL, content, header_values,
@@ -412,11 +414,20 @@ esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
     goto exit;
   }
 
+  access_token = GetJSONString(json, "access_token");
+  refresh_token = GetJSONString(json, "refresh_token");
+  token_type = GetJSONString(json, "token_type");
+  scope = GetJSONString(json, "scope");
+
   give_mutex = xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE;
-  auth_data_.access_token = GetJSONString(json, "access_token");
-  auth_data_.token_type = GetJSONString(json, "token_type");
-  auth_data_.refresh_token = GetJSONString(json, "refresh_token");
-  auth_data_.scope = GetJSONString(json, "scope");
+  if (!access_token.empty())
+    auth_data_.access_token = std::move(access_token);
+  if (!token_type.empty())
+    auth_data_.token_type = std::move(token_type);
+  if (!refresh_token.empty())
+    auth_data_.refresh_token = std::move(refresh_token);
+  if (!scope.empty())
+    auth_data_.scope = std::move(scope);
   auth_data_.auth_code.clear();
   if (give_mutex)
     xSemaphoreGive(mutex_);
