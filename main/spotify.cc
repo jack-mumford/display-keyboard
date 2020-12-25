@@ -162,7 +162,7 @@ Spotify::Spotify(const Config* config,
       event_group_(event_group),
       wifi_(wifi),
       initialized_(false),
-      token_renew_timer_(nullptr),
+      token_refresh_timer_(nullptr),
       mutex_(xSemaphoreCreateMutex()) {
   assert(config != nullptr);
   assert(https_server != nullptr);
@@ -171,8 +171,8 @@ Spotify::Spotify(const Config* config,
 }
 
 Spotify::~Spotify() {
-  if (token_renew_timer_)
-    esp_timer_delete(token_renew_timer_);
+  if (token_refresh_timer_)
+    esp_timer_delete(token_refresh_timer_);
   ESP_ERROR_CHECK_WITHOUT_ABORT(
       https_server_->UnregisterURIHandler(kCallbackURI, HTTP_GET));
   ESP_ERROR_CHECK_WITHOUT_ABORT(
@@ -180,8 +180,8 @@ Spotify::~Spotify() {
 };
 
 // static:
-void Spotify::TokenRenewCb(void* arg) {
-  static_cast<Spotify*>(arg)->RenewAccessToken();
+void Spotify::TokenRefreshCb(void* arg) {
+  static_cast<Spotify*>(arg)->RefreshAccessToken();
 }
 
 esp_err_t Spotify::Initialize() {
@@ -208,13 +208,13 @@ esp_err_t Spotify::Initialize() {
     return err;
 
   const esp_timer_create_args_t timer_args = {
-      .callback = TokenRenewCb,
+      .callback = TokenRefreshCb,
       .arg = this,
       .dispatch_method = ESP_TIMER_TASK,
-      .name = "AccessTokenRenew",
+      .name = "AccessTokenRefresh",
       .skip_unhandled_events = true,
   };
-  err = esp_timer_create(&timer_args, &token_renew_timer_);
+  err = esp_timer_create(&timer_args, &token_refresh_timer_);
   if (err != ESP_OK)
     return err;
 
@@ -338,7 +338,7 @@ esp_err_t Spotify::RequestAccessToken() {
   return GetAccessToken(TokenGrantType::OneTime, std::move(one_time_code));
 }
 
-esp_err_t Spotify::RenewAccessToken() {
+esp_err_t Spotify::RefreshAccessToken() {
   bool give_mutex = xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE;
   std::string refresh_token = auth_data_.refresh_token;
   if (give_mutex)

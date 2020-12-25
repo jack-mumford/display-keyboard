@@ -71,7 +71,7 @@ class Spotify {
 
   static esp_err_t RootHandler(httpd_req_t* request);
   static esp_err_t CallbackHandler(httpd_req_t* request);
-  static void TokenRenewCb(void* arg);
+  static void TokenRefreshCb(void* arg);
 
   /**
    * HTTPD request handler for "/".
@@ -90,21 +90,21 @@ class Spotify {
   esp_err_t HandleCallbackRequest(httpd_req_t* request);
 
   /**
-   * Get or renew the Spotify API access token.
+   * Get or refresh the Spotify API access token.
    *
    * @note Can be called on any task.
    *
-   * @param grant_type The type of code grant being renewed.
-   * @param code The code (one-time or renew) used.
+   * @param grant_type The type of code grant being refreshed.
+   * @param code The code (one-time or refresh) used.
    */
   esp_err_t GetAccessToken(TokenGrantType grant_type, std::string code);
 
   /**
-   * Renew the access token.
+   * Refresh the access token.
    *
    * Called on another task.
    */
-  esp_err_t RenewAccessToken();
+  esp_err_t RefreshAccessToken();
 
   /**
    * Create the URL to have Spotify redirect to after user successfully
@@ -129,7 +129,7 @@ class Spotify {
   EventGroupHandle_t event_group_;  // Used to inform owner of events.
   WiFi* wifi_;                      // Object used to controll Wi-Fi network.
   bool initialized_;                // Is this instance initialized?
-  esp_timer_handle_t token_renew_timer_;  // Used to renew timer.
+  esp_timer_handle_t token_refresh_timer_;  // Used to refresh access token.
   SemaphoreHandle_t mutex_;  // Synchronize access to following members.
   AuthData auth_data_;       // Current user auth data.
 };
