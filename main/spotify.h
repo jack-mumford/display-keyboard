@@ -33,7 +33,7 @@ class Spotify {
    *
    * Call this after the authorization code has been retrieved.
    */
-  esp_err_t RequestAccessToken();
+  esp_err_t ContinueLogin();
 
   /**
    * Retrieve the Spotify currently playing track information.

@@ -334,7 +334,7 @@ esp_err_t Spotify::GetCurrentlyPlaying() {
   return ESP_OK;
 }
 
-esp_err_t Spotify::RequestAccessToken() {
+esp_err_t Spotify::ContinueLogin() {
   bool give_mutex = xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE;
   std::string authorization_code = std::move(auth_data_.auth_code);
   if (give_mutex)

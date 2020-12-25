@@ -265,7 +265,7 @@ void App::Run() {
       if (spotify_->initialized()) {
         if (spotify_->HaveAuthorizatonCode()) {
           ESP_LOGD(TAG, "Got authorization code, getting token.");
-          ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->RequestAccessToken());
+          ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->ContinueLogin());
         } else if (spotify_need_access_token_refresh_) {
           spotify_need_access_token_refresh_ = false;
           spotify_->RefreshAccessToken();
