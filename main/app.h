@@ -44,4 +44,5 @@ class App {
   TaskHandle_t main_task_ = nullptr;          // Event task.
   bool online_ = false;                       // Is this device on the network?
   bool started_spotify_currently_playing_ = false;
+  bool spotify_need_access_token_refresh_ = false;
 };

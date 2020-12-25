@@ -182,7 +182,9 @@ Spotify::~Spotify() {
 
 // static:
 void Spotify::TokenRefreshCb(void* arg) {
-  static_cast<Spotify*>(arg)->RefreshAccessToken();
+  ESP_LOGD(TAG, "Timer fired to refresh access token");
+  xEventGroupSetBits(static_cast<Spotify*>(arg)->event_group_,
+                     EVENT_SPOTIFY_ACCESS_TOKEN_EXPIRE);
 }
 
 esp_err_t Spotify::Initialize() {
@@ -329,7 +331,6 @@ esp_err_t Spotify::GetCurrentlyPlaying() {
   cJSON_Delete(json);
 
   ESP_LOGI(TAG, "Got currently-playing response.");
-  ESP_LOGI(TAG, "currently playing: %s", json_response.c_str());
   return ESP_OK;
 }
 
@@ -408,7 +409,9 @@ esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
 
   cJSON_Delete(json);
 
-  // Start the timer to refresh the access token.
+  ESP_LOGI(TAG, "%s access code. Refreshing in %d secs.",
+           grant_type == TokenGrantType::Refresh ? "Refreshed" : "Got",
+           expires_in_secs);
   esp_timer_start_once(token_refresh_timer_,
                        static_cast<uint64_t>(expires_in_secs) * 1000 * 1000);
 

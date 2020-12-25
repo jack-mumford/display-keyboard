@@ -92,6 +92,10 @@ void IRAM_ATTR App::WiFiStatusTask(void* arg) {
     if (bits & EVENT_SPOTIFY_ACCESS_TOKEN_GOOD) {
       ESP_LOGI(TAG, "Have access token");
     }
+    if (bits & EVENT_SPOTIFY_ACCESS_TOKEN_EXPIRE) {
+      ESP_LOGI(TAG, "Access token needs refresh");
+      app->spotify_need_access_token_refresh_ = true;
+    }
   }
 }
 
@@ -258,15 +262,19 @@ void App::Run() {
                  auth_start_url.c_str());
       }
 
-      if (spotify_->HaveAuthorizatonCode()) {
-        ESP_LOGD(TAG, "Got authorization code, getting token.");
-        ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->RequestAccessToken());
-      }
-
-      if (!started_spotify_currently_playing_ && spotify_->HaveAccessToken()) {
-        ESP_LOGD(TAG, "Getting Spotify currently playing info.");
-        started_spotify_currently_playing_ = true;
-        ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->GetCurrentlyPlaying());
+      if (spotify_->initialized()) {
+        if (spotify_->HaveAuthorizatonCode()) {
+          ESP_LOGD(TAG, "Got authorization code, getting token.");
+          ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->RequestAccessToken());
+        } else if (spotify_need_access_token_refresh_) {
+          spotify_need_access_token_refresh_ = false;
+          spotify_->RefreshAccessToken();
+        } else if (!started_spotify_currently_playing_ &&
+                   spotify_->HaveAccessToken()) {
+          ESP_LOGD(TAG, "Getting Spotify currently playing info.");
+          started_spotify_currently_playing_ = true;
+          ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->GetCurrentlyPlaying());
+        }
       }
     }
     // Need to use vTaskDelay to avoid triggering the task WDT.

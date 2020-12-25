@@ -51,6 +51,13 @@ class Spotify {
 
   bool HaveAccessToken() const;
 
+  /**
+   * Refresh the access token.
+   *
+   * @note Called on the timer task.
+   */
+  esp_err_t RefreshAccessToken();
+
  private:
   enum class TokenGrantType {
     Refresh,
@@ -97,13 +104,6 @@ class Spotify {
    * @param code The code (authorization or refresh) used.
    */
   esp_err_t GetAccessToken(TokenGrantType grant_type, std::string code);
-
-  /**
-   * Refresh the access token.
-   *
-   * @note Called on the timer task.
-   */
-  esp_err_t RefreshAccessToken();
 
   /**
    * Create the URL to have Spotify redirect to after user successfully
