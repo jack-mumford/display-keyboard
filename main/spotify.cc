@@ -14,6 +14,7 @@
 
 #include "config.h"
 #include "event_ids.h"
+#include "http_client.h"
 #include "http_server.h"
 #include "wifi.h"
 
@@ -263,8 +264,9 @@ esp_err_t Spotify::GetCurrentlyPlaying() {
   };
 
   std::string json_response;
+  HTTPClient https_client;
   esp_err_t err =
-      https_client_.DoGET(kCurrentlyPlayingURL, header_values, &json_response);
+      https_client.DoGET(kCurrentlyPlayingURL, header_values, &json_response);
 
   if (err != ESP_OK)
     return ESP_FAIL;
@@ -308,6 +310,7 @@ esp_err_t Spotify::GetAccessToken(const string& grant_type,
       {"Connection", "close"},
   };
   string content;
+  HTTPClient http_client;
 
   if (grant_type != "authorization_code" && grant_type != "refresh_token") {
     err = ESP_ERR_INVALID_ARG;
@@ -320,8 +323,8 @@ esp_err_t Spotify::GetAccessToken(const string& grant_type,
   content = "grant_type=" + grant_type + "&" + code_param + "=" + code +
             "&redirect_uri=" + EntityEncode(redirect_url);
 
-  err = https_client_.DoPOST(kGetAccessTokenURL, content, header_values,
-                             &json_response);
+  err = http_client.DoPOST(kGetAccessTokenURL, content, header_values,
+                           &json_response);
   if (err != ESP_OK)
     goto exit;
 
