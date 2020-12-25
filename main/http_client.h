@@ -28,12 +28,5 @@ class HTTPClient {
  private:
   static esp_err_t EventHandler(esp_http_client_event_t* evt);
 
-  std::string CreateRequestString(
-      const std::string& request_type,
-      const std::string& host,
-      const std::string& resource,
-      const std::string& content,
-      const std::vector<HeaderValue>& header_values) const;
-
   std::string last_response_data_;  // contents of the current request data.
 };
