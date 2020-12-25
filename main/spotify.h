@@ -63,7 +63,6 @@ class Spotify {
   struct AuthData {
     std::string access_token;   // Access token used for all API calls.
     std::string token_type;     // Access token type. Always "Bearer".
-    uint32_t expires_in_secs;   // Number of seconds until access_token expires.
     std::string refresh_token;  // The refresh token used to get access_token.
     std::string scope;          // Privilege scope.
     std::string auth_code;      // Code used when fully authenticating.
@@ -102,7 +101,7 @@ class Spotify {
   /**
    * Refresh the access token.
    *
-   * Called on another task.
+   * @note Called on the timer task.
    */
   esp_err_t RefreshAccessToken();
 

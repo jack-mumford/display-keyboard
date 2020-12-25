@@ -356,6 +356,7 @@ esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
   string redirect_url;
   string json_response;
   bool give_mutex = false;
+  uint32_t expires_in_secs = 0;
   const string kGetAccessTokenURL("https://accounts.spotify.com/api/token");
   const std::vector<HTTPClient::HeaderValue> header_values = {
       {"Authorization",
@@ -400,12 +401,16 @@ esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
   auth_data_.token_type = GetJSONString(json, "token_type");
   auth_data_.refresh_token = GetJSONString(json, "refresh_token");
   auth_data_.scope = GetJSONString(json, "scope");
-  auth_data_.expires_in_secs = GetJSONNumber(json, "expires_in");
   auth_data_.auth_code.clear();
   if (give_mutex)
     xSemaphoreGive(mutex_);
+  expires_in_secs = GetJSONNumber(json, "expires_in");
 
   cJSON_Delete(json);
+
+  // Start the timer to refresh the access token.
+  esp_timer_start_once(token_refresh_timer_,
+                       static_cast<uint64_t>(expires_in_secs) * 1000 * 1000);
 
 exit:
   xEventGroupSetBits(event_group_, err == ESP_OK
