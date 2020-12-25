@@ -261,7 +261,7 @@ void App::Run() {
       if (got_spotify_one_time_code_) {
         ESP_LOGD(TAG, "Got one-time-code, getting token.");
         got_spotify_one_time_code_ = false;
-        ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->RequestAuthToken());
+        ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->RequestAccessToken());
       }
 
       if (got_spotify_access_token_ && !started_spotify_currently_playing_) {

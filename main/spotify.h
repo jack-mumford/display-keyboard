@@ -19,8 +19,23 @@ class Spotify {
           EventGroupHandle_t event_group);
   ~Spotify();
 
+  /**
+   * Initialize this instance.
+   *
+   * Must be done before using any other method.
+   */
   esp_err_t Initialize();
-  esp_err_t RequestAuthToken();
+
+  /**
+   * Request the access token.
+   *
+   * Call this after the one-time code has been retrieved.
+   */
+  esp_err_t RequestAccessToken();
+
+  /**
+   * Retrieve the Spotify currently playing track information.
+   */
   esp_err_t GetCurrentlyPlaying();
 
   // Was this instance *successfully* initialized?
@@ -31,6 +46,9 @@ class Spotify {
   std::string GetAuthStartURL() const;
 
  private:
+  /**
+   * Contains authentication values for the current Spotify user.
+   */
   struct AuthData {
     std::string access_token;   // Access token used for all API calls.
     std::string token_type;     // Access token type. Always "Bearer".
@@ -86,10 +104,10 @@ class Spotify {
    */
   esp_err_t GetHostname(std::string* host) const;
 
-  AuthData auth_data_;
-  const Config* config_;  // Application config data.
-  HTTPServer* https_server_;
-  EventGroupHandle_t event_group_;
-  WiFi* wifi_;
-  bool initialized_;
+  AuthData auth_data_;              // Current user auth data.
+  const Config* config_;            // Application config data.
+  HTTPServer* https_server_;        // Accept inbound requests for auth.
+  EventGroupHandle_t event_group_;  // Used to inform owner of events.
+  WiFi* wifi_;                      // Object used to controll Wi-Fi network.
+  bool initialized_;                // Is this instance initialized?
 };

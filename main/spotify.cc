@@ -288,7 +288,7 @@ esp_err_t Spotify::GetCurrentlyPlaying() {
   return ESP_OK;
 }
 
-esp_err_t Spotify::RequestAuthToken() {
+esp_err_t Spotify::RequestAccessToken() {
   return GetAccessToken("authorization_code",
                         std::move(auth_data_.one_time_code));
 }
