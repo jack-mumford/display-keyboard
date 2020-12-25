@@ -265,8 +265,12 @@ esp_err_t Spotify::GetCurrentlyPlaying() {
 
   std::string json_response;
   HTTPClient https_client;
-  esp_err_t err =
-      https_client.DoGET(kCurrentlyPlayingURL, header_values, &json_response);
+  esp_err_t err = https_client.DoGET(
+      kCurrentlyPlayingURL, header_values,
+      [&json_response](const void* data, int data_len) {
+        json_response.append(static_cast<const char*>(data), data_len);
+        return ESP_OK;
+      });
 
   if (err != ESP_OK)
     return ESP_FAIL;
@@ -324,7 +328,11 @@ esp_err_t Spotify::GetAccessToken(const string& grant_type,
             "&redirect_uri=" + EntityEncode(redirect_url);
 
   err = http_client.DoPOST(kGetAccessTokenURL, content, header_values,
-                           &json_response);
+                           [&json_response](const void* data, int data_len) {
+                             json_response.append(
+                                 static_cast<const char*>(data), data_len);
+                             return ESP_OK;
+                           });
   if (err != ESP_OK)
     goto exit;
 

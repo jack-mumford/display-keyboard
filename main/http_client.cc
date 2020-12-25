@@ -17,15 +17,13 @@ esp_err_t HTTPClient::EventHandler(esp_http_client_event_t* evt) {
 
   switch (evt->event_id) {
     case HTTP_EVENT_ERROR:
-      client->last_response_data_.clear();
       break;
     case HTTP_EVENT_ON_CONNECTED:
-      client->last_response_data_.clear();
       break;
     case HTTP_EVENT_ON_DATA:
       ESP_LOGI(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
-      client->last_response_data_.append(static_cast<const char*>(evt->data),
-                                         evt->data_len);
+      if (client->data_callback_)
+        client->data_callback_(evt->data, evt->data_len);
       break;
     default:
       // fallthrough
@@ -39,14 +37,14 @@ HTTPClient::HTTPClient() = default;
 HTTPClient::~HTTPClient() = default;
 
 esp_err_t HTTPClient::DoSSLCheck() {
-  std::string response;
   return DoGET("https://www.howsmyssl.com/a/check", std::vector<HeaderValue>(),
-               &response);
+               [](const void*, int) { return ESP_OK; });
 }
 
 esp_err_t HTTPClient::DoGET(const std::string& url,
                             const std::vector<HeaderValue>& header_values,
-                            std::string* response) {
+                            DataCallback data_callback) {
+  data_callback_ = data_callback;
   const esp_http_client_config_t config = {
       .url = url.c_str(),
       .auth_type = HTTP_AUTH_TYPE_BASIC,
@@ -68,9 +66,9 @@ esp_err_t HTTPClient::DoGET(const std::string& url,
   err = esp_http_client_perform(client);
 
 exit:
+  data_callback_ = nullptr;
   esp_http_client_cleanup(client);
   if (err == ESP_OK) {
-    *response = std::move(last_response_data_);
     ESP_LOGI(TAG, "Status = %d, content_length = %d",
              esp_http_client_get_status_code(client),
              esp_http_client_get_content_length(client));
@@ -81,7 +79,8 @@ exit:
 esp_err_t HTTPClient::DoPOST(const std::string& url,
                              const std::string& content,
                              const std::vector<HeaderValue>& header_values,
-                             std::string* response) {
+                             DataCallback data_callback) {
+  data_callback_ = data_callback;
   const esp_http_client_config_t config = {
       .url = url.c_str(),
       .auth_type = HTTP_AUTH_TYPE_BASIC,
@@ -107,9 +106,9 @@ esp_err_t HTTPClient::DoPOST(const std::string& url,
   err = esp_http_client_perform(client);
 
 exit:
+  data_callback_ = nullptr;
   esp_http_client_cleanup(client);
   if (err == ESP_OK) {
-    *response = std::move(last_response_data_);
     ESP_LOGI(TAG, "Status = %d, content_length = %d",
              esp_http_client_get_status_code(client),
              esp_http_client_get_content_length(client));

@@ -13,5 +13,5 @@ class HTTPServer {
   esp_err_t UnregisterURIHandler(const char* uri, httpd_method_t method);
 
  private:
-  httpd_handle_t server_; // ESP-IDF server object.
+  httpd_handle_t server_;  // ESP-IDF server object.
 };
