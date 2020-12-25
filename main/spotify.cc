@@ -128,8 +128,9 @@ int GetJSONNumber(const cJSON* json, const char* key) {
   return num_val;
 }
 
-std::string CreateAccessTokenOneTimeContent(const std::string& code,
-                                            const std::string& redirect_url) {
+std::string CreateAccessTokenAuthorizationContent(
+    const std::string& code,
+    const std::string& redirect_url) {
   return "grant_type=authorization_code&code=" + code +
          "&redirect_uri=" + EntityEncode(redirect_url);
 }
@@ -226,7 +227,7 @@ esp_err_t Spotify::Initialize() {
 
 // Redirect the user agent to Spotify to authenticate. After successful
 // authentication Spotify will redirect the user agent to a second URL
-// that will contain our one-time code.
+// that will contain our authorization code.
 esp_err_t Spotify::HandleRootRequest(httpd_req_t* request) {
   ESP_LOGD(TAG, "In HandleRootRequest");
   esp_err_t err = httpd_resp_set_status(request, "302 Found");
@@ -259,21 +260,21 @@ esp_err_t Spotify::HandleRootRequest(httpd_req_t* request) {
 }
 
 // The handler for the second part of the user authenticaton where
-// Spotify delivers the one-time code.
+// Spotify delivers the authorization code.
 esp_err_t Spotify::HandleCallbackRequest(httpd_req_t* request) {
   ESP_LOGD(TAG, "In HandleCallbackRequest");
   bool give_mutex = xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE;
-  auth_data_.one_time_code = GetQueryString(request, "code");
-  bool is_empty = auth_data_.one_time_code.empty();
+  auth_data_.auth_code = GetQueryString(request, "code");
+  bool is_empty = auth_data_.auth_code.empty();
   if (give_mutex)
     xSemaphoreGive(give_mutex);
   if (is_empty)
     return httpd_resp_send_500(request);
 
-  // Now that we have the one-time code, notify the application so that
+  // Now that we have the authorization code, notify the application so that
   // it can update any UI (if desired) and continue the process of connecting
   // to Spotify.
-  xEventGroupSetBits(event_group_, EVENT_SPOTIFY_GOT_ONE_TIME_CODE);
+  xEventGroupSetBits(event_group_, EVENT_SPOTIFY_GOT_AUTHORIZATION_CODE);
 
   constexpr char kCallbackSuccess[] =
       "<html><head></head><body>Succesfully authentiated this device with "
@@ -334,10 +335,11 @@ esp_err_t Spotify::GetCurrentlyPlaying() {
 
 esp_err_t Spotify::RequestAccessToken() {
   bool give_mutex = xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE;
-  std::string one_time_code = std::move(auth_data_.one_time_code);
+  std::string authorization_code = std::move(auth_data_.auth_code);
   if (give_mutex)
     xSemaphoreGive(mutex_);
-  return GetAccessToken(TokenGrantType::OneTime, std::move(one_time_code));
+  return GetAccessToken(TokenGrantType::AuthorizationCode,
+                        std::move(authorization_code));
 }
 
 esp_err_t Spotify::RefreshAccessToken() {
@@ -368,8 +370,8 @@ esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
   err = GetRedirectURL(&redirect_url);
   if (err != ESP_OK)
     goto exit;
-  content = grant_type == TokenGrantType::OneTime
-                ? CreateAccessTokenOneTimeContent(code, redirect_url)
+  content = grant_type == TokenGrantType::AuthorizationCode
+                ? CreateAccessTokenAuthorizationContent(code, redirect_url)
                 : CreateAccessTokenRefreshContent(code, redirect_url);
 
   err = http_client.DoPOST(kGetAccessTokenURL, content, header_values,
@@ -399,7 +401,7 @@ esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
   auth_data_.refresh_token = GetJSONString(json, "refresh_token");
   auth_data_.scope = GetJSONString(json, "scope");
   auth_data_.expires_in_secs = GetJSONNumber(json, "expires_in");
-  auth_data_.one_time_code.clear();
+  auth_data_.auth_code.clear();
   if (give_mutex)
     xSemaphoreGive(mutex_);
 
@@ -435,10 +437,10 @@ string Spotify::GetAuthStartURL() const {
   return "http://" + host + '/';
 }
 
-bool Spotify::HaveOneTimeCode() const {
+bool Spotify::HaveAuthorizatonCode() const {
   if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
     return false;
-  const bool have_it = auth_data_.one_time_code.empty();
+  const bool have_it = auth_data_.auth_code.empty();
   xSemaphoreGive(mutex_);
   return have_it;
 }

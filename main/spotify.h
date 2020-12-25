@@ -31,7 +31,7 @@ class Spotify {
   /**
    * Request the access token.
    *
-   * Call this after the one-time code has been retrieved.
+   * Call this after the authorization code has been retrieved.
    */
   esp_err_t RequestAccessToken();
 
@@ -47,14 +47,14 @@ class Spotify {
   // process.
   std::string GetAuthStartURL() const;
 
-  bool HaveOneTimeCode() const;
+  bool HaveAuthorizatonCode() const;
 
   bool HaveAccessToken() const;
 
  private:
   enum class TokenGrantType {
     Refresh,
-    OneTime,
+    AuthorizationCode,
   };
 
   /**
@@ -66,7 +66,7 @@ class Spotify {
     uint32_t expires_in_secs;   // Number of seconds until access_token expires.
     std::string refresh_token;  // The refresh token used to get access_token.
     std::string scope;          // Privilege scope.
-    std::string one_time_code;  // Code used when fully authenticating.
+    std::string auth_code;      // Code used when fully authenticating.
   };
 
   static esp_err_t RootHandler(httpd_req_t* request);
@@ -95,7 +95,7 @@ class Spotify {
    * @note Can be called on any task.
    *
    * @param grant_type The type of code grant being refreshed.
-   * @param code The code (one-time or refresh) used.
+   * @param code The code (authorization or refresh) used.
    */
   esp_err_t GetAccessToken(TokenGrantType grant_type, std::string code);
 

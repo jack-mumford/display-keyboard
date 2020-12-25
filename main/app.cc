@@ -86,8 +86,8 @@ void IRAM_ATTR App::WiFiStatusTask(void* arg) {
       app->online_ = false;
       // TODO: Set a timer so that we can retry in a little while.
     }
-    if (bits & EVENT_SPOTIFY_GOT_ONE_TIME_CODE) {
-      ESP_LOGI(TAG, "Have one-time code");
+    if (bits & EVENT_SPOTIFY_GOT_AUTHORIZATION_CODE) {
+      ESP_LOGI(TAG, "Have authorization code");
     }
     if (bits & EVENT_SPOTIFY_ACCESS_TOKEN_GOOD) {
       ESP_LOGI(TAG, "Have access token");
@@ -258,8 +258,8 @@ void App::Run() {
                  auth_start_url.c_str());
       }
 
-      if (spotify_->HaveOneTimeCode()) {
-        ESP_LOGD(TAG, "Got one-time-code, getting token.");
+      if (spotify_->HaveAuthorizatonCode()) {
+        ESP_LOGD(TAG, "Got authorization code, getting token.");
         ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->RequestAccessToken());
       }
 
