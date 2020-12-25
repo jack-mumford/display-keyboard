@@ -17,7 +17,7 @@
 #include "display.h"
 #include "event_ids.h"
 #include "filesystem.h"
-#include "https_server.h"
+#include "http_server.h"
 #include "keyboard.h"
 #include "led_controller.h"
 #include "spotify.h"
@@ -227,7 +227,7 @@ esp_err_t App::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  https_server_.reset(new HTTPSServer());  // Initialize once online.
+  https_server_.reset(new HTTPServer());  // Initialize once online.
 
   display_.reset(new Display(320, 240));
   if (!display_->Initialize())

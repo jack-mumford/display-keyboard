@@ -10,13 +10,13 @@
 #include "http_client.h"
 
 class Config;
-class HTTPSServer;
+class HTTPServer;
 class WiFi;
 
 class Spotify {
  public:
   Spotify(const Config* config,
-          HTTPSServer* https_server,
+          HTTPServer* https_server,
           WiFi* wifi,
           EventGroupHandle_t event_group);
   ~Spotify();
@@ -91,7 +91,7 @@ class Spotify {
   HTTPClient https_client_;
   AuthData auth_data_;
   const Config* config_;  // Application config data.
-  HTTPSServer* https_server_;
+  HTTPServer* https_server_;
   EventGroupHandle_t event_group_;
   WiFi* wifi_;
   bool initialized_;

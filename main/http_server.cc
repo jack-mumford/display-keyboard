@@ -1,4 +1,4 @@
-#include "https_server.h"
+#include "http_server.h"
 
 #include <esp_log.h>
 
@@ -6,9 +6,9 @@ namespace {
 constexpr char TAG[] = "kbd_httpd";
 }
 
-HTTPSServer::HTTPSServer() : server_(nullptr) {}
+HTTPServer::HTTPServer() : server_(nullptr) {}
 
-HTTPSServer::~HTTPSServer() {
+HTTPServer::~HTTPServer() {
   if (server_) {
     const esp_err_t err = httpd_stop(server_);
     if (err == ESP_OK)
@@ -18,7 +18,7 @@ HTTPSServer::~HTTPSServer() {
   }
 }
 
-esp_err_t HTTPSServer::Initialize() {
+esp_err_t HTTPServer::Initialize() {
   if (server_)
     return ESP_FAIL;
   const httpd_config_t config = HTTPD_DEFAULT_CONFIG();
@@ -30,15 +30,15 @@ esp_err_t HTTPSServer::Initialize() {
   return err;
 }
 
-esp_err_t HTTPSServer::RegisterURIHandler(const httpd_uri_t* handler_info) {
+esp_err_t HTTPServer::RegisterURIHandler(const httpd_uri_t* handler_info) {
   const esp_err_t err = httpd_register_uri_handler(server_, handler_info);
   if (err != ESP_OK)
     ESP_LOGE(TAG, "Failure registering handler: %s", esp_err_to_name(err));
   return err;
 }
 
-esp_err_t HTTPSServer::UnregisterURIHandler(const char* uri,
-                                            httpd_method_t method) {
+esp_err_t HTTPServer::UnregisterURIHandler(const char* uri,
+                                           httpd_method_t method) {
   const esp_err_t err = httpd_unregister_uri_handler(server_, uri, method);
   if (err != ESP_OK)
     ESP_LOGE(TAG, "Failure unregistering handler: %s", esp_err_to_name(err));

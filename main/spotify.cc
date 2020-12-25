@@ -14,7 +14,7 @@
 
 #include "config.h"
 #include "event_ids.h"
-#include "https_server.h"
+#include "http_server.h"
 #include "wifi.h"
 
 using std::string;
@@ -142,7 +142,7 @@ esp_err_t Spotify::CallbackHandler(httpd_req_t* request) {
 }
 
 Spotify::Spotify(const Config* config,
-                 HTTPSServer* https_server,
+                 HTTPServer* https_server,
                  WiFi* wifi,
                  EventGroupHandle_t event_group)
     : https_client_(kUserAgent),
