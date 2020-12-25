@@ -267,7 +267,7 @@ esp_err_t Spotify::HandleCallbackRequest(httpd_req_t* request) {
   auth_data_.auth_code = GetQueryString(request, "code");
   bool is_empty = auth_data_.auth_code.empty();
   if (give_mutex)
-    xSemaphoreGive(give_mutex);
+    xSemaphoreGive(mutex_);
   if (is_empty)
     return httpd_resp_send_500(request);
 
@@ -302,7 +302,7 @@ esp_err_t Spotify::GetCurrentlyPlaying() {
       {"Connection", "close"},
   };
   if (give_mutex)
-    xSemaphoreGive(give_mutex);
+    xSemaphoreGive(mutex_);
 
   std::string json_response;
   HTTPClient https_client;
@@ -445,7 +445,7 @@ string Spotify::GetAuthStartURL() const {
 bool Spotify::HaveAuthorizatonCode() const {
   if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
     return false;
-  const bool have_it = auth_data_.auth_code.empty();
+  const bool have_it = !auth_data_.auth_code.empty();
   xSemaphoreGive(mutex_);
   return have_it;
 }
@@ -453,7 +453,7 @@ bool Spotify::HaveAuthorizatonCode() const {
 bool Spotify::HaveAccessToken() const {
   if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
     return false;
-  const bool have_it = auth_data_.access_token.empty();
+  const bool have_it = !auth_data_.access_token.empty();
   xSemaphoreGive(mutex_);
   return have_it;
 }
