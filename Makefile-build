@@ -40,6 +40,9 @@ flash:
 monitor:
 	${IDF} --port ${PORT} monitor
 
+.PHONY:
+flash-erase:
+	${ESPTOOL} --chip esp32s2 --port ${PORT} --baud ${BAUD} erase_flash
 
 submodules-update:
 	git submodule update --init ${GIT_SUBMODULES}
