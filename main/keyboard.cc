@@ -37,7 +37,7 @@ enum class Register : uint8_t {
 };
 // clang-format on
 
-struct RegisterCFG {
+struct Register_CFG {
   uint8_t KE_IEN : 1;        // Key events interrupt enable to host processor.
   uint8_t GPI_IEN : 1;       // GPI interrupt enable to host processor.
   uint8_t K_LCK_IEN : 1;     // Keypad lock interrupt enable.
@@ -48,7 +48,26 @@ struct RegisterCFG {
   uint8_t AI : 1;            // Auto-increment for read and write operations.
 };
 
-static_assert(sizeof(RegisterCFG) == sizeof(uint8_t));
+struct Register_INT_STAT {
+  uint8_t K_INT : 1;         // Key events interrupt status.
+  uint8_t GPI_INT : 1;       // GPI interrupt status.
+  uint8_t K_LCK_INT : 1;     // Keypad lock interrupt status.
+  uint8_t OVR_FLOW_INT : 1;  // Overflow interrupt status.
+  uint8_t CAD_INT : 1;       // CTRL-ALT-DEL key sequence status.
+  uint8_t Reserved : 3;      // Always zero.
+};
+
+struct Register_KEY_LCK_EC {
+  uint8_t KEC : 4;       // Key event count.
+  uint8_t LCK1 : 1;      // Keypad lock status.
+  uint8_t LCK2 : 1;      // Keypad lock status.
+  uint8_t K_LCK_EN : 1;  // Key lock enable.
+  uint8_t Reserved : 1;  // Always 0.
+};
+
+static_assert(sizeof(Register_CFG) == sizeof(uint8_t));
+static_assert(sizeof(Register_INT_STAT) == sizeof(uint8_t));
+static_assert(sizeof(Register_KEY_LCK_EC) == sizeof(uint8_t));
 
 esp_err_t ReadRegister(i2c::Master& i2c_master, Register reg, void* val) {
   return i2c_master.ReadRegister(kSlaveAddress, static_cast<uint8_t>(reg),
@@ -74,7 +93,7 @@ Keyboard::Keyboard(i2c::Master i2c_master)
 Keyboard::~Keyboard() = default;
 
 esp_err_t Keyboard::Initialize() {
-  constexpr RegisterCFG config = {
+  constexpr Register_CFG config = {
       .KE_IEN = true,
       .GPI_IEN = false,
       .K_LCK_IEN = false,
@@ -89,6 +108,17 @@ esp_err_t Keyboard::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  RegisterCFG read_config;
+  Register_CFG read_config;
   return ReadRegister(i2c_master_, Register::CFG, &read_config);
+}
+
+esp_err_t Keyboard::LogEventCount() {
+  Register_KEY_LCK_EC reg_value;
+
+  esp_err_t err = ReadRegister(i2c_master_, Register::CFG, &reg_value);
+  if (err != ESP_OK)
+    return err;
+
+  ESP_LOGI(TAG, "Key event tounc: %u", reg_value.KEC);
+  return ESP_OK;
 }

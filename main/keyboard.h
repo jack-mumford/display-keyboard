@@ -10,6 +10,7 @@ class Keyboard {
   ~Keyboard();
 
   esp_err_t Initialize();
+  esp_err_t LogEventCount();
 
  private:
   i2c::Master i2c_master_;
