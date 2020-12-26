@@ -5,10 +5,10 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "Keyboard Prototype Board"
-Date "12 Dec 2020"
-Rev "1"
+Date "26 Dec 2020"
+Rev "2"
 Comp "Prototype Schematic"
-Comment1 "Based on Adafruit Feather nRF52840 Express and TCA8418 keyboard IC"
+Comment1 "Based on Adafruit Feather S2 and LM8330 keyboard IC"
 Comment2 ""
 Comment3 "License: MIT"
 Comment4 "Design: cmumford"
