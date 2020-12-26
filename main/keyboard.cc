@@ -38,14 +38,14 @@ enum class Register : uint8_t {
 // clang-format on
 
 struct RegisterCFG {
-  uint8_t KE_IEN : 1;
-  uint8_t GPI_IEN : 1;
-  uint8_t K_LCK_IEN : 1;
-  uint8_t OVR_FLOW_IEN : 1;
-  uint8_t INT_CFG : 1;
-  uint8_t OVR_FLOW_M : 1;
-  uint8_t GPI_E_CFG : 1;
-  uint8_t AI : 1;
+  uint8_t KE_IEN : 1;        // Key events interrupt enable to host processor.
+  uint8_t GPI_IEN : 1;       // GPI interrupt enable to host processor.
+  uint8_t K_LCK_IEN : 1;     // Keypad lock interrupt enable.
+  uint8_t OVR_FLOW_IEN : 1;  // Overflow interrupt enable.
+  uint8_t INT_CFG : 1;       // Interrupt configuration.
+  uint8_t OVR_FLOW_M : 1;    // Overflow mode.
+  uint8_t GPI_E_CFG : 1;     // GPI event mode configuration.
+  uint8_t AI : 1;            // Auto-increment for read and write operations.
 };
 
 static_assert(sizeof(RegisterCFG) == sizeof(uint8_t));
