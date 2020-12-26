@@ -2,15 +2,11 @@
 # Fefore running:
 # . $HOME/esp/esp-idf/export.sh
 
-# Download mkspiffs from:
-# https://github.com/igrr/mkspiffs/releases
-
 # pip install esptool
 PORT=/dev/cu.usbserial-GT4YU06W
 BAUD=921600
 IDF=idf.py
 ESPTOOL=esptool.py
-MKSPIFFS=./mkspiffs
 FS_BLOCK_SIZE=4096
 FS_PAGE_SIZE=256
 FS_IMAGE_SIZE=0x100000
@@ -21,13 +17,13 @@ GIT_SUBMODULES=components/i2clib \
 							 components/tinyusb \
 							 components/lv_port_esp32
 
-.PHONY: format clean target build flash config flash-spiffs monitor submodules-update
+.PHONY: format clean target build flash config monitor submodules-update
 
 format:
 	clang-format -i main/*.cc main/*.c main/*.h
 
 clean:
-	rm -rf build sdkconfig.old spiffs.bin
+	rm -rf build sdkconfig.old
 
 config:
 	${IDF} menuconfig
@@ -44,11 +40,6 @@ flash:
 monitor:
 	${IDF} --port ${PORT} monitor
 
-spiffs.bin: Makefile-build fs/*
-	${MKSPIFFS} -c fs -b ${FS_BLOCK_SIZE} -p ${FS_PAGE_SIZE} -s ${FS_IMAGE_SIZE} spiffs.bin
-
-flash-spiffs: spiffs.bin
-	${ESPTOOL} --chip esp32s2 --port ${PORT} --baud ${BAUD} write_flash -z ${PARTITION_OFFSET} spiffs.bin
 
 submodules-update:
 	git submodule update --init ${GIT_SUBMODULES}
