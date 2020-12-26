@@ -32,5 +32,8 @@ class HTTPClient {
  private:
   static esp_err_t EventHandler(esp_http_client_event_t* evt);
 
+  esp_http_client_config_t CreateClientConfig(const std::string& url,
+                                              esp_http_client_method_t method);
+
   DataCallback data_callback_;
 };

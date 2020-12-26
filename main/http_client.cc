@@ -11,6 +11,39 @@ namespace {
 constexpr char TAG[] = "kbd_httpc";
 }  // namespace
 
+esp_http_client_config_t HTTPClient::CreateClientConfig(
+    const std::string& url,
+    esp_http_client_method_t method) {
+  esp_http_client_config_t config = {
+      .url = url.c_str(),
+      .host = 0,
+      .port = 443,
+      .username = nullptr,
+      .password = nullptr,
+      .auth_type = HTTP_AUTH_TYPE_BASIC,
+      .path = nullptr,
+      .query = nullptr,
+      .cert_pem = nullptr,
+      .client_cert_pem = nullptr,
+      .client_key_pem = nullptr,
+      .user_agent = nullptr,
+      .method = method,
+      .timeout_ms = 0,
+      .disable_auto_redirect = false,
+      .max_redirection_count = 0,
+      .max_authorization_retries = 0,
+      .event_handler = HTTPClient::EventHandler,
+      .transport_type = HTTP_TRANSPORT_UNKNOWN,
+      .buffer_size = 0,
+      .buffer_size_tx = 0,
+      .user_data = this,
+      .is_async = false,
+      .use_global_ca_store = false,
+      .skip_cert_common_name_check = false,
+  };
+  return config;
+}
+
 // static
 esp_err_t HTTPClient::EventHandler(esp_http_client_event_t* evt) {
   HTTPClient* client = static_cast<HTTPClient*>(evt->user_data);
@@ -38,9 +71,8 @@ HTTPClient::~HTTPClient() = default;
 
 esp_err_t HTTPClient::DoSSLCheck() {
   int status;
-  return DoGET(
-      "https://www.howsmyssl.com/a/check", std::vector<HeaderValue>(),
-      [](const void*, int) { return ESP_OK; }, &status);
+  return DoGET("https://www.howsmyssl.com/a/check", std::vector<HeaderValue>(),
+               [](const void*, int) { return ESP_OK; }, &status);
 }
 
 esp_err_t HTTPClient::DoGET(const std::string& url,
@@ -48,14 +80,8 @@ esp_err_t HTTPClient::DoGET(const std::string& url,
                             DataCallback data_callback,
                             int* status_code) {
   data_callback_ = data_callback;
-  const esp_http_client_config_t config = {
-      .url = url.c_str(),
-      .auth_type = HTTP_AUTH_TYPE_BASIC,
-      //.cert_pem = howsmyssl_com_root_cert_pem_start,
-      .method = HTTP_METHOD_GET,
-      .event_handler = HTTPClient::EventHandler,
-      .user_data = this,
-  };
+  const esp_http_client_config_t config =
+      CreateClientConfig(url, HTTP_METHOD_GET);
   esp_http_client_handle_t client = esp_http_client_init(&config);
   if (!client)
     return ESP_FAIL;
@@ -82,14 +108,8 @@ esp_err_t HTTPClient::DoPOST(const std::string& url,
                              DataCallback data_callback,
                              int* status_code) {
   data_callback_ = data_callback;
-  const esp_http_client_config_t config = {
-      .url = url.c_str(),
-      .auth_type = HTTP_AUTH_TYPE_BASIC,
-      //.cert_pem = howsmyssl_com_root_cert_pem_start,
-      .method = HTTP_METHOD_POST,
-      .event_handler = HTTPClient::EventHandler,
-      .user_data = this,
-  };
+  const esp_http_client_config_t config =
+      CreateClientConfig(url, HTTP_METHOD_POST);
   esp_http_client_handle_t client = esp_http_client_init(&config);
   if (!client)
     return ESP_FAIL;
