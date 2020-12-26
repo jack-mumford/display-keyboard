@@ -17,31 +17,35 @@ GIT_SUBMODULES=components/i2clib \
 							 components/tinyusb \
 							 components/lv_port_esp32
 
-.PHONY: format clean target build flash config monitor submodules-update
-
+.PHONY: format
 format:
 	clang-format -i main/*.cc main/*.c main/*.h
 
+.PHONY: clean
 clean:
 	rm -rf build sdkconfig.old
 
+.PHONY: config
 config:
 	${IDF} menuconfig
 
+.PHONY: target
 target:
 	${IDF} set-target esp32s2
 
+.PHONY: build
 build:
 	${IDF} build
 
 build/bootloader/bootloader.bin:
 	${IDF} build
 
+.PHONY: flash
 flash:
 	${IDF} --port ${PORT} --baud ${BAUD} flash monitor
 
 # Manual flash should be the equivalent of the flash target above.
-.PHONY:
+.PHONY: manual-flash
 manual-flash: build/bootloader/bootloader.bin
 	esptool.py --chip esp32s2 --port ${PORT} --baud ${BAUD} \
 		--before=default_reset --after=no_reset write_flash \
@@ -52,15 +56,16 @@ manual-flash: build/bootloader/bootloader.bin
 		0x210000 build/storage.bin; \
 		echo "Press the RST button."
 
+.PHONY: monitor
 monitor:
 	${IDF} --port ${PORT} monitor
 
-.PHONY:
+.PHONY: flash-erase
 flash-erase:
 	${ESPTOOL} --chip esp32s2 --port ${PORT} --baud ${BAUD} erase_flash
 
 # Instructions from https://feathers2.io/install_uf2.html
-.PHONY:
+.PHONY: flash-feathers2-stock-bootloader
 flash-feathers2-stock-bootloader:
 	esptool.py --chip esp32s2 --port ${PORT} --baud ${BAUD} \
 		--before=default_reset --after=no_reset write_flash \
@@ -71,6 +76,7 @@ flash-feathers2-stock-bootloader:
 		0x410000 FeatherS2Files/tinyuf2.bin; \
 		echo "Press the RST button."
 
-submodules-update:
+.PHONY: submodules
+submodules:
 	git submodule update --init ${GIT_SUBMODULES}
 	git -C components/lv_port_esp32 submodule update --init components/lvgl/lvgl
