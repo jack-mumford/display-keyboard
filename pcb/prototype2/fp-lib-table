@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name Adafruit_Feather_nRF52840_Express)(type KiCad)(uri ${KIPRJMOD}/library/Adafruit_Feather_nRF52840_Express/footprints.pretty/Adafruit_Feather_nRF52840_Express.pretty)(options "")(descr ""))
+)
