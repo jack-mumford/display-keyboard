@@ -44,6 +44,18 @@ monitor:
 flash-erase:
 	${ESPTOOL} --chip esp32s2 --port ${PORT} --baud ${BAUD} erase_flash
 
+# Instructions from https://feathers2.io/install_uf2.html
+.PHONY:
+flash-feathers2-stock-bootloader:
+	esptool.py --chip esp32s2 --port ${PORT} --baud ${BAUD} \
+		--before=default_reset --after=no_reset write_flash \
+		--flash_mode dio --flash_size detect --flash_freq 80m \
+		0x1000 FeatherS2Files/bootloader.bin \
+		0x8000 FeatherS2Files/partition-table.bin \
+		0xe000 FeatherS2Files/ota_data_initial.bin \
+		0x410000 FeatherS2Files/tinyuf2.bin; \
+		echo "Press the RST button."
+
 submodules-update:
 	git submodule update --init ${GIT_SUBMODULES}
 	git -C components/lv_port_esp32 submodule update --init components/lvgl/lvgl
