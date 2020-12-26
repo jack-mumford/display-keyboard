@@ -11,17 +11,6 @@
 #define SET_BITS(value, bits) (value |= (bits))
 #endif
 
-struct RegisterCFG {
-  uint8_t KE_IEN : 1;
-  uint8_t GPI_IEN : 1;
-  uint8_t K_LCK_IEN : 1;
-  uint8_t OVR_FLOW_IEN : 1;
-  uint8_t INT_CFG : 1;
-  uint8_t OVR_FLOW_M : 1;
-  uint8_t GPI_E_CFG : 1;
-  uint8_t AI : 1;
-};
-
 namespace {
 constexpr char TAG[] = "kbd_kbd";
 constexpr uint8_t kSlaveAddress = 0x34;  // I2C address of TCA8418 IC.
@@ -48,7 +37,35 @@ enum class Register : uint8_t {
 };
 // clang-format on
 
+struct RegisterCFG {
+  uint8_t KE_IEN : 1;
+  uint8_t GPI_IEN : 1;
+  uint8_t K_LCK_IEN : 1;
+  uint8_t OVR_FLOW_IEN : 1;
+  uint8_t INT_CFG : 1;
+  uint8_t OVR_FLOW_M : 1;
+  uint8_t GPI_E_CFG : 1;
+  uint8_t AI : 1;
+};
+
 static_assert(sizeof(RegisterCFG) == sizeof(uint8_t));
+
+esp_err_t ReadRegister(i2c::Master& i2c_master, Register reg, void* val) {
+  return i2c_master.ReadRegister(kSlaveAddress, static_cast<uint8_t>(reg),
+                                 static_cast<uint8_t*>(val))
+             ? ESP_OK
+             : ESP_FAIL;
+}
+
+esp_err_t WriteRegister(i2c::Master& i2c_master,
+                        Register reg,
+                        const void* val) {
+  return i2c_master.WriteRegister(kSlaveAddress, static_cast<uint8_t>(reg),
+                                  *static_cast<const uint8_t*>(val))
+             ? ESP_OK
+             : ESP_FAIL;
+}
+
 }  // namespace
 
 Keyboard::Keyboard(i2c::Master i2c_master)
@@ -57,29 +74,6 @@ Keyboard::Keyboard(i2c::Master i2c_master)
 Keyboard::~Keyboard() = default;
 
 esp_err_t Keyboard::Initialize() {
-  esp_err_t err = WriteConfig();
-  if (err != ESP_OK)
-    return err;
-
-  RegisterCFG config;
-  err = ReadConfig(&config);
-  if (err != ESP_OK)
-    return err;
-
-  return ESP_OK;
-}
-
-esp_err_t Keyboard::ReadConfig(RegisterCFG* config) {
-  uint8_t value;
-  if (!i2c_master_.ReadRegister(kSlaveAddress,
-                                static_cast<uint8_t>(Register::CFG), &value))
-    return ESP_FAIL;
-
-  std::memcpy(config, &value, sizeof(RegisterCFG));
-  return ESP_OK;
-}
-
-esp_err_t Keyboard::WriteConfig() {
   constexpr RegisterCFG config = {
       .KE_IEN = true,
       .GPI_IEN = false,
@@ -91,10 +85,10 @@ esp_err_t Keyboard::WriteConfig() {
       .AI = false,
   };
 
-  uint8_t value;
-  std::memcpy(&value, &config, sizeof(value));
-  return i2c_master_.WriteRegister(kSlaveAddress,
-                                   static_cast<uint8_t>(Register::CFG), value)
-             ? ESP_OK
-             : ESP_FAIL;
+  esp_err_t err = WriteRegister(i2c_master_, Register::CFG, &config);
+  if (err != ESP_OK)
+    return err;
+
+  RegisterCFG read_config;
+  return ReadRegister(i2c_master_, Register::CFG, &read_config);
 }
