@@ -7,7 +7,7 @@
 
 # pip install esptool
 PORT=/dev/cu.usbserial-GT4YU06W
-BAUD=115200
+BAUD=921600
 IDF=idf.py
 ESPTOOL=esptool.py
 MKSPIFFS=./mkspiffs
@@ -39,10 +39,10 @@ build:
 	${IDF} build
 
 flash:
-	${IDF} -p ${PORT} flash monitor
+	${IDF} --port ${PORT} --baud ${BAUD} flash monitor
 
 monitor:
-	${IDF} -p ${PORT} monitor
+	${IDF} --port ${PORT} monitor
 
 spiffs.bin: Makefile-build fs/*
 	${MKSPIFFS} -c fs -b ${FS_BLOCK_SIZE} -p ${FS_PAGE_SIZE} -s ${FS_IMAGE_SIZE} spiffs.bin
