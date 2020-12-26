@@ -3,7 +3,7 @@
 # . $HOME/esp/esp-idf/export.sh
 
 # pip install esptool
-PORT=/dev/cu.usbserial-GT4YU06W
+
 BAUD=921600
 IDF=idf.py
 ESPTOOL=esptool.py

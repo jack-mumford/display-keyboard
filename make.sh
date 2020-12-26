@@ -1,6 +1,7 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
-# Fefore running:
+# Run this first:
 # . $HOME/esp/esp-idf/export.sh
 
-make --file=Makefile-build $*
+port=$(./getdev.py)
+PORT=$port make --file=Makefile-build $*
