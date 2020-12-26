@@ -34,8 +34,23 @@ target:
 build:
 	${IDF} build
 
+build/bootloader/bootloader.bin:
+	${IDF} build
+
 flash:
 	${IDF} --port ${PORT} --baud ${BAUD} flash monitor
+
+# Manual flash should be the equivalent of the flash target above.
+.PHONY:
+manual-flash: build/bootloader/bootloader.bin
+	esptool.py --chip esp32s2 --port ${PORT} --baud ${BAUD} \
+		--before=default_reset --after=no_reset write_flash \
+		--flash_mode dio --flash_size detect --flash_freq 80m \
+		0x1000 build/bootloader/bootloader.bin \
+		0x8000 build/partition_table/partition-table.bin \
+		0x10000 build/keyboard.bin \
+		0x210000 build/storage.bin; \
+		echo "Press the RST button."
 
 monitor:
 	${IDF} --port ${PORT} monitor
