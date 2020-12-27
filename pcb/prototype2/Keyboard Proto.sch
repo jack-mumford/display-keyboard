@@ -187,9 +187,6 @@ Text GLabel 5150 6900 2    50   Input ~ 0
 3V3_RST
 NoConn ~ 4450 5600
 NoConn ~ 4450 5900
-NoConn ~ 4450 6000
-NoConn ~ 4450 6100
-NoConn ~ 4450 6200
 NoConn ~ 4450 6300
 NoConn ~ 4450 6400
 NoConn ~ 4450 6500
@@ -197,9 +194,9 @@ NoConn ~ 4450 6700
 NoConn ~ 4450 6800
 NoConn ~ 4450 6900
 NoConn ~ 5150 5400
-NoConn ~ 5150 6200
-NoConn ~ 5150 6300
-NoConn ~ 5150 6400
+NoConn ~ 4450 6200
+NoConn ~ 4450 6000
+NoConn ~ 4450 6100
 NoConn ~ 5150 6500
 NoConn ~ 5150 6700
 Text GLabel 5150 6800 2    50   Input ~ 0
@@ -258,39 +255,39 @@ Wire Wire Line
 $Comp
 L Connector:Conn_01x14_Female J1
 U 1 1 5FCD18E2
-P 8850 5700
-F 0 "J1" H 8878 5676 50  0000 L CNN
-F 1 "Conn_01x14_Female" H 8878 5585 50  0000 L CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x14_P2.54mm_Vertical" H 8850 5700 50  0001 C CNN
-F 3 "~" H 8850 5700 50  0001 C CNN
-	1    8850 5700
+P 9950 5550
+F 0 "J1" H 9978 5526 50  0000 L CNN
+F 1 "Conn_01x14_Female" H 9400 4700 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x14_P2.54mm_Vertical" H 9950 5550 50  0001 C CNN
+F 3 "~" H 9950 5550 50  0001 C CNN
+	1    9950 5550
 	1    0    0    -1  
 $EndComp
-Text GLabel 8650 5100 0    50   Input ~ 0
+Text GLabel 9750 4950 0    50   Input ~ 0
 3V3
-Text GLabel 8650 5200 0    50   Input ~ 0
+Text GLabel 9750 5050 0    50   Input ~ 0
 Gnd
-Text GLabel 8650 5300 0    50   Input ~ 0
+Text GLabel 9750 5150 0    50   Input ~ 0
 D_CS
-Text GLabel 8650 5400 0    50   Input ~ 0
+Text GLabel 9750 5250 0    50   Input ~ 0
 3V3_RST
-Text GLabel 8650 5600 0    50   Input ~ 0
+Text GLabel 9750 5450 0    50   Input ~ 0
 MOSI
-Text GLabel 8650 5700 0    50   Input ~ 0
+Text GLabel 9750 5550 0    50   Input ~ 0
 SCK
-Text GLabel 8650 5800 0    50   Input ~ 0
+Text GLabel 9750 5650 0    50   Input ~ 0
 3V3
-Text GLabel 8650 5900 0    50   Input ~ 0
+Text GLabel 9750 5750 0    50   Input ~ 0
 MISO
-Text GLabel 8650 6000 0    50   Input ~ 0
+Text GLabel 9750 5850 0    50   Input ~ 0
 SCK
-Text GLabel 8650 6100 0    50   Input ~ 0
+Text GLabel 9750 5950 0    50   Input ~ 0
 T_CS
-Text GLabel 8650 6200 0    50   Input ~ 0
+Text GLabel 9750 6050 0    50   Input ~ 0
 MOSI
-Text GLabel 8650 6300 0    50   Input ~ 0
+Text GLabel 9750 6150 0    50   Input ~ 0
 MISO
-Text GLabel 8650 6400 0    50   Input ~ 0
+Text GLabel 9750 6250 0    50   Input ~ 0
 T_IRQ
 Text GLabel 5150 6000 2    50   Input ~ 0
 D_CS
@@ -302,7 +299,7 @@ Text GLabel 5150 6100 2    50   Input ~ 0
 T_CS
 Text GLabel 4450 5800 0    50   Input ~ 0
 T_IRQ
-NoConn ~ 8650 5500
+NoConn ~ 9750 5350
 $Comp
 L LM8330:LM8330 U4
 U 1 1 5FE7EC0A
@@ -570,7 +567,7 @@ Wire Notes Line
 	7000 4150 10500 4150
 Wire Notes Line
 	7000 3950 3400 3950
-Text Notes 8300 4650 0    118  ~ 0
+Text Notes 9200 4550 0    118  ~ 0
 LCD Header
 Text Notes 4750 4600 0    197  ~ 0
 MCU
@@ -599,4 +596,35 @@ Wire Wire Line
 	5150 5500 5950 5500
 Wire Wire Line
 	5150 5600 5950 5600
+$Comp
+L Connector:Conn_01x05_Female J3
+U 1 1 5FEA0C78
+P 7950 5500
+F 0 "J3" H 7978 5526 50  0000 L CNN
+F 1 "Conn_01x05_Female" H 7350 5100 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical" H 7950 5500 50  0001 C CNN
+F 3 "~" H 7950 5500 50  0001 C CNN
+	1    7950 5500
+	1    0    0    -1  
+$EndComp
+Wire Notes Line
+	8700 4150 8700 6750
+Text Notes 7150 4550 0    118  ~ 0
+Rotary Encoder
+Text GLabel 7750 5600 0    50   Input ~ 0
+3V3
+Text GLabel 7750 5700 0    50   Input ~ 0
+Gnd
+Text GLabel 7750 5300 0    50   Input ~ 0
+Enc_CLK
+Text GLabel 7750 5400 0    50   Input ~ 0
+Enc_DT
+Text GLabel 7750 5500 0    50   Input ~ 0
+Enc_SW
+Text GLabel 5150 6200 2    50   Input ~ 0
+Enc_CLK
+Text GLabel 5150 6300 2    50   Input ~ 0
+Enc_DT
+Text GLabel 5150 6400 2    50   Input ~ 0
+Enc_SW
 $EndSCHEMATC
