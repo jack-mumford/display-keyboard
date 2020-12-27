@@ -197,8 +197,6 @@ NoConn ~ 4450 6700
 NoConn ~ 4450 6800
 NoConn ~ 4450 6900
 NoConn ~ 5150 5400
-NoConn ~ 5150 5500
-NoConn ~ 5150 5600
 NoConn ~ 5150 6200
 NoConn ~ 5150 6300
 NoConn ~ 5150 6400
@@ -586,4 +584,19 @@ Text Notes 1150 4950 0    118  ~ 0
 Pull-up resistors
 Text Notes 7850 900  0    118  ~ 0
 Keyboard control IC
+$Comp
+L Connector:Conn_01x02_Female J2
+U 1 1 5FE93246
+P 6150 5500
+F 0 "J2" H 6178 5476 50  0000 L CNN
+F 1 "UART Debug header" H 5750 5300 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 6150 5500 50  0001 C CNN
+F 3 "~" H 6150 5500 50  0001 C CNN
+	1    6150 5500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5150 5500 5950 5500
+Wire Wire Line
+	5150 5600 5950 5600
 $EndSCHEMATC
