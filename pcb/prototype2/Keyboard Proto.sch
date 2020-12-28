@@ -13,20 +13,9 @@ Comment2 ""
 Comment3 "License: MIT"
 Comment4 "Design: cmumford"
 $EndDescr
-$Comp
-L Keyboard-Proto-rescue:Adafruit_Feather_nRF52840_Express-Adafruit_Feather_nRF52840_Express U1
-U 1 1 5FCC3339
-P 4800 6100
-F 0 "U1" H 4800 7065 50  0000 C CNN
-F 1 "Adafruit_Feather_nRF52840_Express" H 4800 6974 50  0000 C CNN
-F 2 "Adafruit_Feather_nRF52840_Express:Adafruit_Feather_nRF52840_Express" H 4550 7000 50  0001 C CNN
-F 3 "https://www.adafruit.com/product/4062" H 4550 7000 50  0001 C CNN
-	1    4800 6100
-	1    0    0    -1  
-$EndComp
-Text GLabel 4450 5400 0    50   Input ~ 0
+Text GLabel 5450 6850 2    50   Input ~ 0
 3V3_SDA
-Text GLabel 4450 5500 0    50   Input ~ 0
+Text GLabel 5450 6750 2    50   Input ~ 0
 3V3_SCL
 Text GLabel 8200 1650 0    50   Input ~ 0
 1V8_SDA
@@ -34,7 +23,7 @@ Text GLabel 8200 1750 0    50   Input ~ 0
 1V8_SCL
 Text GLabel 8200 1850 0    50   Input ~ 0
 1V8_KBDINT
-Text GLabel 4450 5700 0    50   Input ~ 0
+Text GLabel 5450 6650 2    50   Input ~ 0
 3V3_KBDINT
 $Comp
 L Switch:SW_Push Q1
@@ -183,25 +172,11 @@ Wire Wire Line
 	4550 2600 4550 2850
 Text GLabel 8200 1950 0    50   Input ~ 0
 1V8_RST
-Text GLabel 5150 6900 2    50   Input ~ 0
+Text GLabel 4600 5350 0    50   Input ~ 0
 3V3_RST
-NoConn ~ 4450 5600
-NoConn ~ 4450 5900
-NoConn ~ 4450 6300
-NoConn ~ 4450 6400
-NoConn ~ 4450 6500
-NoConn ~ 4450 6700
-NoConn ~ 4450 6800
-NoConn ~ 4450 6900
-NoConn ~ 5150 5400
-NoConn ~ 4450 6200
-NoConn ~ 4450 6000
-NoConn ~ 4450 6100
-NoConn ~ 5150 6500
-NoConn ~ 5150 6700
-Text GLabel 5150 6800 2    50   Input ~ 0
+Text GLabel 4600 5450 0    50   Input ~ 0
 3V3
-Text GLabel 5150 6600 2    50   Input ~ 0
+Text GLabel 4600 5650 0    50   Input ~ 0
 Gnd
 Text GLabel 8750 3650 3    50   Input ~ 0
 Gnd
@@ -289,15 +264,15 @@ Text GLabel 9750 6150 0    50   Input ~ 0
 MISO
 Text GLabel 9750 6250 0    50   Input ~ 0
 T_IRQ
-Text GLabel 5150 6000 2    50   Input ~ 0
+Text GLabel 5450 6250 2    50   Input ~ 0
 D_CS
-Text GLabel 5150 5800 2    50   Input ~ 0
+Text GLabel 4600 6550 0    50   Input ~ 0
 MOSI
-Text GLabel 5150 5700 2    50   Input ~ 0
+Text GLabel 4600 6450 0    50   Input ~ 0
 MISO
-Text GLabel 5150 6100 2    50   Input ~ 0
+Text GLabel 5450 6150 2    50   Input ~ 0
 T_CS
-Text GLabel 4450 5800 0    50   Input ~ 0
+Text GLabel 5450 6050 2    50   Input ~ 0
 T_IRQ
 NoConn ~ 9750 5350
 $Comp
@@ -350,7 +325,7 @@ F 4 "Texas Instruments" H 2400 4350 50  0001 C CNN "Manufacturer"
 $EndComp
 Text GLabel 1000 1500 0    50   Input ~ 0
 3V3
-Text GLabel 4450 6600 0    50   Input ~ 0
+Text GLabel 5450 5850 2    50   Input ~ 0
 EN
 Text GLabel 1500 1700 0    50   Input ~ 0
 EN
@@ -415,7 +390,7 @@ Text GLabel 1900 4150 3    50   Input ~ 0
 Gnd
 Text GLabel 1500 3500 0    50   Input ~ 0
 EN
-Text GLabel 5150 5900 2    50   Input ~ 0
+Text GLabel 4600 6350 0    50   Input ~ 0
 SCK
 Text GLabel 1500 3600 0    50   Input ~ 0
 3V3_SDA
@@ -584,18 +559,14 @@ Keyboard control IC
 $Comp
 L Connector:Conn_01x02_Female J2
 U 1 1 5FE93246
-P 6150 5500
-F 0 "J2" H 6178 5476 50  0000 L CNN
-F 1 "UART Debug header" H 5750 5300 50  0000 L CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 6150 5500 50  0001 C CNN
-F 3 "~" H 6150 5500 50  0001 C CNN
-	1    6150 5500
-	1    0    0    -1  
+P 4100 6750
+F 0 "J2" H 4128 6726 50  0000 L CNN
+F 1 "UART Debug header" H 3900 6850 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 4100 6750 50  0001 C CNN
+F 3 "~" H 4100 6750 50  0001 C CNN
+	1    4100 6750
+	-1   0    0    1   
 $EndComp
-Wire Wire Line
-	5150 5500 5950 5500
-Wire Wire Line
-	5150 5600 5950 5600
 $Comp
 L Connector:Conn_01x05_Female J3
 U 1 1 5FEA0C78
@@ -621,10 +592,37 @@ Text GLabel 7750 5400 0    50   Input ~ 0
 Enc_DT
 Text GLabel 7750 5500 0    50   Input ~ 0
 Enc_SW
-Text GLabel 5150 6200 2    50   Input ~ 0
+Text GLabel 4600 6050 0    50   Input ~ 0
 Enc_CLK
-Text GLabel 5150 6300 2    50   Input ~ 0
+Text GLabel 4600 6150 0    50   Input ~ 0
 Enc_DT
-Text GLabel 5150 6400 2    50   Input ~ 0
+Text GLabel 4600 5950 0    50   Input ~ 0
 Enc_SW
+$Comp
+L FeatherS2:FeatherS2 U?
+U 1 1 5FE9446F
+P 5050 6050
+F 0 "U?" H 5025 7015 50  0000 C CNN
+F 1 "FeatherS2" H 5025 6924 50  0000 C CNN
+F 2 "FeatherS2:FeatherS2" H 5100 5050 50  0001 C CNN
+F 3 "https://www.adafruit.com/product/4062" H 4700 6950 50  0001 C CNN
+	1    5050 6050
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4600 6650 4300 6650
+Wire Wire Line
+	4300 6750 4600 6750
+NoConn ~ 5450 5450
+NoConn ~ 5450 5550
+NoConn ~ 5450 5750
+NoConn ~ 5450 5950
+NoConn ~ 5450 6350
+NoConn ~ 5450 6450
+NoConn ~ 5450 6550
+NoConn ~ 4600 6850
+NoConn ~ 4600 6250
+NoConn ~ 4600 5850
+NoConn ~ 4600 5750
+NoConn ~ 4600 5550
 $EndSCHEMATC
