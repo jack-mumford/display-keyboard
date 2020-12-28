@@ -13,9 +13,9 @@ Comment2 ""
 Comment3 "License: MIT"
 Comment4 "Design: cmumford"
 $EndDescr
-Text GLabel 5450 6850 2    50   Input ~ 0
+Text GLabel 5650 5850 2    50   Input ~ 0
 3V3_SDA
-Text GLabel 5450 6750 2    50   Input ~ 0
+Text GLabel 5650 5750 2    50   Input ~ 0
 3V3_SCL
 Text GLabel 8200 1650 0    50   Input ~ 0
 1V8_SDA
@@ -23,7 +23,7 @@ Text GLabel 8200 1750 0    50   Input ~ 0
 1V8_SCL
 Text GLabel 8200 1850 0    50   Input ~ 0
 1V8_KBDINT
-Text GLabel 5450 6650 2    50   Input ~ 0
+Text GLabel 5650 5650 2    50   Input ~ 0
 3V3_KBDINT
 $Comp
 L Switch:SW_Push Q1
@@ -172,11 +172,11 @@ Wire Wire Line
 	4550 2600 4550 2850
 Text GLabel 8200 1950 0    50   Input ~ 0
 1V8_RST
-Text GLabel 4600 5350 0    50   Input ~ 0
+Text GLabel 4800 4350 0    50   Input ~ 0
 3V3_RST
-Text GLabel 4600 5450 0    50   Input ~ 0
+Text GLabel 4800 4450 0    50   Input ~ 0
 3V3
-Text GLabel 4600 5650 0    50   Input ~ 0
+Text GLabel 4800 4650 0    50   Input ~ 0
 Gnd
 Text GLabel 8750 3650 3    50   Input ~ 0
 Gnd
@@ -264,15 +264,15 @@ Text GLabel 9750 6150 0    50   Input ~ 0
 MISO
 Text GLabel 9750 6250 0    50   Input ~ 0
 T_IRQ
-Text GLabel 5450 6250 2    50   Input ~ 0
+Text GLabel 5650 5250 2    50   Input ~ 0
 D_CS
-Text GLabel 4600 6550 0    50   Input ~ 0
+Text GLabel 4800 5550 0    50   Input ~ 0
 MOSI
-Text GLabel 4600 6450 0    50   Input ~ 0
+Text GLabel 4800 5450 0    50   Input ~ 0
 MISO
-Text GLabel 5450 6150 2    50   Input ~ 0
+Text GLabel 5650 5150 2    50   Input ~ 0
 T_CS
-Text GLabel 5450 6050 2    50   Input ~ 0
+Text GLabel 5650 5050 2    50   Input ~ 0
 T_IRQ
 NoConn ~ 9750 5350
 $Comp
@@ -325,7 +325,7 @@ F 4 "Texas Instruments" H 2400 4350 50  0001 C CNN "Manufacturer"
 $EndComp
 Text GLabel 1000 1500 0    50   Input ~ 0
 3V3
-Text GLabel 5450 5850 2    50   Input ~ 0
+Text GLabel 5650 4850 2    50   Input ~ 0
 EN
 Text GLabel 1500 1700 0    50   Input ~ 0
 EN
@@ -390,7 +390,7 @@ Text GLabel 1900 4150 3    50   Input ~ 0
 Gnd
 Text GLabel 1500 3500 0    50   Input ~ 0
 EN
-Text GLabel 4600 6350 0    50   Input ~ 0
+Text GLabel 4800 5350 0    50   Input ~ 0
 SCK
 Text GLabel 1500 3600 0    50   Input ~ 0
 3V3_SDA
@@ -541,10 +541,10 @@ Wire Notes Line
 Wire Notes Line
 	7000 4150 10500 4150
 Wire Notes Line
-	7000 3950 3400 3950
+	7000 3350 3400 3350
 Text Notes 9200 4550 0    118  ~ 0
 LCD Header
-Text Notes 4750 4600 0    197  ~ 0
+Text Notes 5100 3900 0    197  ~ 0
 MCU
 Text Notes 4500 1150 0    118  ~ 0
 Keyboard Matrix
@@ -559,12 +559,12 @@ Keyboard control IC
 $Comp
 L Connector:Conn_01x02_Female J2
 U 1 1 5FE93246
-P 4100 6750
-F 0 "J2" H 4128 6726 50  0000 L CNN
-F 1 "UART Debug header" H 3900 6850 50  0000 L CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 4100 6750 50  0001 C CNN
-F 3 "~" H 4100 6750 50  0001 C CNN
-	1    4100 6750
+P 4300 5750
+F 0 "J2" H 4328 5726 50  0000 L CNN
+F 1 "UART Debug header" H 4100 5850 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 4300 5750 50  0001 C CNN
+F 3 "~" H 4300 5750 50  0001 C CNN
+	1    4300 5750
 	-1   0    0    1   
 $EndComp
 $Comp
@@ -592,37 +592,112 @@ Text GLabel 7750 5400 0    50   Input ~ 0
 Enc_DT
 Text GLabel 7750 5500 0    50   Input ~ 0
 Enc_SW
-Text GLabel 4600 6050 0    50   Input ~ 0
+Text GLabel 4800 5050 0    50   Input ~ 0
 Enc_CLK
-Text GLabel 4600 6150 0    50   Input ~ 0
+Text GLabel 4800 5150 0    50   Input ~ 0
 Enc_DT
-Text GLabel 4600 5950 0    50   Input ~ 0
+Text GLabel 4800 4950 0    50   Input ~ 0
 Enc_SW
 $Comp
-L FeatherS2:FeatherS2 U?
+L FeatherS2:FeatherS2 U5
 U 1 1 5FE9446F
-P 5050 6050
-F 0 "U?" H 5025 7015 50  0000 C CNN
-F 1 "FeatherS2" H 5025 6924 50  0000 C CNN
-F 2 "FeatherS2:FeatherS2" H 5100 5050 50  0001 C CNN
-F 3 "https://www.adafruit.com/product/4062" H 4700 6950 50  0001 C CNN
-	1    5050 6050
+P 5250 5050
+F 0 "U5" H 5225 6015 50  0000 C CNN
+F 1 "FeatherS2" H 5225 5924 50  0000 C CNN
+F 2 "FeatherS2:FeatherS2" H 5300 4050 50  0001 C CNN
+F 3 "https://www.adafruit.com/product/4062" H 4900 5950 50  0001 C CNN
+	1    5250 5050
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	4600 6650 4300 6650
+	4800 5650 4500 5650
 Wire Wire Line
-	4300 6750 4600 6750
-NoConn ~ 5450 5450
-NoConn ~ 5450 5550
-NoConn ~ 5450 5750
-NoConn ~ 5450 5950
-NoConn ~ 5450 6350
-NoConn ~ 5450 6450
-NoConn ~ 5450 6550
-NoConn ~ 4600 6850
-NoConn ~ 4600 6250
-NoConn ~ 4600 5850
-NoConn ~ 4600 5750
-NoConn ~ 4600 5550
+	4500 5750 4800 5750
+NoConn ~ 5650 4450
+NoConn ~ 5650 4550
+NoConn ~ 5650 4750
+NoConn ~ 5650 4950
+NoConn ~ 5650 5550
+NoConn ~ 4800 5850
+NoConn ~ 4800 5250
+NoConn ~ 4800 4850
+NoConn ~ 4800 4750
+NoConn ~ 4800 4550
+$Comp
+L 128x32_OLED_LCD_LED:128x32_OLED_LCD_LED U1
+U 1 1 5FE96299
+P 5050 7300
+F 0 "U1" H 5228 7346 50  0000 L CNN
+F 1 "128x32_OLED_LCD_LED" H 4650 6900 50  0000 L CNN
+F 2 "128x32_OLED_LCD_LED:128x32_OLED_LCD_LED" H 5150 6850 50  0001 C CNN
+F 3 "" H 5050 7300 50  0001 C CNN
+F 4 "https://www.aliexpress.com/item/32672229793.html" H 5150 6950 50  0001 C CNN "URL"
+	1    5050 7300
+	1    0    0    -1  
+$EndComp
+Text GLabel 4850 7450 0    50   Input ~ 0
+Gnd
+Text GLabel 4850 7350 0    50   Input ~ 0
+3V3
+Text GLabel 4100 7150 0    50   Input ~ 0
+SDA
+Text GLabel 5650 5350 2    50   Input ~ 0
+SDA
+Text GLabel 5650 5450 2    50   Input ~ 0
+SCL
+Text GLabel 4100 7250 0    50   Input ~ 0
+SCL
+Wire Notes Line
+	3400 6250 7000 6250
+Text GLabel 4450 6750 1    50   Input ~ 0
+3V3
+Wire Wire Line
+	4100 7150 4300 7150
+Wire Wire Line
+	4850 7250 4600 7250
+$Comp
+L Device:R_Small R7
+U 1 1 5FEA47CB
+P 4300 7000
+F 0 "R7" V 4200 7000 50  0000 C CNN
+F 1 "5kΩ" V 4400 7000 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 4300 7000 50  0001 C CNN
+F 3 "~" H 4300 7000 50  0001 C CNN
+	1    4300 7000
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R8
+U 1 1 5FEA50C5
+P 4600 7000
+F 0 "R8" V 4500 7000 50  0000 C CNN
+F 1 "5kΩ" V 4700 7000 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 4600 7000 50  0001 C CNN
+F 3 "~" H 4600 7000 50  0001 C CNN
+	1    4600 7000
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	4600 7100 4600 7250
+Connection ~ 4600 7250
+Wire Wire Line
+	4600 7250 4100 7250
+Wire Wire Line
+	4300 7100 4300 7150
+Connection ~ 4300 7150
+Wire Wire Line
+	4300 7150 4850 7150
+Wire Wire Line
+	4300 6900 4300 6850
+Wire Wire Line
+	4300 6850 4450 6850
+Wire Wire Line
+	4450 6850 4450 6750
+Wire Wire Line
+	4450 6850 4600 6850
+Wire Wire Line
+	4600 6850 4600 6900
+Connection ~ 4450 6850
+Text Notes 4950 6600 0    118  ~ 0
+Volume Display
 $EndSCHEMATC
