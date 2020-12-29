@@ -592,18 +592,18 @@ Text GLabel 7750 5400 0    50   Input ~ 0
 Enc_DT
 Text GLabel 7750 5500 0    50   Input ~ 0
 Enc_SW
-Text GLabel 4800 5050 0    50   Input ~ 0
-Enc_CLK
 Text GLabel 4800 5150 0    50   Input ~ 0
+Enc_CLK
+Text GLabel 4800 5050 0    50   Input ~ 0
 Enc_DT
 Text GLabel 4800 4950 0    50   Input ~ 0
 Enc_SW
 $Comp
-L FeatherS2:FeatherS2 U5
+L Keyboard-Proto-rescue:FeatherS2-FeatherS2 U5
 U 1 1 5FE9446F
 P 5250 5050
 F 0 "U5" H 5225 6015 50  0000 C CNN
-F 1 "FeatherS2" H 5225 5924 50  0000 C CNN
+F 1 "FeatherS2-FeatherS2" H 5225 5924 50  0000 C CNN
 F 2 "FeatherS2:FeatherS2" H 5300 4050 50  0001 C CNN
 F 3 "https://www.adafruit.com/product/4062" H 4900 5950 50  0001 C CNN
 	1    5250 5050
@@ -626,78 +626,78 @@ NoConn ~ 4800 4550
 $Comp
 L 128x32_OLED_LCD_LED:128x32_OLED_LCD_LED U1
 U 1 1 5FE96299
-P 5050 7300
-F 0 "U1" H 5228 7346 50  0000 L CNN
-F 1 "128x32_OLED_LCD_LED" H 4650 6900 50  0000 L CNN
-F 2 "128x32_OLED_LCD_LED:128x32_OLED_LCD_LED" H 5150 6850 50  0001 C CNN
-F 3 "" H 5050 7300 50  0001 C CNN
-F 4 "https://www.aliexpress.com/item/32672229793.html" H 5150 6950 50  0001 C CNN "URL"
-	1    5050 7300
+P 5100 7250
+F 0 "U1" H 5278 7296 50  0000 L CNN
+F 1 "128x32_OLED_LCD_LED" H 4700 6850 50  0000 L CNN
+F 2 "128x32_OLED_LCD_LED:128x32_OLED_LCD_LED" H 5200 6800 50  0001 C CNN
+F 3 "" H 5100 7250 50  0001 C CNN
+F 4 "https://www.aliexpress.com/item/32672229793.html" H 5200 6900 50  0001 C CNN "URL"
+	1    5100 7250
 	1    0    0    -1  
 $EndComp
-Text GLabel 4850 7450 0    50   Input ~ 0
+Text GLabel 4900 7400 0    50   Input ~ 0
 Gnd
-Text GLabel 4850 7350 0    50   Input ~ 0
+Text GLabel 4900 7300 0    50   Input ~ 0
 3V3
-Text GLabel 4100 7150 0    50   Input ~ 0
-SDA
-Text GLabel 5650 5350 2    50   Input ~ 0
+Text GLabel 4000 7100 0    50   Input ~ 0
 SDA
 Text GLabel 5650 5450 2    50   Input ~ 0
+SDA
+Text GLabel 5650 5350 2    50   Input ~ 0
 SCL
-Text GLabel 4100 7250 0    50   Input ~ 0
+Text GLabel 4000 7200 0    50   Input ~ 0
 SCL
 Wire Notes Line
 	3400 6250 7000 6250
-Text GLabel 4450 6750 1    50   Input ~ 0
+Text Notes 3950 6550 0    118  ~ 0
+Volume Display
+Text GLabel 4300 6750 0    50   Input ~ 0
 3V3
 Wire Wire Line
-	4100 7150 4300 7150
+	4000 7100 4400 7100
 Wire Wire Line
-	4850 7250 4600 7250
+	4900 7200 4650 7200
 $Comp
 L Device:R_Small R7
-U 1 1 5FEA47CB
-P 4300 7000
-F 0 "R7" V 4200 7000 50  0000 C CNN
-F 1 "5kΩ" V 4400 7000 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 4300 7000 50  0001 C CNN
-F 3 "~" H 4300 7000 50  0001 C CNN
-	1    4300 7000
+U 1 1 5FEB56DF
+P 4400 6950
+F 0 "R7" H 4500 7000 50  0000 C CNN
+F 1 "5kΩ" H 4550 6900 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 4400 6950 50  0001 C CNN
+F 3 "~" H 4400 6950 50  0001 C CNN
+	1    4400 6950
 	-1   0    0    1   
 $EndComp
 $Comp
 L Device:R_Small R8
-U 1 1 5FEA50C5
-P 4600 7000
-F 0 "R8" V 4500 7000 50  0000 C CNN
-F 1 "5kΩ" V 4700 7000 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 4600 7000 50  0001 C CNN
-F 3 "~" H 4600 7000 50  0001 C CNN
-	1    4600 7000
+U 1 1 5FEB5F07
+P 4650 6950
+F 0 "R8" H 4550 7000 50  0000 C CNN
+F 1 "5kΩ" H 4500 6900 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 4650 6950 50  0001 C CNN
+F 3 "~" H 4650 6950 50  0001 C CNN
+	1    4650 6950
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	4600 7100 4600 7250
-Connection ~ 4600 7250
+	4300 6750 4400 6750
 Wire Wire Line
-	4600 7250 4100 7250
+	4650 6750 4650 6850
 Wire Wire Line
-	4300 7100 4300 7150
-Connection ~ 4300 7150
+	4650 7050 4650 7200
+Connection ~ 4650 7200
 Wire Wire Line
-	4300 7150 4850 7150
+	4650 7200 4000 7200
 Wire Wire Line
-	4300 6900 4300 6850
+	4400 6750 4400 6850
+Connection ~ 4400 6750
 Wire Wire Line
-	4300 6850 4450 6850
+	4400 6750 4650 6750
 Wire Wire Line
-	4450 6850 4450 6750
+	4400 7050 4400 7100
+Connection ~ 4400 7100
 Wire Wire Line
-	4450 6850 4600 6850
-Wire Wire Line
-	4600 6850 4600 6900
-Connection ~ 4450 6850
-Text Notes 4950 6600 0    118  ~ 0
-Volume Display
+	4400 7100 4900 7100
+Text Notes 5350 6550 0    79   ~ 0
+(separate I2C)
 $EndSCHEMATC
