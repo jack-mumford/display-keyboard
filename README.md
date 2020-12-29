@@ -6,11 +6,17 @@ integrated touch display.
 Hardware features:
 
 * Mechanical keys.
-* ESP32-S2 ([datasheet](https://www.espressif.com/sites/default/files/documentation/esp32-s2_datasheet_en.pdf)).
+* [FeatherS2](https://unexpectedmaker.com/shop/feathers2-esp32-s2). This is a
+  [ESP32-S2](https://www.espressif.com/sites/default/files/documentation/esp32-s2_datasheet_en.pdf)
+  based embedded development board.
 * 2.8" LCD capacitive [touch display](https://www.adafruit.com/product/2770).
 * 0.91" vertical [OLED display](https://www.aliexpress.com/item/32672229793.html)
   for volume display.
 * Volume control knob.
+
+The FeatherS2 conforms to the [Adafruit Feather](https://www.adafruit.com/feather)
+requirements, and allows for the possibility of replacing that MCU with another
+Feather with little (if any) PCB rework.
 
 ## Hardware Design
 
