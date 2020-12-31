@@ -26,6 +26,7 @@
 #include "spotify.h"
 #include "usb_device.h"
 #include "usb_hid.h"
+#include "gpio_pins.h"
 #include "wifi.h"
 
 namespace {
@@ -36,7 +37,6 @@ constexpr char TAG[] = "kbd_app";
 
 constexpr uint64_t kMaxMainLoopWaitMSecs = 100;
 constexpr uint32_t kMinMainLoopWaitMSecs = 10;
-constexpr gpio_num_t kActivityGPIO = GPIO_NUM_2;
 
 // Make sure min wait time is at least one tick.
 static_assert((kMinMainLoopWaitMSecs / portTICK_PERIOD_MS) > 0);
@@ -261,8 +261,8 @@ esp_err_t App::Initialize() {
 
   const i2c::Master::InitParams i2c_config = {
       .i2c_bus = I2C_NUM_0,
-      .sda_gpio = 41,
-      .scl_gpio = 40,
+      .sda_gpio = kI2C0SDA,
+      .scl_gpio = kI2C0SCL,
       .clk_speed = 400000,
       .sda_pullup_enable = true,
       .scl_pullup_enable = true,

@@ -4,10 +4,13 @@
 #include <esp_system.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <i2clib/master.h>
 #include <nvs_flash.h>
 #include <sdkconfig.h>
 
 #include "app.h"
+#include "gpio_pins.h"
+#include "keyboard.h"
 
 namespace {
 

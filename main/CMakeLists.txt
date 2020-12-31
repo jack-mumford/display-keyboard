@@ -19,6 +19,7 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/main"
     "${IDF_PATH}/components/driver/include"
     "${IDF_PATH}/components/esp-tls"
+    "${IDF_PATH}/components/esp_common/include"
     "${IDF_PATH}/components/esp_http_client/include"
     "${IDF_PATH}/components/esp_http_server/include"
     "${IDF_PATH}/components/freertos/include/freertos"
