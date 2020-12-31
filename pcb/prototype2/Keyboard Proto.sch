@@ -274,7 +274,6 @@ Text GLabel 5650 5150 2    50   Input ~ 0
 T_CS
 Text GLabel 5650 5050 2    50   Input ~ 0
 T_IRQ
-NoConn ~ 9750 5350
 $Comp
 L LM8330:LM8330 U4
 U 1 1 5FE7EC0A
@@ -619,7 +618,6 @@ NoConn ~ 5650 4750
 NoConn ~ 5650 4950
 NoConn ~ 5650 5550
 NoConn ~ 4800 5850
-NoConn ~ 4800 5250
 NoConn ~ 4800 4850
 NoConn ~ 4800 4750
 NoConn ~ 4800 4550
@@ -700,4 +698,8 @@ Wire Wire Line
 	4400 7100 4900 7100
 Text Notes 5350 6550 0    79   ~ 0
 (separate I2C)
+Text GLabel 9750 5350 0    50   Input ~ 0
+D_DC
+Text GLabel 4800 5250 0    50   Input ~ 0
+D_DC
 $EndSCHEMATC

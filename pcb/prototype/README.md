@@ -15,3 +15,4 @@ There are a few errors in this first prototype board:
    switches.
 3. Unused [TCA8418](https://www.ti.com/lit/ds/symlink/tca8418.pdf) key switches
    should have been tied to VCC (via resistors).
+4. Didn't route the display's DC pin.
