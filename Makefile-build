@@ -42,7 +42,11 @@ build/bootloader/bootloader.bin:
 
 .PHONY: flash
 flash:
-	${IDF} --port ${PORT} --baud ${BAUD} flash monitor
+	${IDF} --port ${PORT} --baud ${BAUD} flash
+
+.PHONY: monitor
+monitor:
+	${IDF} --port ${PORT} monitor
 
 # Manual flash should be the equivalent of the flash target above.
 .PHONY: manual-flash
@@ -55,10 +59,6 @@ manual-flash: build/bootloader/bootloader.bin
 		0x10000 build/keyboard.bin \
 		0x210000 build/storage.bin; \
 		echo "Press the RST button."
-
-.PHONY: monitor
-monitor:
-	${IDF} --port ${PORT} monitor
 
 .PHONY: flash-erase
 flash-erase:
