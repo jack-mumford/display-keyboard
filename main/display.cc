@@ -2,8 +2,10 @@
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
+#include <esp_err.h>
 #include <esp_idf_version.h>
 #include <esp_log.h>
+#include <esp_timer.h>
 #include <lvgl.h>
 #include <lvgl_helpers.h>
 
