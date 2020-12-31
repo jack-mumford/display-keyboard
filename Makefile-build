@@ -42,16 +42,16 @@ build/bootloader/bootloader.bin:
 
 .PHONY: flash
 flash:
-	${IDF} --port ${PORT} --baud ${BAUD} flash
+	${IDF} --port ${FLASH_PORT} --baud ${BAUD} flash
 
 .PHONY: monitor
 monitor:
-	${IDF} --port ${PORT} monitor
+	${IDF} --port ${MONITOR_PORT} monitor
 
 # Manual flash should be the equivalent of the flash target above.
 .PHONY: manual-flash
 manual-flash: build/bootloader/bootloader.bin
-	esptool.py --chip esp32s2 --port ${PORT} --baud ${BAUD} \
+	esptool.py --chip esp32s2 --port ${FLASH_PORT} --baud ${BAUD} \
 		--before=default_reset --after=no_reset write_flash \
 		--flash_mode dio --flash_size detect --flash_freq 80m \
 		0x1000 build/bootloader/bootloader.bin \
@@ -62,12 +62,12 @@ manual-flash: build/bootloader/bootloader.bin
 
 .PHONY: flash-erase
 flash-erase:
-	${ESPTOOL} --chip esp32s2 --port ${PORT} --baud ${BAUD} erase_flash
+	${ESPTOOL} --chip esp32s2 --port ${FLASH_PORT} --baud ${BAUD} erase_flash
 
 # Instructions from https://feathers2.io/install_uf2.html
 .PHONY: flash-feathers2-stock-bootloader
 flash-feathers2-stock-bootloader:
-	esptool.py --chip esp32s2 --port ${PORT} --baud ${BAUD} \
+	esptool.py --chip esp32s2 --port ${FLASH_PORT} --baud ${BAUD} \
 		--before=default_reset --after=no_reset write_flash \
 		--flash_mode dio --flash_size detect --flash_freq 80m \
 		0x1000 FeatherS2Files/bootloader.bin \

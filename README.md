@@ -33,7 +33,7 @@ the [pcb](pcb) directory.
 
 ```sh
 git clone https://github.com/BigMumf/display-keyboard.git
-./make.sh submodules-update
+./make.py submodules-update
 ```
 
 **Note**: Because this project makes use of new features (USB) of the ESP32-S2
@@ -46,24 +46,12 @@ Configuration (GPIO pins, etc.) is stored in the sdkconfig file. This is
 set using menuconfig as so:
 
 ```sh
-./make.sh config
-```
-
-**Setting device port:**
-
-A connected ESP32-S2 is not always given the same device port when
-connected to a computer via USB. Follow
-[these instructions](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/establish-serial-connection.html#check-port-on-windows)
-to determine your port. When found edit `make.sh` to specify the
-port on your computer by modifying the following line:
-
-```sh
-PORT=/dev/cu.usbserial-GT4YU06W
+./make.py config
 ```
 
 Build and flash to the attached ESP32-S2 device as so:
 
 ```sh
 . $HOME/esp/esp-idf/export.sh # only do this once
-./make.sh build && ./make.sh flash
+./make.py build && ./make.py flash
 ```
