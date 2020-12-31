@@ -13,12 +13,13 @@ constexpr gpio_num_t kI2C0SCL = GPIO_NUM_9;       // I2C port 0 SCL GPIO.
 
 /*
  * The SPI pins, used for display/touch, are specified in sdkconfig
- * SPI-CS-DISP = 6
- * SPI-MOSI    = 35
- * SPI-SCK     = 36
- * SPI-MISO    = 37
- * DC          = 5
- * Reset       = 0 (TODO: verify this)
+ * SPI-CS-DISP  = 5
+ * SPI-CS-TOUCH =
+ * SPI-MOSI     = 35 (used for touch, but not display)
+ * SPI-SCK      = 36
+ * SPI-MISO     = 37
+ * DC           = 6
+ * Reset        = 0 (TODO: verify this)
  */
 
 #elif (BOARD_CUCUMBER == 1)

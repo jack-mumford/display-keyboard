@@ -20,13 +20,13 @@
 #include "display.h"
 #include "event_ids.h"
 #include "filesystem.h"
+#include "gpio_pins.h"
 #include "http_server.h"
 #include "keyboard.h"
 #include "led_controller.h"
 #include "spotify.h"
 #include "usb_device.h"
 #include "usb_hid.h"
-#include "gpio_pins.h"
 #include "wifi.h"
 
 namespace {
