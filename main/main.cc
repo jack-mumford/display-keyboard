@@ -41,9 +41,34 @@ void LogHardwareInfo() {
            esp_get_minimum_free_heap_size());
 }
 
-}  // namespace
+esp_err_t KeyboardTest() {
+  const i2c::Master::InitParams i2c_config = {
+      .i2c_bus = I2C_NUM_0,
+      .sda_gpio = kI2C0SDA,
+      .scl_gpio = kI2C0SCL,
+      .clk_speed = 400000,
+      .sda_pullup_enable = true,
+      .scl_pullup_enable = true,
+  };
+  i2c::Master i2c_master(I2C_NUM_0, /*mutex=*/nullptr);
+  if (!i2c_master.Initialize(i2c_config))
+    return ESP_FAIL;
+  Keyboard keyboard(std::move(i2c_master));
+  esp_err_t err = keyboard.Initialize();
+  if (err != ESP_OK)
+    return err;
 
-// See GPIO pin assignments in sdconfig.defaults
+  int count = 1;
+  while (true) {
+    ESP_LOGI(TAG, "Iteration %d", count++);
+    keyboard.LogEventCount();
+    vTaskDelay(pdMS_TO_TICKS(1000));
+  }
+
+  return ESP_OK;
+}
+
+}  // namespace
 
 extern "C" void app_main(void) {
   WaitForDebugMonitor();
