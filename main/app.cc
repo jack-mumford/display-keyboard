@@ -2,10 +2,13 @@
 
 #include <utility>
 
+#include <time.h>
+
 #define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
 
 #include <class/hid/hid.h>
 #include <esp_log.h>
+#include <esp_sntp.h>
 #include <esp_spi_flash.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -39,6 +42,8 @@ constexpr gpio_num_t kActivityGPIO = GPIO_NUM_2;
 static_assert((kMinMainLoopWaitMSecs / portTICK_PERIOD_MS) > 0);
 static_assert(kMaxMainLoopWaitMSecs > kMinMainLoopWaitMSecs);
 
+App* g_app;
+
 esp_err_t InitNVRAM() {
   esp_err_t ret = nvs_flash_init();
   if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
@@ -51,11 +56,59 @@ esp_err_t InitNVRAM() {
 
 }  // namespace
 
-App::App() : config_(new Config()) {}
+App::App() : config_(new Config()) {
+  g_app = this;
+}
 
 App::~App() {
+  g_app = nullptr;
   if (event_group_)
     vEventGroupDelete(event_group_);
+}
+
+esp_err_t App::SetTimezone() {
+  ESP_LOGI(TAG, "Setting timezone");
+  if (config_->time.timezone.empty()) {
+    ESP_LOGE(TAG, "No timezone");
+    return ESP_FAIL;
+  }
+
+  setenv("TZ", config_->time.timezone.c_str(), 1);
+  tzset();
+
+  return ESP_OK;
+}
+
+// static
+void App::SNTPSyncEventHandler(struct timeval* tv) {
+  const time_t nowtime = tv->tv_sec;
+  struct tm *nowtm = localtime(&nowtime);
+  char tmbuf[64];
+  strftime(tmbuf, sizeof(tmbuf), "%Y-%m-%d %H:%M:%S", nowtm);
+  ESP_LOGI(TAG, "SNTP sync: %s", tmbuf);
+  if (!g_app)
+    return;
+  g_app->uptate_display_time_ = true;
+}
+
+/**
+ * Initialize SNTP and get the current time.
+ *
+ * Call once online.
+ */
+esp_err_t App::InitializSNTP() {
+  ESP_LOGI(TAG, "Initializing SNTP");
+  if (config_->time.ntp_server.empty()) {
+    ESP_LOGE(TAG, "No NTP server");
+    return ESP_FAIL;
+  }
+  sntp_setoperatingmode(SNTP_OPMODE_POLL);
+  sntp_setservername(0, config_->time.ntp_server.c_str());
+  sntp_set_time_sync_notification_cb(SNTPSyncEventHandler);
+  sntp_set_sync_mode(SNTP_SYNC_MODE_SMOOTH);
+  sntp_init();
+  sntp_initialized_ = true;
+  return ESP_OK;
 }
 
 esp_err_t App::CreateAppEventTask() {
@@ -81,6 +134,8 @@ void IRAM_ATTR App::AppEventTask(void* arg) {
     if (bits & EVENT_NETWORK_GOT_IP) {
       ESP_LOGI(TAG, "Wi-Fi is connected.");
       app->online_ = true;
+      if (!app->sntp_initialized_)
+        app->InitializSNTP();
     } else if (bits & EVENT_NETWORK_DISCONNECTED) {
       ESP_LOGW(TAG, "Wi-Fi connection failed.");
       app->online_ = false;
@@ -191,6 +246,8 @@ esp_err_t App::Initialize() {
   if (err != ESP_OK)
     return err;
 
+  SetTimezone();  // Ignore return value - not critical.
+
   ESP_LOGI(TAG, "Wi-Fi SSID: \"%s\"", config_->wifi.ssid.c_str());
   event_group_ = xEventGroupCreate();
   wifi_.reset(new WiFi(event_group_));
@@ -248,6 +305,10 @@ esp_err_t App::Initialize() {
 void App::Run() {
   display_->Update();
   while (true) {
+    if (uptate_display_time_) {
+      // TODO: Implement.
+      uptate_display_time_ = false;
+    }
     uint32_t wait_msecs = display_->HandleTask() / 1000;
     if (wait_msecs < kMinMainLoopWaitMSecs)
       wait_msecs = kMinMainLoopWaitMSecs;

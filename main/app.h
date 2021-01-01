@@ -28,10 +28,13 @@ class App {
   static void IRAM_ATTR AppEventTask(void*);
   static void IRAM_ATTR KeyboardSimulatorTask(void* arg);
   static void IRAM_ATTR USBTask(void* arg);
+  static void IRAM_ATTR SNTPSyncEventHandler(struct timeval *tv);
 
   esp_err_t CreateAppEventTask();
   esp_err_t CreateKeyboardSimulatorTask();
   esp_err_t CreateUSBTask();
+  esp_err_t InitializSNTP();
+  esp_err_t SetTimezone();
 
   std::unique_ptr<Config> config_;            // Application config data.
   std::unique_ptr<Display> display_;          // Object owning main display.
@@ -45,4 +48,6 @@ class App {
   bool online_ = false;                       // Is this device on the network?
   bool started_spotify_currently_playing_ = false;
   bool spotify_need_access_token_refresh_ = false;
+  bool sntp_initialized_ = false;
+  bool uptate_display_time_ = false;
 };

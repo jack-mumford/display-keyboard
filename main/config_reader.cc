@@ -29,12 +29,18 @@ int handler(void* user,
       config->wifi.key = value;
     else
       return 1;  // Unknown key.
+  }
+  if (streq(section, "time")) {
+    if (streq(name, "ntp_server"))
+      config->time.ntp_server = value;
+    else if (streq(name, "timezone"))
+      config->time.timezone = value;
   } else {
     return 1;  // Unknown section.
   }
 
   return 1;
-}
+}  // namespace
 
 }  // namespace
 
