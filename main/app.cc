@@ -58,12 +58,12 @@ App::~App() {
     vEventGroupDelete(event_group_);
 }
 
-esp_err_t App::CreateWiFiStatusTask() {
+esp_err_t App::CreateAppEventTask() {
   // https://www.freertos.org/FAQMem.html#StackSize
   // TODO: Reduce this size and take the HTTPS requtest out of this task.
   constexpr uint32_t kStackDepthWords = 2048;
 
-  BaseType_t task = xTaskCreate(WiFiStatusTask, "wifi-status", kStackDepthWords,
+  BaseType_t task = xTaskCreate(AppEventTask, "app-event", kStackDepthWords,
                                 this, tskIDLE_PRIORITY, &main_task_);
   if (task != pdPASS)
     return ESP_FAIL;
@@ -71,7 +71,7 @@ esp_err_t App::CreateWiFiStatusTask() {
 }
 
 // static:
-void IRAM_ATTR App::WiFiStatusTask(void* arg) {
+void IRAM_ATTR App::AppEventTask(void* arg) {
   App* app = static_cast<App*>(arg);
   ESP_LOGW(TAG, "In Wi-Fi status task handler.");
   while (true) {
@@ -194,7 +194,7 @@ esp_err_t App::Initialize() {
   ESP_LOGI(TAG, "Wi-Fi SSID: \"%s\"", config_->wifi.ssid.c_str());
   event_group_ = xEventGroupCreate();
   wifi_.reset(new WiFi(event_group_));
-  err = CreateWiFiStatusTask();
+  err = CreateAppEventTask();
   if (err != ESP_OK)
     return err;
 
