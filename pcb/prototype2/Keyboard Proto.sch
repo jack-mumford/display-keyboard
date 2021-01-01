@@ -266,10 +266,6 @@ Text GLabel 9750 6250 0    50   Input ~ 0
 T_IRQ
 Text GLabel 5650 5250 2    50   Input ~ 0
 D_CS
-Text GLabel 4800 5550 0    50   Input ~ 0
-MOSI
-Text GLabel 4800 5450 0    50   Input ~ 0
-MISO
 Text GLabel 5650 5150 2    50   Input ~ 0
 T_CS
 Text GLabel 5650 5050 2    50   Input ~ 0
@@ -702,4 +698,8 @@ Text GLabel 9750 5350 0    50   Input ~ 0
 D_DC
 Text GLabel 4800 5250 0    50   Input ~ 0
 D_DC
+Text GLabel 4800 5450 0    50   Input ~ 0
+MOSI
+Text GLabel 4800 5550 0    50   Input ~ 0
+MISO
 $EndSCHEMATC
