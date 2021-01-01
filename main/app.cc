@@ -81,14 +81,8 @@ esp_err_t App::SetTimezone() {
 
 // static
 void App::SNTPSyncEventHandler(struct timeval* tv) {
-  const time_t nowtime = tv->tv_sec;
-  struct tm* nowtm = localtime(&nowtime);
-  char tmbuf[64];
-  strftime(tmbuf, sizeof(tmbuf), "%Y-%m-%d %H:%M:%S", nowtm);
-  ESP_LOGI(TAG, "Got SNTP sync: %s", tmbuf);
-  if (!g_app)
-    return;
-  g_app->uptate_display_time_ = true;
+  if (g_app)
+    g_app->uptate_display_time_ = true;
 }
 
 /**
@@ -109,24 +103,6 @@ esp_err_t App::InitializSNTP() {
   sntp_set_sync_mode(SNTP_SYNC_MODE_SMOOTH);
   sntp_init();
   sntp_initialized_ = true;
-
-  // wait for time to be set
-  int retry = 0;
-  constexpr int retry_count = 10;
-  while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET &&
-         ++retry < retry_count) {
-    ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry,
-             retry_count);
-    vTaskDelay(2000 / portTICK_PERIOD_MS);
-  }
-  time_t now_epoch_coordinated_universal = 0;
-  time(&now_epoch_coordinated_universal);
-  struct tm now_local;
-  localtime_r(&now_epoch_coordinated_universal, &now_local);
-  char tmbuf[64];
-  asctime_r(&now_local, tmbuf);
-  ESP_LOGI(TAG, "Time after first NTP sync: %s", tmbuf);
-
   return ESP_OK;
 }
 
@@ -330,7 +306,16 @@ void App::Run() {
   display_->Update();
   while (true) {
     if (uptate_display_time_) {
-      // TODO: Implement.
+      struct tm now_local;
+      {
+        time_t now_epoch_coordinated_universal = 0;
+        time(&now_epoch_coordinated_universal);
+        localtime_r(&now_epoch_coordinated_universal, &now_local);
+      }
+      char tmbuf[64];
+      asctime_r(&now_local, tmbuf);
+      ESP_LOGI(TAG, "Current time: %s", tmbuf);
+      // TODO: Actually update the display.
       uptate_display_time_ = false;
     }
     uint32_t wait_msecs = display_->HandleTask() / 1000;
