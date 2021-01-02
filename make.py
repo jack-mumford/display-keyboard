@@ -7,8 +7,45 @@ import subprocess
 import sys
 
 
+class SdkConfigManager(object):
+
+    @staticmethod
+    def GetConsoleTarget(sdkconfig):
+        if 'CONFIG_ESP_CONSOLE_UART' in sdkconfig and \
+            sdkconfig['CONFIG_ESP_CONSOLE_UART'] == 'y':
+            return 'UART'
+        if 'CONFIG_ESP_CONSOLE_CDC' in sdkconfig and \
+            sdkconfig['CONFIG_ESP_CONSOLE_CDC'] == 'y':
+            return 'CDC'
+        if 'CONFIG_ESP_CONSOLE_CUSTOM' in sdkconfig and \
+            sdkconfig['CONFIG_ESP_CONSOLE_CUSTOM'] == 'y':
+            return 'CUSTOM'
+        return 'NONE'
+
+    @staticmethod
+    def Load():
+        values = dict()
+        with open('sdkconfig', 'r') as f:
+            for line in f.readlines():
+                line = line.strip()
+                if len(line) < 1:
+                    continue
+                if line[0] == '#':
+                    continue
+                items = line.split('=')
+                if len(items) != 2:
+                    print(line)
+                if items[0] in values:
+                    print('Already have: ' + line)
+                values[items[0]] = items[1]
+        return values
+
 class PortManager(object):
     ignored = ('/dev/cu.Bluetooth-Incoming-Port')
+
+    def __init__(self, sdkconfig):
+        self.__sdkconfig = sdkconfig
+        self.__console_target = SdkConfigManager.GetConsoleTarget(sdkconfig)
 
     @staticmethod
     def __GetSerialWildcard():
@@ -42,12 +79,16 @@ class PortManager(object):
             return ports
         return PortManager.GetSerialPorts()
 
-    @staticmethod
-    def GetMonitorPort():
-        ports = PortManager.GetSerialPorts()
-        if ports:
-            return ports
-        return PortManager.GetFlashPort()
+    def GetMonitorPort(self):
+        if self.__console_target == 'UART':
+            return PortManager.GetSerialPorts()
+        return PortManager.GetModemPorts()
+
+    def PrintPorts(self):
+        print('Serial ports: %s' % PortManager.GetSerialPorts())
+        print('Modem ports: %s' % PortManager.GetSerialPorts())
+        print('Flash port: %s' % PortManager.GetFlashPort())
+        print('Monitor port: %s' % self.GetMonitorPort())
 
 
 def TargetNeedsMonitorPort(target):
@@ -59,22 +100,20 @@ def TargetNeedsFlashPort(target):
                       'flash-feathers2-stock-bootloader')
 
 
-def MakeTargets(targets):
+def MakeTargets(targets, port_manager):
     flash_ports = PortManager.GetFlashPort()
-    monitor_ports = PortManager.GetMonitorPort()
+    monitor_ports = port_manager.GetMonitorPort()
     for target in targets:
         if TargetNeedsMonitorPort(target) and not monitor_ports:
-            print("%s needs a port, but can't find one", target, file=sys.stderr)
+            print("Target \"%s\" needs a monitor port, but can't find one." % target, file=sys.stderr)
             sys.exit(errno.ENODEV)
         if TargetNeedsFlashPort(target) and not flash_ports:
-            print("%s needs a port, but can't find one", target, file=sys.stderr)
+            print("Target \"%s\" needs a flash port, but can't find one." % target, file=sys.stderr)
             sys.exit(errno.ENODEV)
     if flash_ports:
         os.environ["FLASH_PORT"] = flash_ports[0]
     if monitor_ports:
         os.environ["MONITOR_PORT"] = monitor_ports[0]
-    print('Flash ports: %s' % flash_ports)
-    print('Monitor ports: %s' % monitor_ports)
     cmd = ['make', '--file=Makefile-build']
     cmd.extend(targets)
     subprocess.check_call(cmd)
@@ -86,5 +125,7 @@ if 'IDF_PATH' not in os.environ:
     print(file=sys.stderr)
     sys.exit(1)
 
+port_manager = PortManager(SdkConfigManager.Load())
+
 targets = sys.argv[1:]
-MakeTargets(targets)
+MakeTargets(targets, port_manager)
