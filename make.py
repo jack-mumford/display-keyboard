@@ -76,19 +76,22 @@ class PortManager(object):
     def GetFlashPort():
         ports = PortManager.GetModemPorts()
         if ports:
-            return ports
-        return PortManager.GetSerialPorts()
+            return ports[0]
+        ports = PortManager.GetSerialPorts()
+        return ports[0] if ports else None
 
     def GetMonitorPort(self):
         if self.__console_target == 'UART':
-            return PortManager.GetSerialPorts()
-        return PortManager.GetModemPorts()
+            ports = PortManager.GetSerialPorts()
+        else:
+            ports = PortManager.GetModemPorts()
+        return ports[0] if ports else None
 
-    def PrintPorts(self):
-        print('Serial ports: %s' % PortManager.GetSerialPorts())
-        print('Modem ports: %s' % PortManager.GetSerialPorts())
-        print('Flash port: %s' % PortManager.GetFlashPort())
-        print('Monitor port: %s' % self.GetMonitorPort())
+    def PrintPorts(self, fd = sys.stdout):
+        print('Serial ports: %s' % PortManager.GetSerialPorts(), file=fd)
+        print('Modem ports: %s' % PortManager.GetSerialPorts(), file=fd)
+        print('Flash port: %s' % PortManager.GetFlashPort(), file=fd)
+        print('Monitor port: %s' % self.GetMonitorPort(), file=fd)
 
 
 def TargetNeedsMonitorPort(target):
@@ -106,9 +109,11 @@ def MakeTargets(targets, port_manager):
     for target in targets:
         if TargetNeedsMonitorPort(target) and not monitor_ports:
             print("Target \"%s\" needs a monitor port, but can't find one." % target, file=sys.stderr)
+            port_manager.PrintPorts(sys.stderr)
             sys.exit(errno.ENODEV)
         if TargetNeedsFlashPort(target) and not flash_ports:
             print("Target \"%s\" needs a flash port, but can't find one." % target, file=sys.stderr)
+            port_manager.PrintPorts(sys.stderr)
             sys.exit(errno.ENODEV)
     if flash_ports:
         os.environ["FLASH_PORT"] = flash_ports[0]
