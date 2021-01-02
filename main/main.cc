@@ -76,7 +76,13 @@ extern "C" void app_main(void) {
   ESP_LOGI(TAG, "Keyboard app!");
   LogHardwareInfo();
 
+#if 0
+  esp_err_t err = KeyboardTest();
+  if (err != ESP_OK)
+    ESP_LOGE(TAG, "Keyboard test failure: %s.", esp_err_to_name(err));
+#else
   App app;
   ESP_ERROR_CHECK(app.Initialize());
   app.Run();
+#endif
 }

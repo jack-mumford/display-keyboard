@@ -28,12 +28,14 @@ class App {
   static void IRAM_ATTR AppEventTask(void*);
   static void IRAM_ATTR KeyboardSimulatorTask(void* arg);
   static void IRAM_ATTR USBTask(void* arg);
-  static void IRAM_ATTR SNTPSyncEventHandler(struct timeval *tv);
+  static void IRAM_ATTR KeyboardISR(void* arg);
+  static void IRAM_ATTR SNTPSyncEventHandler(struct timeval* tv);
 
   esp_err_t CreateAppEventTask();
   esp_err_t CreateKeyboardSimulatorTask();
   esp_err_t CreateUSBTask();
   esp_err_t InitializSNTP();
+  esp_err_t InstallKeyboardISR();
   esp_err_t SetTimezone();
 
   std::unique_ptr<Config> config_;            // Application config data.

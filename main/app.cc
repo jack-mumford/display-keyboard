@@ -37,6 +37,7 @@ constexpr char TAG[] = "kbd_app";
 
 constexpr uint64_t kMaxMainLoopWaitMSecs = 100;
 constexpr uint32_t kMinMainLoopWaitMSecs = 10;
+constexpr int ESP_INTR_FLAG_DEFAULT = 0;
 
 // Make sure min wait time is at least one tick.
 static_assert((kMinMainLoopWaitMSecs / portTICK_PERIOD_MS) > 0);
@@ -146,6 +147,9 @@ void IRAM_ATTR App::AppEventTask(void* arg) {
       ESP_LOGI(TAG, "Access token needs refresh");
       app->spotify_need_access_token_refresh_ = true;
     }
+    if (bits & EVENT_KEYBOARD_EVENT) {
+      ESP_LOGI(TAG, "Got keyboard event.");
+    }
   }
 }
 
@@ -160,7 +164,7 @@ esp_err_t App::CreateKeyboardSimulatorTask() {
 
 // static
 void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
-  // App* app = static_cast<App*>(arg);
+  App* app = static_cast<App*>(arg);
   ESP_LOGW(TAG, "In USB keyboard simulator task.");
   bool on = false;
 #if 0
@@ -200,6 +204,7 @@ void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
       ets_delay_us(5000);
       usb::HID::KeyboardRelease(REPORT_ID_KEYBOARD);
 #endif
+      app->keyboard_->LogEventCount();
       vTaskDelay(pdMS_TO_TICKS(2000));
     } else {
       ESP_LOGD(TAG, "USB not mounted");
@@ -225,6 +230,50 @@ void IRAM_ATTR App::USBTask(void* arg) {
     usb::Device::Tick();
     vTaskDelay(pdMS_TO_TICKS(1));
   }
+}
+
+// static
+void IRAM_ATTR App::KeyboardISR(void* arg) {
+  App* app = static_cast<App*>(arg);
+
+  // xQueueSendFromISR(g_port->gpio.event_queue, &gpio_num, NULL);
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+  xEventGroupSetBitsFromISR(app->event_group_, EVENT_KEYBOARD_EVENT,
+                            &xHigherPriorityTaskWoken);
+}
+
+esp_err_t App::InstallKeyboardISR() {
+  constexpr uint64_t pin_mask = 1ULL << kKeyboardINTGPIO;
+  constexpr gpio_config_t io_conf = {
+      .pin_bit_mask = pin_mask,
+      .mode = GPIO_MODE_INPUT,
+      .pull_up_en = GPIO_PULLUP_ENABLE,
+      .pull_down_en = GPIO_PULLDOWN_DISABLE,
+      .intr_type = GPIO_INTR_POSEDGE,
+  };
+
+  esp_err_t err = gpio_config(&io_conf);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "Unable to config keyboard INT pin: %s.",
+             esp_err_to_name(err));
+    return err;
+  }
+
+  err = gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "gpio_install_isr_service failure: %s.",
+             esp_err_to_name(err));
+    return err;
+  }
+
+  err = gpio_isr_handler_add(kKeyboardINTGPIO, KeyboardISR, this);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "gpio_isr_handler_add failure: %s.", esp_err_to_name(err));
+    return err;
+  }
+  ESP_LOGI(TAG, "Keyboard interrupt handler installed on GPIO %u.",
+           kKeyboardINTGPIO);
+  return ESP_OK;
 }
 
 esp_err_t App::Initialize() {
@@ -298,6 +347,12 @@ esp_err_t App::Initialize() {
                              event_group_));
 
   CreateKeyboardSimulatorTask();
+  if (err != ESP_OK)
+    return err;
+
+  err = InstallKeyboardISR();
+  if (err != ESP_OK)
+    return err;
 
   return ESP_OK;
 }

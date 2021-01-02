@@ -115,13 +115,13 @@ Keyboard::~Keyboard() = default;
 esp_err_t Keyboard::Initialize() {
   constexpr Register_CFG reg_config = {
       .KE_IEN = true,
-      .GPI_IEN = true,
-      .K_LCK_IEN = true,
+      .GPI_IEN = false,
+      .K_LCK_IEN = false,
       .OVR_FLOW_IEN = false,
       .INT_CFG = true,
-      .OVR_FLOW_M = true,
-      .GPI_E_CFG = true,
-      .AI = true,
+      .OVR_FLOW_M = false,
+      .GPI_E_CFG = false,
+      .AI = false,
   };
 
   esp_err_t err = WriteRegister(i2c_master_, Register::CFG, &reg_config);
@@ -131,7 +131,7 @@ esp_err_t Keyboard::Initialize() {
 #if 1
   const uint8_t int_status = 0xff;  // Interrupts on all keys.
 
-#if 1
+#if 0
   for (uint8_t reg = 0x01; reg <= 0x10; reg++)
     WriteRegister(i2c_master_, (Register)reg, &int_status);
 #endif
