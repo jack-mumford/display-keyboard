@@ -15,6 +15,10 @@ namespace {
 constexpr char TAG[] = "kbd_kbd";
 constexpr uint8_t kSlaveAddress = 0x34;  // I2C address of TCA8418 IC.
 
+constexpr uint8_t kActiveRows7_0 = 0b00000011;
+constexpr uint8_t kActiveCols7_0 = 0b00001111;
+constexpr uint8_t kActiveCols9_8 = 0b00000000;
+
 // clang-format off
 enum class Register : uint8_t {
   Reserved       = 0x00,
@@ -47,9 +51,23 @@ enum class Register : uint8_t {
   GPIO_INT_EN2   = 0x1B,
   GPIO_INT_EN3   = 0x1C,
   KP_GPIO1       = 0x1D,
-  KP_GPIO2       = 0x1D,
+  KP_GPIO2       = 0x1E,
   KP_GPIO3       = 0x1F,
-
+  GPI_EM1        = 0x20,
+  GPI_EM2        = 0x21,
+  GPI_EM3        = 0x22,
+  GPIO_DIR1      = 0x23,
+  GPIO_DIR2      = 0x24,
+  GPIO_DIR3      = 0x25,
+  GPIO_INT_LVL1  = 0x26,
+  GPIO_INT_LVL2  = 0x27,
+  GPIO_INT_LVL3  = 0x28,
+  DEBOUNCE_DIS1  = 0x29,
+  DEBOUNCE_DIS2  = 0x2A,
+  DEBOUNCE_DIS3  = 0x2B,
+  GPIO_PULL1     = 0x2C,
+  GPIO_PULL2     = 0x2D,
+  GPIO_PULL3     = 0x2E,
 };
 // clang-format on
 
@@ -83,6 +101,46 @@ struct Register_KEY_LCK_EC {
 
 struct Register_KEY_EVENT_A {
   uint8_t key_code;
+};
+
+// Used for GPIO_INT_STAT1, GPIO_DAT_STAT1, GPIO_DAT_OUT1,
+// and GPIO_INT_EN1.
+struct Register_GPIO_INT_STAT1 {
+  uint8_t R0 : 1;
+  uint8_t R1 : 1;
+  uint8_t R2 : 1;
+  uint8_t R3 : 1;
+  uint8_t R4 : 1;
+  uint8_t R5 : 1;
+  uint8_t R6 : 1;
+  uint8_t R7 : 1;
+};
+
+/**
+ * Used for:
+ *
+ * * GPIO_INT_STAT2
+ * * GPIO_DAT_STAT2
+ * * GPIO_DAT_OUT2
+ * * GPIO_INT_EN2
+ */
+struct Register_GPIO_INT_STAT2 {
+  uint8_t C0 : 1;
+  uint8_t C1 : 1;
+  uint8_t C2 : 1;
+  uint8_t C3 : 1;
+  uint8_t C4 : 1;
+  uint8_t C5 : 1;
+  uint8_t C6 : 1;
+  uint8_t C7 : 1;
+};
+
+// Used for GPIO_INT_STAT3, GPIO_DAT_STAT3, GPIO_DAT_OUT3,
+// and GPIO_INT_EN3.
+struct Register_GPIO_INT_STAT3 {
+  uint8_t C8 : 1;
+  uint8_t C9 : 1;
+  uint8_t Unused : 6;
 };
 
 static_assert(sizeof(Register_CFG) == sizeof(uint8_t));
@@ -128,31 +186,21 @@ esp_err_t Keyboard::Initialize() {
   if (err != ESP_OK)
     return err;
 
-#if 1
-  const uint8_t int_status = 0xff;  // Interrupts on all keys.
-
-#if 0
-  for (uint8_t reg = 0x01; reg <= 0x10; reg++)
-    WriteRegister(i2c_master_, (Register)reg, &int_status);
-#endif
-
-#if 1
-  for (uint8_t reg = 0x11; reg <= 0x22; reg++)
-    WriteRegister(i2c_master_, (Register)reg, &int_status);
-  for (uint8_t reg = 0x2C; reg <= 0x2E; reg++)
-    WriteRegister(i2c_master_, (Register)reg, &int_status);
-#else
-  err = WriteRegister(i2c_master_, Register::GPIO_INT_EN1, &int_status);
-  if (err != ESP_OK)
-    return err;
-  err = WriteRegister(i2c_master_, Register::GPIO_INT_EN2, &int_status);
-  if (err != ESP_OK)
-    return err;
-  err = WriteRegister(i2c_master_, Register::GPIO_INT_EN3, &int_status);
-  if (err != ESP_OK)
-    return err;
-#endif
-#endif
+  if (!i2c_master_.WriteRegister(kSlaveAddress,
+                                 static_cast<uint8_t>(Register::KP_GPIO1),
+                                 kActiveRows7_0)) {
+    return ESP_FAIL;
+  }
+  if (!i2c_master_.WriteRegister(kSlaveAddress,
+                                 static_cast<uint8_t>(Register::KP_GPIO2),
+                                 kActiveCols7_0)) {
+    return ESP_FAIL;
+  }
+  if (!i2c_master_.WriteRegister(kSlaveAddress,
+                                 static_cast<uint8_t>(Register::KP_GPIO3),
+                                 kActiveCols9_8)) {
+    return ESP_FAIL;
+  }
 
   return ESP_OK;
 }
