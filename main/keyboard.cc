@@ -13,7 +13,7 @@
 
 namespace {
 constexpr char TAG[] = "kbd_kbd";
-constexpr uint8_t kSlaveAddress = 0x34;  // I2C address of LM8330 IC.
+constexpr uint8_t kSlaveAddress = 0x88;  // I2C address of LM8330 IC.
 
 // clang-format off
 enum class Register : uint8_t {
