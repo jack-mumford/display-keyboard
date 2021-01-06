@@ -6,14 +6,7 @@
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <esp_log.h>
-
-#if !defined(SET_BITS)
-#define SET_BITS(value, bits) (value |= (bits))
-#endif
-
-namespace {
-constexpr char TAG[] = "kbd_kbd";
-constexpr uint8_t kSlaveAddress = 0x88;  // I2C address of LM8330 IC.
+#include <i2clib/operation.h>
 
 // clang-format off
 // See datasheet pg. 43.
@@ -98,6 +91,9 @@ enum class Register : uint8_t {
 };
 // clang-format on
 
+namespace {
+constexpr char TAG[] = "kbd_kbd";
+constexpr uint8_t kSlaveAddress = 0x88;  // I2C address of LM8330 IC.
 }  // namespace
 
 Keyboard::Keyboard(i2c::Master i2c_master)
@@ -106,9 +102,52 @@ Keyboard::Keyboard(i2c::Master i2c_master)
 Keyboard::~Keyboard() = default;
 
 esp_err_t Keyboard::Initialize() {
+  esp_err_t err = WriteByte(Register::KBDSETTLE, 0x80);
+  if (err != ESP_OK)
+    return err;
+  err = WriteByte(Register::KBDBOUNCE, 0x80);
+  if (err != ESP_OK)
+    return err;
+  err = WriteByte(Register::KBDSIZE, 0x88);
+  if (err != ESP_OK)
+    return err;
+  err = WriteWord(Register::KBDDEDCFG0, 0xFC3F);
+  if (err != ESP_OK)
+    return err;
+  err = WriteByte(Register::IOCFG, 0xF8);
+  if (err != ESP_OK)
+    return err;
+  err = WriteWord(Register::IOPC0, 0xAAAA);
+  if (err != ESP_OK)
+    return err;
+  err = WriteWord(Register::IOPC1, 0x5555);
+  if (err != ESP_OK)
+    return err;
+  err = WriteByte(Register::KBDIC, 0x03);
+  if (err != ESP_OK)
+    return err;
+  err = WriteByte(Register::KBDMSK, 0x03);
+  if (err != ESP_OK)
+    return err;
+  err = WriteByte(Register::CLKEN, 0x01);
+  if (err != ESP_OK)
+    return err;
   return ESP_OK;
 }
 
 esp_err_t Keyboard::LogEventCount() {
   return ESP_OK;
+}
+
+esp_err_t Keyboard::WriteByte(Register reg, uint8_t value) {
+  return i2c_master_.WriteRegister(kSlaveAddress, static_cast<uint8_t>(reg),
+                                   value);
+}
+
+esp_err_t Keyboard::WriteWord(Register reg, uint16_t value) {
+  i2c::Operation op = i2c_master_.CreateWriteOp(
+      kSlaveAddress, static_cast<uint8_t>(reg), "Kbd::WriteWord");
+  if (!op.ready())
+    return ESP_FAIL;
+  return op.Write(&value, sizeof(value)) ? ESP_OK : ESP_FAIL;
 }
