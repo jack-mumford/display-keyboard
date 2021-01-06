@@ -261,7 +261,7 @@ esp_err_t WiFi::Connect(const std::string& ssid, const std::string& key) {
   SafeStrCopy(reinterpret_cast<char*>(wifi_config.sta.password), key.c_str(),
               sizeof(wifi_config.sta.password) - 1);
 
-  err = esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config);
+  err = esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "Failure to set config: %s", esp_err_to_name(err));
     return err;
