@@ -17,77 +17,77 @@ enum class Register : uint8_t {
   KBDDEDCFG0 = 0x04, // Dedicated key 0.
   KBDDEDCFG1 = 0x05, // Dedicated key 1.
   KBDRIS     = 0x06, // Keyboard raw interrupt status.
-  KBDMIS     = 0x07, // Keypad Masked Interrupt Status.
-  KBDIC      = 0x08, // Keypad Interrupt Clear.
-  KBDMSK     = 0x09, // Keypad Interrupt Mask.
-  KBDCODE0   = 0x0B, // Keyboard Code 0.
-  KBDCODE1   = 0x0C, // Keyboard Code 1.
-  KBDCODE2   = 0x0D, // Keyboard Code 2.
-  KBDCODE3   = 0x0E, // Keyboard Code 3.
-  EVTCODE    = 0x10, // Key Event Code.
-  TIMCFG0    = 0x60, // PWM Timer 0 Configuration.
-  PWMCFG0    = 0x61, // PWM Timer 0 Configuration Control.
-  TIMCFG1    = 0x68, // PWM Timer 1 Configuration.
-  PWMCFG1    = 0x69, // PWM Timer 1 Configuration Control.
-  TIMCFG2    = 0x70, // PWM Timer 2 Configuration.
-  PWMCFG2    = 0x71, // PWM Timer 2 Configuration Control.
-  TIMSWRES   = 0x78, // PWM Timer Software Reset.
-  TIMRIS     = 0x7A, // PWM Timer Interrupt Status.
-  TIMMIS     = 0x7B, // PWM Timer Masked Interrupt Status.
-  TIMIC      = 0x7C, // PWM Timer Interrupt Clear.
-  PWMWP      = 0x7D, // PWM Timer Pattern Pointer.
-  PWMCFG     = 0x7E, // PWM Script.
-  I2CSA      = 0x80, // I2C-Compatible ACCESS.bus 10-Bit & 7-Bit Slave Address.
-  MFGCODE    = 0x80, // Manufacturer Code.
-  SWREV      = 0x81, // Software Revision.
-  RSTCTRL    = 0x82, // System Reset.
-  RSTINTCLR  = 0x84, // Clear NO Init/Power-On Interrupt.
-  CLKMODE    = 0x88, // Clock Mode.
+  KBDMIS     = 0x07, // Keypad masked interrupt status.
+  KBDIC      = 0x08, // Keypad interrupt clear.
+  KBDMSK     = 0x09, // Keypad interrupt mask.
+  KBDCODE0   = 0x0B, // Keyboard code 0.
+  KBDCODE1   = 0x0C, // Keyboard code 1.
+  KBDCODE2   = 0x0D, // Keyboard code 2.
+  KBDCODE3   = 0x0E, // Keyboard code 3.
+  EVTCODE    = 0x10, // Key Event code.
+  TIMCFG0    = 0x60, // PWM timer 0 configuration.
+  PWMCFG0    = 0x61, // PWM timer 0 configuration control.
+  TIMCFG1    = 0x68, // PWM timer 1 configuration.
+  PWMCFG1    = 0x69, // PWM timer 1 configuration control.
+  TIMCFG2    = 0x70, // PWM timer 2 configuration.
+  PWMCFG2    = 0x71, // PWM timer 2 configuration control.
+  TIMSWRES   = 0x78, // PWM timer software Reset.
+  TIMRIS     = 0x7A, // PWM timer interrupt status.
+  TIMMIS     = 0x7B, // PWM timer masked interrupt status.
+  TIMIC      = 0x7C, // PWM timer interrupt clear.
+  PWMWP      = 0x7D, // PWM timer pattern Pointer.
+  PWMCFG     = 0x7E, // PWM script.
+  I2CSA      = 0x80, // I2C-Compatible ACCESS.bus 10-Bit & 7-bit slave address.
+  MFGCODE    = 0x80, // Manufacturer code.
+  SWREV      = 0x81, // Software revision.
+  RSTCTRL    = 0x82, // System reset.
+  RSTINTCLR  = 0x84, // Clear NO Init/Power-On interrupt.
+  CLKMODE    = 0x88, // Clock mode.
   CLKEN      = 0x8A, // Clock enable.
-  AUTOSLP    = 0x8B, // Auto-sleep Enable.
+  AUTOSLP    = 0x8B, // Auto-sleep enable.
   AUTOSLPTIL = 0x8C, // Auto-sleep time (low)
   AUTOSLPTIH = 0x8D, // Auto-sheep time (high)
-  IRQST      = 0x91, // Interrupt Global Interrupt Status.
-  IOCFG      = 0xA7, // Input/Output Pin Mapping Configuration.
-  IOPC0      = 0xAA, // Pull Resistor Configuration 0.
-  IOPC1      = 0xAC, // Pull Resistor Configuration 1.
-  IOPC2      = 0xAE, // Pull Resistor Configuration 2.
-  GPIODATA0  = 0xC0, // GPIO Data 0.
-  GPIODATA1  = 0xC2, // GPIO Data 1.
-  GPIODATA2  = 0xC4, // GPIO Data 2.
-  GPIODIR0   = 0xC6, // GPIO Port Direction 0.
-  GPIODIR1   = 0xC7, // GPIO Port Direction 1.
-  GPIODIR2   = 0xC8, // GPIO Port Direction 2.
-  GPIOIS0    = 0xC9, // Interrupt Sense Configuration 0.
-  GPIOIS1    = 0xCA, // Interrupt Sense Configuration 1.
-  GPIOIS2    = 0xCB, // Interrupt Sense Configuration 2.
-  GPIOIBE0   = 0xCC, // GPIO Interrupt Edge Configuration 0.
-  GPIOIBE1   = 0xCD, // GPIO Interrupt Edge Configuration 1.
-  GPIOIBE2   = 0xCE, // GPIO Interrupt Edge Configuration 2.
-  GPIOIEV0   = 0xCF, // GPIO Interrupt Edge Select 0.
-  GPIOIEV1   = 0xD0, // GPIO Interrupt Edge Select 1.
-  GPIOIEV2   = 0xD1, // GPIO Interrupt Edge Select 2.
-  GPIOIE0    = 0xD2, // GPIO Interrupt Enable 0.
-  GPIOIE1    = 0xD3, // GPIO Interrupt Enable 1.
-  GPIOIE2    = 0xD4, // GPIO Interrupt Enable 2.
-  GPIORIS0   = 0xD6, // Raw Interrupt Status 0.
-  GPIORIS1   = 0xD7, // Raw Interrupt Status 1.
-  GPIORIS2   = 0xD8, // Raw Interrupt Status 2.
-  GPIOMIS0   = 0xD9, // Masked Interrupt Status 0.
-  GPIOMIS1   = 0xDA, // Masked Interrupt Status 1.
-  GPIOMIS2   = 0xDB, // Masked Interrupt Status 2.
-  GPIOIC0    = 0xDC, // GPIO Clear Interrupt 0.
-  GPIOIC1    = 0xDD, // GPIO Clear Interrupt 1.
-  GPIOIC2    = 0xDE, // GPIO Clear Interrupt 2.
-  GPIOOME0   = 0xE0, // GPIO Open Drain Mode Enable 0.
-  GPIOOMS0   = 0xE1, // GPIO Open Drain Mode Select 0.
-  GPIOOME1   = 0xE2, // GPIO Open Drain Mode Enable 1.
-  GPIOOMS1   = 0xE3, // GPIO Open Drain Mode Select 1.
-  GPIOOME2   = 0xE4, // GPIO Open Drain Mode Enable 2.
-  GPIOOMS2   = 0xE5, // GPIO Open Drain Mode Select 2.
-  GPIOWAKE0  = 0xE9, // GPIO Wake-Up 0.
-  GPIOWAKE1  = 0xEA, // GPIO Wake-Up 1.
-  GPIOWAKE2  = 0xEB, // GPIO Wake-Up 2.
+  IRQST      = 0x91, // Interrupt global interrupt status.
+  IOCFG      = 0xA7, // Input/Output pin mapping configuration.
+  IOPC0      = 0xAA, // Pull resistor configuration 0.
+  IOPC1      = 0xAC, // Pull resistor configuration 1.
+  IOPC2      = 0xAE, // Pull resistor configuration 2.
+  GPIODATA0  = 0xC0, // GPIO data 0.
+  GPIODATA1  = 0xC2, // GPIO data 1.
+  GPIODATA2  = 0xC4, // GPIO data 2.
+  GPIODIR0   = 0xC6, // GPIO port direction 0.
+  GPIODIR1   = 0xC7, // GPIO port direction 1.
+  GPIODIR2   = 0xC8, // GPIO port direction 2.
+  GPIOIS0    = 0xC9, // Interrupt sense configuration 0.
+  GPIOIS1    = 0xCA, // Interrupt sense configuration 1.
+  GPIOIS2    = 0xCB, // Interrupt sense configuration 2.
+  GPIOIBE0   = 0xCC, // GPIO interrupt edge configuration 0.
+  GPIOIBE1   = 0xCD, // GPIO interrupt edge configuration 1.
+  GPIOIBE2   = 0xCE, // GPIO interrupt edge configuration 2.
+  GPIOIEV0   = 0xCF, // GPIO interrupt edge select 0.
+  GPIOIEV1   = 0xD0, // GPIO interrupt edge select 1.
+  GPIOIEV2   = 0xD1, // GPIO interrupt edge select 2.
+  GPIOIE0    = 0xD2, // GPIO interrupt enable 0.
+  GPIOIE1    = 0xD3, // GPIO interrupt enable 1.
+  GPIOIE2    = 0xD4, // GPIO interrupt enable 2.
+  GPIORIS0   = 0xD6, // Raw interrupt status 0.
+  GPIORIS1   = 0xD7, // Raw interrupt status 1.
+  GPIORIS2   = 0xD8, // Raw interrupt status 2.
+  GPIOMIS0   = 0xD9, // Masked interrupt status 0.
+  GPIOMIS1   = 0xDA, // Masked interrupt status 1.
+  GPIOMIS2   = 0xDB, // Masked interrupt status 2.
+  GPIOIC0    = 0xDC, // GPIO clear interrupt 0.
+  GPIOIC1    = 0xDD, // GPIO clear interrupt 1.
+  GPIOIC2    = 0xDE, // GPIO clear interrupt 2.
+  GPIOOME0   = 0xE0, // GPIO open drain mode enable 0.
+  GPIOOMS0   = 0xE1, // GPIO open drain mode select 0.
+  GPIOOME1   = 0xE2, // GPIO open drain mode enable 1.
+  GPIOOMS1   = 0xE3, // GPIO open drain mode select 1.
+  GPIOOME2   = 0xE4, // GPIO open drain mode enable 2.
+  GPIOOMS2   = 0xE5, // GPIO open drain mode select 2.
+  GPIOWAKE0  = 0xE9, // GPIO wake-up 0.
+  GPIOWAKE1  = 0xEA, // GPIO wake-up 1.
+  GPIOWAKE2  = 0xEB, // GPIO wake-up 2.
 };
 // clang-format on
 
@@ -114,7 +114,7 @@ struct Register_KBDSIZE {
 
 struct Register_CLKEN {
   uint8_t Reserved1 : 5;  // Reserved - set to zero.
-  uint8_t TIMEN : 1;      // PWM Timer 0, 1, 2 clock enable.
+  uint8_t TIMEN : 1;      // PWM timer 0, 1, 2 clock enable.
   uint8_t Reserved2 : 1;  // Reserved - set to zero.
   uint8_t KBDEN : 1;      // Keyboard clock enabled (enables/disables key scan).
 
@@ -145,8 +145,17 @@ constexpr uint8_t kPullNeither = 0x0;
 constexpr uint8_t kPullDown = 0x1;
 constexpr uint8_t kPullUp = 0x2;
 
+/**
+ * Pull Resistor configuration Register 1.
+ *
+ * Resistor enable for KPY* ball:
+ *
+ * 0b00: No pull resistor at ball.
+ * 0b01: Pulldown resistor programmed.
+ * 0b1x: Pullup resistor programmed.
+ */
 struct Register_IOPC1 {
-  uint16_t KPY7PR : 2;  // pullup: 2/3, pulldown: 1, no-pull: 0.
+  uint16_t KPY7PR : 2;
   uint16_t KPY6PR : 2;
   uint16_t KPY5PR : 2;
   uint16_t KPY4PR : 2;
@@ -158,6 +167,14 @@ struct Register_IOPC1 {
   operator uint16_t() const { return *reinterpret_cast<const uint16_t*>(this); }
 };
 
+/**
+ * Dedicated Key Register.
+ *
+ * Bit=0: The dedicated key function applies.
+ * Bit=1: No dedicated key function is selected. The standard GPIO
+ *        functionality applies according to register IOCFG or
+ *        defined keyboard matrix.
+ */
 struct Register_KBDDEDCFG {
   uint16_t KPX7 : 1;
   uint16_t KPX6 : 1;
