@@ -94,6 +94,95 @@ enum class Register : uint8_t {
 namespace {
 constexpr char TAG[] = "kbd_kbd";
 constexpr uint8_t kSlaveAddress = 0x88;  // I2C address of LM8330 IC.
+constexpr uint8_t k12msec = 0x80;
+
+struct Register_IOCFG {
+  uint8_t Reserved1 : 3;  // Reserved - set to zero.
+  uint8_t GPIOSEL : 1;    // KPY11 config. 1 = IRQN enabled.
+  uint8_t Reserved2 : 1;  // Reserved - set to zero.
+  uint8_t BALLCFG : 3;    // Select column to configure.
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_KBDSIZE {
+  uint8_t ROWSIZE : 4;  // Number of rows in the keyboard matrix.
+  uint8_t COLSIZE : 4;  // Number of columns in the keyboard matrix.
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_CLKEN {
+  uint8_t Reserved1 : 5;  // Reserved - set to zero.
+  uint8_t TIMEN : 1;      // PWM Timer 0, 1, 2 clock enable.
+  uint8_t Reserved2 : 1;  // Reserved - set to zero.
+  uint8_t KBDEN : 1;      // Keyboard clock enabled (enables/disables key scan).
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_KBDMSK {
+  uint8_t Reserved : 4;  // Reserved.
+  uint8_t MSKELINT : 1;  // Keyboard event lost interrupt RELINT is masked.
+  uint8_t MSKEINT : 1;   // keyboard event interrupt REVINT is masked,
+  uint8_t MSKLINT : 1;   // keyboard lost interrupt RKLINT is masked.
+  uint8_t MSKSINT : 1;   // keyboard status interrupt RSINT is masked.
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_KBDIC {
+  uint8_t SFOFF : 1;     // Switches off scanning of special function (SF) keys.
+  uint8_t Reserved : 5;  // Keyboard event lost interrupt RELINT is masked.
+  uint8_t EVTIC : 1;  // Clear EVTCODE FIFO and corresponding interrupts REVTINT
+                      // and RELINT.
+  uint8_t KBDIC : 1;  // Clear RSINT and RKLINT interrupt bits.
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+constexpr uint8_t kPullNeither = 0x0;
+constexpr uint8_t kPullDown = 0x1;
+constexpr uint8_t kPullUp = 0x2;
+
+struct Register_IOPC1 {
+  uint16_t KPY7PR : 2;  // pullup: 2/3, pulldown: 1, no-pull: 0.
+  uint16_t KPY6PR : 2;
+  uint16_t KPY5PR : 2;
+  uint16_t KPY4PR : 2;
+  uint16_t KPY3PR : 2;
+  uint16_t KPY2PR : 2;
+  uint16_t KPY1PR : 2;
+  uint16_t KPY0PR : 2;
+
+  operator uint16_t() const { return *reinterpret_cast<const uint16_t*>(this); }
+};
+
+struct Register_KBDDEDCFG {
+  uint16_t KPX7 : 1;
+  uint16_t KPX6 : 1;
+  uint16_t KPX5 : 1;
+  uint16_t KPX4 : 1;
+  uint16_t KPX3 : 1;
+  uint16_t KPX2 : 1;
+  uint16_t KPY11 : 1;
+  uint16_t KPY10 : 1;
+  uint16_t KPY9 : 1;
+  uint16_t KPY8 : 1;
+  uint16_t KPY7 : 1;
+  uint16_t KPY6 : 1;
+  uint16_t KPY5 : 1;
+  uint16_t KPY4 : 1;
+  uint16_t KPY3 : 1;
+  uint16_t KPY2 : 1;
+
+  operator uint16_t() const { return *reinterpret_cast<const uint16_t*>(this); }
+};
+
+static_assert(sizeof(Register_IOCFG) == sizeof(uint8_t));
+static_assert(sizeof(Register_IOPC1) == sizeof(uint16_t));
+static_assert(sizeof(Register_KBDDEDCFG) == sizeof(uint16_t));
+
 }  // namespace
 
 Keyboard::Keyboard(i2c::Master i2c_master)
@@ -102,34 +191,90 @@ Keyboard::Keyboard(i2c::Master i2c_master)
 Keyboard::~Keyboard() = default;
 
 esp_err_t Keyboard::Initialize() {
-  esp_err_t err = WriteByte(Register::KBDSETTLE, 0x80);
+  esp_err_t err = WriteByte(Register::KBDSETTLE, k12msec);
   if (err != ESP_OK)
     return err;
-  err = WriteByte(Register::KBDBOUNCE, 0x80);
+  err = WriteByte(Register::KBDBOUNCE, k12msec);
   if (err != ESP_OK)
     return err;
-  err = WriteByte(Register::KBDSIZE, 0x88);
+  err = WriteByte(Register::KBDSIZE, Register_KBDSIZE{
+                                         .ROWSIZE = 8,
+                                         .COLSIZE = 8,
+                                     });
   if (err != ESP_OK)
     return err;
-  err = WriteWord(Register::KBDDEDCFG0, 0xFC3F);
+  err = WriteWord(Register::KBDDEDCFG0, Register_KBDDEDCFG{
+                                            .KPX7 = 1,
+                                            .KPX6 = 1,
+                                            .KPX5 = 1,
+                                            .KPX4 = 1,
+                                            .KPX3 = 1,
+                                            .KPX2 = 1,
+                                            .KPY11 = 1,
+                                            .KPY10 = 1,
+                                            .KPY9 = 1,
+                                            .KPY8 = 1,
+                                            .KPY7 = 1,
+                                            .KPY6 = 1,
+                                            .KPY5 = 1,
+                                            .KPY4 = 1,
+                                            .KPY3 = 1,
+                                            .KPY2 = 1,
+                                        });
   if (err != ESP_OK)
     return err;
-  err = WriteByte(Register::IOCFG, 0xF8);
+  err = WriteByte(Register::IOCFG, Register_IOCFG{
+                                       .Reserved1 = 0,
+                                       .GPIOSEL = 1,
+                                       .Reserved2 = 0,
+                                       .BALLCFG = 1,
+                                   });
   if (err != ESP_OK)
     return err;
-  err = WriteWord(Register::IOPC0, 0xAAAA);
+  err = WriteWord(Register::IOPC0, Register_IOCFG{
+                                       .Reserved1 = 0,
+                                       .GPIOSEL = 0,
+                                       .Reserved2 = 0,
+                                       .BALLCFG = 0,
+                                   });
   if (err != ESP_OK)
     return err;
-  err = WriteWord(Register::IOPC1, 0x5555);
+  err = WriteWord(Register::IOPC1, Register_IOPC1{
+                                       .KPY7PR = kPullDown,
+                                       .KPY6PR = kPullDown,
+                                       .KPY5PR = kPullDown,
+                                       .KPY4PR = kPullDown,
+                                       .KPY3PR = kPullDown,
+                                       .KPY2PR = kPullDown,
+                                       .KPY1PR = kPullDown,
+                                       .KPY0PR = kPullDown,
+                                   });
   if (err != ESP_OK)
     return err;
-  err = WriteByte(Register::KBDIC, 0x03);
+  err = WriteByte(Register::KBDIC, Register_KBDIC{
+                                       .SFOFF = false,
+                                       .Reserved = 0,
+                                       .EVTIC = true,
+                                       .KBDIC = true,
+                                   });
   if (err != ESP_OK)
     return err;
-  err = WriteByte(Register::KBDMSK, 0x03);
+  err = WriteByte(Register::KBDMSK, Register_KBDMSK{
+                                        .Reserved = 0,
+                                        .MSKELINT = 0,
+                                        .MSKEINT = 0,
+                                        .MSKLINT = 1,
+                                        .MSKSINT = 1,
+                                    });
   if (err != ESP_OK)
     return err;
-  err = WriteByte(Register::CLKEN, 0x01);
+  err = WriteByte(Register::CLKEN, Register_CLKEN{
+                                       .Reserved1 = 0,
+                                       .TIMEN = false,
+                                       .Reserved2 = 0,
+                                       .KBDEN = true,
+
+                                   });
   if (err != ESP_OK)
     return err;
   return ESP_OK;
