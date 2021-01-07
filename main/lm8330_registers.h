@@ -104,6 +104,12 @@ struct Register_KBDSIZE {
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
 
+/**
+ * Clock enable.
+ *
+ * Controls the clock to different functional units. It is used to enable
+ * the functional blocks globally and independently.
+ */
 struct Register_CLKEN {
   uint8_t Reserved1 : 5;  // Reserved - set to zero.
   uint8_t TIMEN : 1;      // PWM timer 0, 1, 2 clock enable.
@@ -113,6 +119,18 @@ struct Register_CLKEN {
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
 
+/**
+ * Keypad interrupt mask.
+ *
+ * Configures masking of keyboard interrupts. Masked interrupts do not
+ * trigger an event on the Interrupt output.
+ *
+ * In case the interrupt processes registers KBDCODE[3:0], MSKELINT and
+ * MSKEINT should be set to '1'. When the Event FIFO is processed,
+ * MSKLINT and MSKSINT should be set. For keyboard polling operations,
+ * all bits should be set and the polling operation consists of reading
+ * out the IRQST.
+ */
 struct Register_KBDMSK {
   uint8_t Reserved : 4;  // Reserved.
   uint8_t MSKELINT : 1;  // Keyboard event lost interrupt RELINT is masked.
@@ -123,6 +141,11 @@ struct Register_KBDMSK {
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
 
+/**
+ * Keypad interrupt clear.
+ *
+ * Setting these bits clears Keypad active Interrupts.
+ */
 struct Register_KBDIC {
   uint8_t SFOFF : 1;     // Switches off scanning of special function (SF) keys.
   uint8_t Reserved : 5;  // Keyboard event lost interrupt RELINT is masked.
