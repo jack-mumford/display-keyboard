@@ -105,6 +105,9 @@ struct Register_IOCFG {
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
 
+/**
+ * Defines the physical keyboard matrix size.
+ */
 struct Register_KBDSIZE {
   uint8_t ROWSIZE : 4;  // Number of rows in the keyboard matrix.
   uint8_t COLSIZE : 4;  // Number of columns in the keyboard matrix.
@@ -141,12 +144,66 @@ struct Register_KBDIC {
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
 
-constexpr uint8_t kPullNeither = 0x0;
-constexpr uint8_t kPullDown = 0x1;
-constexpr uint8_t kPullUp = 0x2;
+/**
+ * Interrupt global interrupt status.
+ *
+ * Returns the interrupt status from various on-chip function blocks. If any of
+ * the bits is set and an IRQN line is configured, the IRQN line is asserted
+ * active.
+ */
+struct Register_IRQST {
+  uint8_t PORIRQ : 1;    // Supply failure on VCC. 0: no failure.
+  uint8_t KBDIRQ : 1;    // Kbd interrupt (further key selection in kbd module).
+  uint8_t Reserved : 2;  // Unused.
+  uint8_t TIM2IRQ : 1;   // Timer2 expiry (CDIRQ or CYCIRQ). 1: active.
+  uint8_t TIM1IRQ : 1;   // Timer1 expiry (CDIRQ or CYCIRQ). 1: active.
+  uint8_t TIM0IRQ : 1;   // Timer0 expiry (CDIRQ or CYCIRQ). 1: active.
+  uint8_t GPIOIRQ : 1;   // GPIO interrupt (further selection in GPIO module).
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
 
 /**
- * Pull Resistor configuration Register 1.
+ * Key event code.
+ *
+ * With this register a FIFO buffer is addressed storing up to 15
+ * consecutive events. Reading the value 0x7F from this address means
+ * that the FIFO buffer is empty.
+ *
+ * @note Auto increment is disabled on this register. Multi-byte read
+ *       will always read from the same address.
+ */
+struct Register_EVTCODE {
+  uint8_t RELEASE : 1;  // Indicates a key press or a key release event.
+  uint8_t KEYROW : 3;   // Row index of key that is pressed or released
+  uint8_t KEYCOL : 4;  // Column index of detected key that is pressed (0 to 11,
+                       // 12 for special function key or and 13 & 14 for
+                       // dedicated key) or released.
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+/**
+ * Keyboard code[0:3].
+ *
+ * Holds the row and column information of the first detected key.
+ */
+struct Register_KBDCODE {
+  uint8_t MULTIKEY : 1;  // If this bit is 1 another key is available in
+                         // KBDCODE1 register.
+  uint8_t KEYROW : 3;    // ROW index of detected key (0 to 7).
+  uint8_t KEYCOL : 4;    // Column index of detected (0 to 11, 12 for special
+                         // function key and 13 & 14 for dedicated KPY key).
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+constexpr uint16_t kPullNeither = 0x0;
+constexpr uint16_t kPullDown = 0x1;
+constexpr uint16_t kPullUp = 0x2;
+
+/**
+ * Pull resistor configuration Register 1.
  *
  * Resistor enable for KPY* ball:
  *
@@ -168,7 +225,10 @@ struct Register_IOPC1 {
 };
 
 /**
- * Dedicated Key Register.
+ * Dedicated key register.
+ *
+ * Defines if a key is used as a standard keyboard/GPIO pin or whether it is
+ * used as dedicated key input.
  *
  * Bit=0: The dedicated key function applies.
  * Bit=1: No dedicated key function is selected. The standard GPIO
