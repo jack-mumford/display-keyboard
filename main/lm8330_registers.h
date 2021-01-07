@@ -187,9 +187,15 @@ struct Register_KBDCODE {
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
 
-constexpr uint16_t kPullNeither = 0x0;
-constexpr uint16_t kPullDown = 0x1;
-constexpr uint16_t kPullUp = 0x2;
+/**
+ * Built-in pull up/down resistor configuration.
+ */
+enum class Pull : uint8_t {
+  Disabled = 0,  // Neither pull-up or down.
+  Down = 1,      // Enable internal pull-down resistor.
+  Up = 2,        // Enable internal pull-up resistor.
+  Upp = 3,       // Enable internal pull-up resistor.
+};
 
 /**
  * Pull resistor configuration Register 1.
@@ -201,14 +207,14 @@ constexpr uint16_t kPullUp = 0x2;
  * 0b1x: Pullup resistor programmed.
  */
 struct Register_IOPC1 {
-  uint16_t KPY7PR : 2;
-  uint16_t KPY6PR : 2;
-  uint16_t KPY5PR : 2;
-  uint16_t KPY4PR : 2;
-  uint16_t KPY3PR : 2;
-  uint16_t KPY2PR : 2;
-  uint16_t KPY1PR : 2;
-  uint16_t KPY0PR : 2;
+  Pull KPY7PR : 2;
+  Pull KPY6PR : 2;
+  Pull KPY5PR : 2;
+  Pull KPY4PR : 2;
+  Pull KPY3PR : 2;
+  Pull KPY2PR : 2;
+  Pull KPY1PR : 2;
+  Pull KPY0PR : 2;
 
   operator uint16_t() const { return *reinterpret_cast<const uint16_t*>(this); }
 };

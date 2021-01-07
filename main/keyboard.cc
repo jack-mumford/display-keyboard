@@ -72,14 +72,14 @@ esp_err_t Keyboard::Initialize() {
   if (err != ESP_OK)
     return err;
   err = WriteWord(Register::IOPC1, Register_IOPC1{
-                                       .KPY7PR = kPullDown,
-                                       .KPY6PR = kPullDown,
-                                       .KPY5PR = kPullDown,
-                                       .KPY4PR = kPullDown,
-                                       .KPY3PR = kPullDown,
-                                       .KPY2PR = kPullDown,
-                                       .KPY1PR = kPullDown,
-                                       .KPY0PR = kPullDown,
+                                       .KPY7PR = Pull::Down,
+                                       .KPY6PR = Pull::Down,
+                                       .KPY5PR = Pull::Down,
+                                       .KPY4PR = Pull::Down,
+                                       .KPY3PR = Pull::Down,
+                                       .KPY2PR = Pull::Down,
+                                       .KPY1PR = Pull::Down,
+                                       .KPY0PR = Pull::Down,
                                    });
   if (err != ESP_OK)
     return err;
