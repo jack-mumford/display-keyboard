@@ -223,12 +223,15 @@ void IRAM_ATTR App::USBTask(void* arg) {
 
 // static
 void IRAM_ATTR App::KeyboardISR(void* arg) {
-  App* app = static_cast<App*>(arg);
-
-  // xQueueSendFromISR(g_port->gpio.event_queue, &gpio_num, NULL);
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-  xEventGroupSetBitsFromISR(app->event_group_, EVENT_KEYBOARD_EVENT,
-                            &xHigherPriorityTaskWoken);
+  BaseType_t xResult = xEventGroupSetBitsFromISR(
+      static_cast<App*>(arg)->event_group_, EVENT_KEYBOARD_EVENT,
+      &xHigherPriorityTaskWoken);
+
+  if (xResult != pdFAIL) {
+    // See https://www.freertos.org/xEventGroupSetBitsFromISR.html
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+  }
 }
 
 esp_err_t App::InstallKeyboardISR() {
