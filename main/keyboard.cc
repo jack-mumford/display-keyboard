@@ -237,6 +237,5 @@ esp_err_t Keyboard::LogEventCount() {
     }
   }
 
-  int_stat.K_INT = false;
   return WriteRegister(i2c_master_, Register::INT_STAT, &int_stat);
 }
