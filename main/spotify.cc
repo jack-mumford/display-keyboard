@@ -389,13 +389,13 @@ esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
                 ? CreateAccessTokenAuthorizationContent(code, redirect_url)
                 : CreateAccessTokenRefreshContent(code);
 
-  err = http_client.DoPOST(kGetAccessTokenURL, content, header_values,
-                           [&response](const void* data, int data_len) {
-                             response.append(static_cast<const char*>(data),
-                                             data_len);
-                             return ESP_OK;
-                           },
-                           &status_code);
+  err = http_client.DoPOST(
+      kGetAccessTokenURL, content, header_values,
+      [&response](const void* data, int data_len) {
+        response.append(static_cast<const char*>(data), data_len);
+        return ESP_OK;
+      },
+      &status_code);
   if (err != ESP_OK)
     goto exit;
   if (status_code != HttpStatus_Ok) {
