@@ -7,7 +7,7 @@
 
 #if (BOARD_FEATHERS2 == 1)
 
-constexpr gpio_num_t kActivityGPIO = GPIO_NUM_2;      // Pin for activity LED.
+constexpr gpio_num_t kActivityGPIO = GPIO_NUM_13;     // Pin for activity LED.
 constexpr gpio_num_t kI2C0SDA = GPIO_NUM_8;           // I2C port 0 SDA GPIO.
 constexpr gpio_num_t kI2C0SCL = GPIO_NUM_9;           // I2C port 0 SCL GPIO.
 constexpr gpio_num_t kKeyboardINTGPIO = GPIO_NUM_38;  // Keyboard event INT.
