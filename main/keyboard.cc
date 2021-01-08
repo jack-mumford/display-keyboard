@@ -176,10 +176,10 @@ esp_err_t Keyboard::Initialize() {
       .GPI_IEN = false,
       .K_LCK_IEN = false,
       .OVR_FLOW_IEN = false,
-      .INT_CFG = true,
+      .INT_CFG = false,
       .OVR_FLOW_M = false,
       .GPI_E_CFG = false,
-      .AI = false,
+      .AI = true,
   };
 
   esp_err_t err = WriteRegister(i2c_master_, Register::CFG, &reg_config);
