@@ -17,16 +17,18 @@
 #include <esp_idf_version.h>
 #include <esp_timer.h>
 
+#include "gpio_pins.h"
+
 namespace {
 
 constexpr char TAG[] = "led-controller";
-constexpr uint64_t kLEDOffDelayUsec = 50000;
+constexpr uint64_t kLEDOffDelayUsec = 50 * 1000;
 
 }  // namespace
 
 LEDController::LEDController(gpio_num_t activity_gpio)
     : activity_gpio_(activity_gpio), led_off_timer_(nullptr) {
-#if 0
+#if (BOARD_FEATHERS2 == 1)
   const gpio_config_t config = {
       .pin_bit_mask = (1UL << activity_gpio_),
       .mode = GPIO_MODE_OUTPUT,

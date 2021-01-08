@@ -11,6 +11,7 @@ class Display;
 class Filesystem;
 class HTTPServer;
 class Keyboard;
+class LEDController;
 class Spotify;
 class WiFi;
 
@@ -45,6 +46,7 @@ class App {
   std::unique_ptr<WiFi> wifi_;                // Controls WiFi.
   std::unique_ptr<Spotify> spotify_;          // All interracitons w/Spotify.
   std::unique_ptr<Keyboard> keyboard_;        // All interaction with keyboard.
+  std::unique_ptr<LEDController> led_controller_;
   EventGroupHandle_t event_group_ = nullptr;  // Application events.
   TaskHandle_t main_task_ = nullptr;          // Event task.
   bool online_ = false;                       // Is this device on the network?
