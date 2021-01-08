@@ -282,9 +282,8 @@ esp_err_t Keyboard::ReportHIDEvents() {
     ESP_LOGW(TAG, "Unable to report all keys. %u pressed, max %u",
              num_pressed_keys, ARRAY_SIZE(keycodes));
   }
-  // return usb::HID::KeyboardReport(usb::REPORT_ID_KEYBOARD, modifier,
-  // keycodes);
-  return ESP_OK;
+
+  return usb::HID::KeyboardReport(usb::REPORT_ID_KEYBOARD, modifier, keycodes);
 }
 
 esp_err_t Keyboard::HandleEvents() {
@@ -309,12 +308,16 @@ esp_err_t Keyboard::HandleEvents() {
   }
   ESP_LOGI(TAG, "Had keyboard event %u. count: %u", event_number_,
            key_lck_ec.KEC);
-  for (uint8_t i = 0; i < key_lck_ec.KEC; i++) {
+  while (true) {
     Register_KEY_EVENT_A key_event_a;
     err = ReadRegister(i2c_master_, Register::KEY_EVENT_A, &key_event_a);
     if (err != ESP_OK) {
       ESP_LOGE(TAG, "Can't read KEY_EVENT_A");
       return err;
+    }
+    if (key_event_a.key_code == 0) {
+      // keyboard queue is empty.
+      break;
     }
     const uint8_t key_code = key_event_a.key_code & 0b01111111;
     if (key_code <= 80) {
