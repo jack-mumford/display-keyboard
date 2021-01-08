@@ -104,21 +104,21 @@ def TargetNeedsFlashPort(target):
 
 
 def MakeTargets(targets, port_manager):
-    flash_ports = PortManager.GetFlashPort()
-    monitor_ports = port_manager.GetMonitorPort()
+    flash_port = PortManager.GetFlashPort()
+    monitor_port = port_manager.GetMonitorPort()
     for target in targets:
-        if TargetNeedsMonitorPort(target) and not monitor_ports:
+        if TargetNeedsMonitorPort(target) and not monitor_port:
             print("Target \"%s\" needs a monitor port, but can't find one." % target, file=sys.stderr)
             port_manager.PrintPorts(sys.stderr)
             sys.exit(errno.ENODEV)
-        if TargetNeedsFlashPort(target) and not flash_ports:
+        if TargetNeedsFlashPort(target) and not flash_port:
             print("Target \"%s\" needs a flash port, but can't find one." % target, file=sys.stderr)
             port_manager.PrintPorts(sys.stderr)
             sys.exit(errno.ENODEV)
-    if flash_ports:
-        os.environ["FLASH_PORT"] = flash_ports[0]
-    if monitor_ports:
-        os.environ["MONITOR_PORT"] = monitor_ports[0]
+    if flash_port:
+        os.environ["FLASH_PORT"] = flash_port
+    if monitor_port:
+        os.environ["MONITOR_PORT"] = monitor_port
     cmd = ['make', '--file=Makefile-build']
     cmd.extend(targets)
     subprocess.check_call(cmd)
