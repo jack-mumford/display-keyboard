@@ -196,7 +196,7 @@ struct Register_EVTCODE {
 };
 
 /**
- * Keyboard code[0:3].
+ * Keyboard KBDCODE[0:3].
  *
  * Holds the row and column information of the first detected key.
  */
@@ -275,34 +275,18 @@ struct Register_KBDDEDCFG {
 };
 
 /**
- * Keyboard raw interrupt status.
+ * Keyboard interrupt status (both KBDRIS and KBDMIS).
  *
  * Returns the status of stored keyboard interrupts.
  */
-struct Register_KBDRIS {
+struct Register_KBDIS {
   uint8_t Reserved : 4;
-  uint8_t RELINT : 1;   // Raw event lost interrupt.
-  uint8_t REVTINT : 1;  // Raw keyboard event interrupt.
-  uint8_t RKLINT : 1;   // Raw key lost interrupt indicates a lost key-code.
-  uint8_t RSINT : 1;    // Raw scan interrupt.
+  uint8_t ELINT : 1;   // Event lost interrupt.
+  uint8_t EVTINT : 1;  // Keyboard event interrupt.
+  uint8_t KLINT : 1;   // Key lost interrupt indicates a lost key-code.
+  uint8_t SINT : 1;    // Scan interrupt.
 
-  operator uint16_t() const { return *reinterpret_cast<const uint16_t*>(this); }
-};
-
-/**
- * Keypad masked interrupt status.
- *
- * Returns the status on masked keyboard interrupts after masking with the
- * KBDMSK register.
- */
-struct Register_KBDMIS {
-  uint8_t Reserved : 4;  // Reserved.
-  uint8_t MELINT : 1;    // Masked event lost interrupt.
-  uint8_t MEVTINT : 1;   // Masked keyboard event interrupt.
-  uint8_t MKLINT : 1;    // Masked key lost interrupt.
-  uint8_t MSINT : 1;     // Masked scan interrupt.
-
-  operator uint16_t() const { return *reinterpret_cast<const uint16_t*>(this); }
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
 
 static_assert(sizeof(Register_IOCFG) == sizeof(uint8_t));

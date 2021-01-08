@@ -14,7 +14,7 @@ namespace {
 constexpr char TAG[] = "kbd_kbd";
 constexpr uint8_t kSlaveAddress = 0x88;  // I2C address of LM8330 IC.
 constexpr uint8_t k12msec = 0x80;
-
+constexpr uint8_t kInvalidEventCode = 0x7F;
 }  // namespace
 
 Keyboard::Keyboard(i2c::Master i2c_master)
@@ -113,12 +113,53 @@ esp_err_t Keyboard::Initialize() {
 }
 
 esp_err_t Keyboard::LogEventCount() {
+  Register_IRQST global_int_status;
+  esp_err_t err = ReadByte(Register::IRQST, &global_int_status);
+  if (err != ESP_OK)
+    return err;
+  if (!global_int_status.KBDIRQ)
+    return ESP_OK;
+
+  Register_KBDIS kbd_int_status;
+  err = ReadByte(Register::KBDMIS, &kbd_int_status);
+  if (err != ESP_OK)
+    return err;
+
+  Register_KBDCODE keyboard_code;
+  err = ReadByte(Register::KBDCODE0, &keyboard_code);
+  if (err != ESP_OK)
+    return err;
+
+  ESP_LOGI(TAG, "Key (%d, %d) %s.", keyboard_code.KEYCOL, keyboard_code.KEYROW,
+           keyboard_code.MULTIKEY ? "multi-key" : "single-key");
+
+  while (true) {
+    Register_EVTCODE event_code;
+    err = ReadByte(Register::EVTCODE, &event_code);
+    if (err != ESP_OK)
+      return err;
+
+    if (event_code == kInvalidEventCode)
+      break;
+
+    ESP_LOGI(TAG, "Key (%d, %d) %s.", event_code.KEYCOL, event_code.KEYROW,
+             event_code.RELEASE ? "released" : "pressed");
+  }
   return ESP_OK;
+}
+
+esp_err_t Keyboard::ReadByte(Register reg, void* value) {
+  return i2c_master_.ReadRegister(kSlaveAddress, static_cast<uint8_t>(reg),
+                                  reinterpret_cast<uint8_t*>(value))
+             ? ESP_OK
+             : ESP_FAIL;
 }
 
 esp_err_t Keyboard::WriteByte(Register reg, uint8_t value) {
   return i2c_master_.WriteRegister(kSlaveAddress, static_cast<uint8_t>(reg),
-                                   value);
+                                   value)
+             ? ESP_OK
+             : ESP_FAIL;
 }
 
 esp_err_t Keyboard::WriteWord(Register reg, uint16_t value) {
