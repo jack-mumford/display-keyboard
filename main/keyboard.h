@@ -22,8 +22,6 @@ class Keyboard {
    */
   esp_err_t HandleEvents();
 
-  esp_err_t LogEventCount();
-
  private:
   /**
    * Report all HID events to the host via TinyUSB.
@@ -39,4 +37,5 @@ class Keyboard {
    * pressed/depressed state. true=pressed.
    */
   std::vector<bool> key_states_;
+  uint32_t event_number_ = 0;
 };

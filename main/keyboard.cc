@@ -6,6 +6,7 @@
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <class/hid/hid.h>
+#include <esp_err.h>
 #include <esp_log.h>
 
 #include "usb_hid.h"
@@ -281,30 +282,40 @@ esp_err_t Keyboard::ReportHIDEvents() {
     ESP_LOGW(TAG, "Unable to report all keys. %u pressed, max %u",
              num_pressed_keys, ARRAY_SIZE(keycodes));
   }
-  return usb::HID::KeyboardReport(usb::REPORT_ID_KEYBOARD, modifier, keycodes);
+  // return usb::HID::KeyboardReport(usb::REPORT_ID_KEYBOARD, modifier,
+  // keycodes);
+  return ESP_OK;
 }
 
 esp_err_t Keyboard::HandleEvents() {
+  event_number_++;
   Register_INT_STAT int_stat;
   esp_err_t err = ReadRegister(i2c_master_, Register::INT_STAT, &int_stat);
-  if (err != ESP_OK)
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "Can't read from kbd IC.");
     return err;
+  }
   const bool had_keyboard_event = int_stat.K_INT || int_stat.GPI_INT;
   if (!had_keyboard_event) {
-    ESP_LOGW(TAG, "No keyboard event");
+    // TODO: Investigate triggering. We call this too often.
     return ESP_OK;
   }
 
   Register_KEY_LCK_EC key_lck_ec;
   err = ReadRegister(i2c_master_, Register::KEY_LCK_EC, &key_lck_ec);
-  if (err != ESP_OK)
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "Can't read KEY_LCK_EC");
     return err;
-  ESP_LOGI(TAG, "Had keyboard event. count: %u", key_lck_ec.KEC);
+  }
+  ESP_LOGI(TAG, "Had keyboard event %u. count: %u", event_number_,
+           key_lck_ec.KEC);
   for (uint8_t i = 0; i < key_lck_ec.KEC; i++) {
     Register_KEY_EVENT_A key_event_a;
     err = ReadRegister(i2c_master_, Register::KEY_EVENT_A, &key_event_a);
-    if (err != ESP_OK)
+    if (err != ESP_OK) {
+      ESP_LOGE(TAG, "Can't read KEY_EVENT_A");
       return err;
+    }
     const uint8_t key_code = key_event_a.key_code & 0b01111111;
     if (key_code <= 80) {
       const uint8_t hid_keycode = KeyboardKeyCodeToHIDKeyCode(key_code);
@@ -318,41 +329,12 @@ esp_err_t Keyboard::HandleEvents() {
   }
 
   err = WriteRegister(i2c_master_, Register::INT_STAT, &int_stat);
-  esp_err_t report_err = ReportHIDEvents();
-  return err == ESP_OK ? report_err : err;
-}
+  if (err == ESP_OK)
+    err = ReportHIDEvents();
+  else
+    ReportHIDEvents();
 
-esp_err_t Keyboard::LogEventCount() {
-  Register_INT_STAT int_stat;
-  esp_err_t err = ReadRegister(i2c_master_, Register::INT_STAT, &int_stat);
-  if (err != ESP_OK)
-    return err;
-  const bool had_keyboard_event = int_stat.K_INT || int_stat.GPI_INT;
-  if (!had_keyboard_event) {
-    ESP_LOGI(TAG, "No keyboard event");
-    return ESP_OK;
-  }
-
-  Register_KEY_LCK_EC key_lck_ec;
-  err = ReadRegister(i2c_master_, Register::KEY_LCK_EC, &key_lck_ec);
-  if (err != ESP_OK)
-    return err;
-  ESP_LOGI(TAG, "Had keyboard event. count: %u", key_lck_ec.KEC);
-  for (uint8_t i = 0; i < key_lck_ec.KEC; i++) {
-    Register_KEY_EVENT_A key_event_a;
-    err = ReadRegister(i2c_master_, Register::KEY_EVENT_A, &key_event_a);
-    if (err != ESP_OK)
-      return err;
-    uint8_t key_code = key_event_a.key_code & 0b01111111;
-    bool key_pressed = key_event_a.key_code & 0b10000000 ? true : false;
-    if (key_code <= 80) {
-      ESP_LOGI(TAG, "Key %u %s", key_code,
-               key_pressed ? "pressed" : "released");
-    } else {
-      ESP_LOGI(TAG, "GPIO %u %s", key_code,
-               key_pressed ? "pressed" : "released");
-    }
-  }
-
-  return WriteRegister(i2c_master_, Register::INT_STAT, &int_stat);
+  ESP_LOGI(TAG, "  Handled %u events, %s", key_lck_ec.KEC,
+           esp_err_to_name(err));
+  return err;
 }
