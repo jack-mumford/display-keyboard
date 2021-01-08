@@ -62,9 +62,11 @@ void tud_hid_set_report_cb(uint8_t report_id,
 // static
 esp_err_t HID::KeyboardReport(uint8_t report_id,
                               uint8_t modifier,
-                              uint8_t keycode[6]) {
-  return tud_hid_keyboard_report(report_id, modifier, keycode) ? ESP_OK
-                                                               : ESP_FAIL;
+                              const uint8_t keycode[6]) {
+  return tud_hid_keyboard_report(report_id, modifier,
+                                 const_cast<uint8_t*>(keycode))
+             ? ESP_OK
+             : ESP_FAIL;
 }
 
 // static

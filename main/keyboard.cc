@@ -5,10 +5,17 @@
 #include <utility>
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+#include <class/hid/hid.h>
 #include <esp_log.h>
+
+#include "usb_hid.h"
 
 #if !defined(SET_BITS)
 #define SET_BITS(value, bits) (value |= (bits))
+#endif
+
+#if !defined(ARRAY_SIZE)
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 #endif
 
 namespace {
@@ -163,10 +170,43 @@ esp_err_t WriteRegister(i2c::Master& i2c_master,
              : ESP_FAIL;
 }
 
+/**
+ * @brief Convert a Keyboard code to a HID keycode.
+ *
+ * @param key_code The code returned by the keyboard IC.
+ *
+ * @return The TinyUSB HID keycode. HID_KEY_NONE if no mapping.
+ */
+uint8_t KeyboardKeyCodeToHIDKeyCode(uint8_t key_code) {
+  // Hard-coded. Will replace with a configuration which comes from
+  // a config file at some point.
+  switch (key_code) {
+    case 14:
+      return HID_KEY_A;
+    case 13:
+      return HID_KEY_S;
+    case 12:
+      return HID_KEY_D;
+    case 11:
+      return HID_KEY_F;
+    case 04:
+      return HID_KEY_Q;
+    case 03:
+      return HID_KEY_W;
+    case 02:
+      return HID_KEY_E;
+    case 01:
+      return HID_KEY_R;
+    default:
+      break;
+  }
+  return HID_KEY_NONE;
+}
+
 }  // namespace
 
 Keyboard::Keyboard(i2c::Master i2c_master)
-    : i2c_master_(std::move(i2c_master)) {}
+    : i2c_master_(std::move(i2c_master)), key_states_(0xFF, false) {}
 
 Keyboard::~Keyboard() = default;
 
@@ -203,6 +243,83 @@ esp_err_t Keyboard::Initialize() {
   }
 
   return ESP_OK;
+}
+
+esp_err_t Keyboard::ReportHIDEvents() {
+  uint8_t next_key_idx = 0;
+  uint8_t keycodes[6] = {HID_KEY_NONE};
+  uint8_t modifier = 0;
+  uint8_t num_pressed_keys = 0;  // non-modifier keys.
+
+  for (uint8_t keycode = 0; keycode < key_states_.size(); keycode++) {
+    if (key_states_[keycode]) {
+      if (keycode == HID_KEY_SHIFT_LEFT) {
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+      } else if (keycode == HID_KEY_SHIFT_RIGHT) {
+        modifier |= KEYBOARD_MODIFIER_RIGHTSHIFT;
+      } else if (keycode == HID_KEY_CONTROL_LEFT) {
+        modifier |= KEYBOARD_MODIFIER_LEFTCTRL;
+      } else if (keycode == HID_KEY_CONTROL_RIGHT) {
+        modifier |= KEYBOARD_MODIFIER_RIGHTCTRL;
+      } else if (keycode == HID_KEY_ALT_LEFT) {
+        modifier |= KEYBOARD_MODIFIER_LEFTALT;
+      } else if (keycode == HID_KEY_ALT_RIGHT) {
+        modifier |= KEYBOARD_MODIFIER_RIGHTALT;
+      } else if (keycode == HID_KEY_GUI_LEFT) {
+        modifier |= KEYBOARD_MODIFIER_LEFTGUI;
+      } else if (keycode == HID_KEY_GUI_RIGHT) {
+        modifier |= KEYBOARD_MODIFIER_RIGHTGUI;
+      } else {
+        num_pressed_keys++;
+        if (next_key_idx < ARRAY_SIZE(keycodes))
+          keycodes[next_key_idx++] = keycode;
+      }
+    }
+  }
+
+  if (num_pressed_keys > ARRAY_SIZE(keycodes)) {
+    ESP_LOGW(TAG, "Unable to report all keys. %u pressed, max %u",
+             num_pressed_keys, ARRAY_SIZE(keycodes));
+  }
+  return usb::HID::KeyboardReport(usb::REPORT_ID_KEYBOARD, modifier, keycodes);
+}
+
+esp_err_t Keyboard::HandleEvents() {
+  Register_INT_STAT int_stat;
+  esp_err_t err = ReadRegister(i2c_master_, Register::INT_STAT, &int_stat);
+  if (err != ESP_OK)
+    return err;
+  const bool had_keyboard_event = int_stat.K_INT || int_stat.GPI_INT;
+  if (!had_keyboard_event) {
+    ESP_LOGW(TAG, "No keyboard event");
+    return ESP_OK;
+  }
+
+  Register_KEY_LCK_EC key_lck_ec;
+  err = ReadRegister(i2c_master_, Register::KEY_LCK_EC, &key_lck_ec);
+  if (err != ESP_OK)
+    return err;
+  ESP_LOGI(TAG, "Had keyboard event. count: %u", key_lck_ec.KEC);
+  for (uint8_t i = 0; i < key_lck_ec.KEC; i++) {
+    Register_KEY_EVENT_A key_event_a;
+    err = ReadRegister(i2c_master_, Register::KEY_EVENT_A, &key_event_a);
+    if (err != ESP_OK)
+      return err;
+    const uint8_t key_code = key_event_a.key_code & 0b01111111;
+    if (key_code <= 80) {
+      const uint8_t hid_keycode = KeyboardKeyCodeToHIDKeyCode(key_code);
+      if (hid_keycode < key_states_.size()) {
+        const bool key_pressed = key_event_a.key_code & 0b10000000;
+        key_states_[hid_keycode] = key_pressed;
+      }
+    } else {
+      // Don't register for GPIO events, so shouldn't occur.
+    }
+  }
+
+  err = WriteRegister(i2c_master_, Register::INT_STAT, &int_stat);
+  esp_err_t report_err = ReportHIDEvents();
+  return err == ESP_OK ? report_err : err;
 }
 
 esp_err_t Keyboard::LogEventCount() {

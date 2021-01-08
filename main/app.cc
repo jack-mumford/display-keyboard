@@ -31,8 +31,6 @@
 
 namespace {
 
-enum { REPORT_ID_KEYBOARD = 1, REPORT_ID_MOUSE };
-
 constexpr char TAG[] = "kbd_app";
 
 constexpr uint64_t kMaxMainLoopWaitMSecs = 100;
@@ -148,8 +146,7 @@ void IRAM_ATTR App::AppEventTask(void* arg) {
       app->spotify_need_access_token_refresh_ = true;
     }
     if (bits & EVENT_KEYBOARD_EVENT) {
-      ESP_LOGI(TAG, "Got keyboard event.");
-      app->keyboard_->LogEventCount();
+      app->keyboard_->HandleEvents();
     }
   }
 }
@@ -165,7 +162,7 @@ esp_err_t App::CreateKeyboardSimulatorTask() {
 
 // static
 void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
-  //App* app = static_cast<App*>(arg);
+  // App* app = static_cast<App*>(arg);
   ESP_LOGW(TAG, "In USB keyboard simulator task.");
   bool on = false;
 #if 0

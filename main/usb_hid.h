@@ -11,6 +11,8 @@
 
 namespace usb {
 
+enum { REPORT_ID_KEYBOARD = 1, REPORT_ID_MOUSE };
+
 class HID {
  private:
   constexpr static uint8_t kBootProtocol = HID_PROTOCOL_NONE;
@@ -50,7 +52,7 @@ class HID {
    */
   static esp_err_t KeyboardReport(uint8_t report_id,
                                   uint8_t modifier,
-                                  uint8_t keycode[6]);
+                                  const uint8_t keycode[6]);
 
   static esp_err_t KeyboardPress(uint8_t report_id, char ch);
 
