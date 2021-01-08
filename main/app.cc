@@ -149,6 +149,7 @@ void IRAM_ATTR App::AppEventTask(void* arg) {
     }
     if (bits & EVENT_KEYBOARD_EVENT) {
       ESP_LOGI(TAG, "Got keyboard event.");
+      app->keyboard_->LogEventCount();
     }
   }
 }
@@ -164,7 +165,7 @@ esp_err_t App::CreateKeyboardSimulatorTask() {
 
 // static
 void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
-  App* app = static_cast<App*>(arg);
+  //App* app = static_cast<App*>(arg);
   ESP_LOGW(TAG, "In USB keyboard simulator task.");
   bool on = false;
 #if 0
@@ -204,7 +205,6 @@ void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
       ets_delay_us(5000);
       usb::HID::KeyboardRelease(REPORT_ID_KEYBOARD);
 #endif
-      app->keyboard_->LogEventCount();
       vTaskDelay(pdMS_TO_TICKS(2000));
     } else {
       ESP_LOGD(TAG, "USB not mounted");
@@ -249,7 +249,7 @@ esp_err_t App::InstallKeyboardISR() {
       .mode = GPIO_MODE_INPUT,
       .pull_up_en = GPIO_PULLUP_ENABLE,
       .pull_down_en = GPIO_PULLDOWN_DISABLE,
-      .intr_type = GPIO_INTR_POSEDGE,
+      .intr_type = GPIO_INTR_ANYEDGE,
   };
 
   esp_err_t err = gpio_config(&io_conf);
