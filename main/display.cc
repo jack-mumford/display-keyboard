@@ -9,6 +9,7 @@
 #include <lvgl.h>
 #include <lvgl_helpers.h>
 
+#include "lvgl_drive.h"
 #include "main_screen.h"
 
 namespace {
@@ -103,6 +104,9 @@ bool Display::Initialize() {
     return false;
 
   if (CreateTickTimer() != ESP_OK)
+    return false;
+
+  if (lvgl::Drive::Initialize() != ESP_OK)
     return false;
 
   initialized_ = true;
