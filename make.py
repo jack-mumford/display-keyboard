@@ -25,19 +25,22 @@ class SdkConfigManager(object):
     @staticmethod
     def Load():
         values = dict()
-        with open('sdkconfig', 'r') as f:
-            for line in f.readlines():
-                line = line.strip()
-                if len(line) < 1:
-                    continue
-                if line[0] == '#':
-                    continue
-                items = line.split('=')
-                if len(items) != 2:
-                    print(line)
-                if items[0] in values:
-                    print('Already have: ' + line)
-                values[items[0]] = items[1]
+        try:
+            with open('sdkconfig', 'r') as f:
+                for line in f.readlines():
+                    line = line.strip()
+                    if len(line) < 1:
+                        continue
+                    if line[0] == '#':
+                        continue
+                    items = line.split('=')
+                    if len(items) != 2:
+                        print(line)
+                    if items[0] in values:
+                        print('Already have: ' + line)
+                    values[items[0]] = items[1]
+        except FileNotFoundError:
+            pass
         return values
 
 class PortManager(object):
