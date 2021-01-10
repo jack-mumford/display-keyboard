@@ -14,6 +14,7 @@ PARTITION_OFFSET=0x110000
 
 GIT_SUBMODULES=components/i2clib \
 							 components/inih \
+							 components/lv_lib_png \
 							 components/tinyusb \
 							 components/lv_port_esp32
 
