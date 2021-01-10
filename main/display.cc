@@ -7,6 +7,7 @@
 #include <esp_log.h>
 #include <esp_timer.h>
 #include <lv_lib_png/lv_png.h>
+#include <lv_lib_split_jpg/lv_sjpg.h>
 #include <lvgl.h>
 #include <lvgl_helpers.h>
 
@@ -40,6 +41,7 @@ Display::Display(uint16_t width, uint16_t height)
   lv_init();
   lvgl_driver_init();
   lv_png_init();
+  lv_split_jpeg_init();
 }
 
 Display::~Display() = default;

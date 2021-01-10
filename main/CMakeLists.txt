@@ -13,6 +13,8 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/components/i2clib/src/operation.cc"
     "${CMAKE_SOURCE_DIR}/components/lv_lib_png/lodepng.c"
     "${CMAKE_SOURCE_DIR}/components/lv_lib_png/lv_png.c"
+    "${CMAKE_SOURCE_DIR}/components/lv_lib_split_jpg/lv_sjpg.c"
+    "${CMAKE_SOURCE_DIR}/components/lv_lib_split_jpg/tjpgd.c"
   INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/components"
     "${CMAKE_SOURCE_DIR}/components/i2clib/include"

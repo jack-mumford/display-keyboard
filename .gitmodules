@@ -13,3 +13,6 @@
 [submodule "components/lv_lib_png"]
 	path = components/lv_lib_png
 	url = https://github.com/lvgl/lv_lib_png.git
+[submodule "components/lv_lib_split_jpg"]
+	path = components/lv_lib_split_jpg
+	url = https://github.com/lvgl/lv_lib_split_jpg.git
