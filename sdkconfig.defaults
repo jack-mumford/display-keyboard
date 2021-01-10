@@ -26,3 +26,12 @@ CONFIG_HTTPD_MAX_URI_LEN=1024
 #
 CONFIG_LWIP_LOCAL_HOSTNAME="display-keyboard"
 # end of LWIP
+
+# HTTPS server used for Spotify authentication.
+
+#
+# ESP HTTPS server
+#
+CONFIG_ESP_HTTPS_SERVER_ENABLE=y
+# end of ESP HTTPS server
+
