@@ -1,5 +1,5 @@
 
-# Fefore running:
+# Before running:
 # . $HOME/esp/esp-idf/export.sh
 
 # pip install esptool
