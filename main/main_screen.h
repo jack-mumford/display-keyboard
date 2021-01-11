@@ -13,4 +13,5 @@ class MainScreen : public Screen {
 
  private:
   lv_obj_t* lbl_test_ = nullptr;
+  lv_obj_t* img_test_ = nullptr;
 };
