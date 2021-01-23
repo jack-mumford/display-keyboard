@@ -3,8 +3,11 @@
 import errno
 import glob
 import os
+import platform
+import serial.tools.list_ports
 import subprocess
 import sys
+from pprint import pprint
 
 
 class SdkConfigManager(object):
@@ -12,13 +15,13 @@ class SdkConfigManager(object):
     @staticmethod
     def GetConsoleTarget(sdkconfig):
         if 'CONFIG_ESP_CONSOLE_UART' in sdkconfig and \
-            sdkconfig['CONFIG_ESP_CONSOLE_UART'] == 'y':
+                sdkconfig['CONFIG_ESP_CONSOLE_UART'] == 'y':
             return 'UART'
         if 'CONFIG_ESP_CONSOLE_CDC' in sdkconfig and \
-            sdkconfig['CONFIG_ESP_CONSOLE_CDC'] == 'y':
+                sdkconfig['CONFIG_ESP_CONSOLE_CDC'] == 'y':
             return 'CDC'
         if 'CONFIG_ESP_CONSOLE_CUSTOM' in sdkconfig and \
-            sdkconfig['CONFIG_ESP_CONSOLE_CUSTOM'] == 'y':
+                sdkconfig['CONFIG_ESP_CONSOLE_CUSTOM'] == 'y':
             return 'CUSTOM'
         return 'NONE'
 
@@ -42,6 +45,7 @@ class SdkConfigManager(object):
         except FileNotFoundError:
             pass
         return values
+
 
 class PortManager(object):
     ignored = ('/dev/cu.Bluetooth-Incoming-Port')
@@ -68,7 +72,17 @@ class PortManager(object):
         return ports
 
     @staticmethod
+    def __GetCOMPorts():
+        ports = []
+        for port in serial.tools.list_ports.comports():
+            ports.append(port.device)
+            # pprint(vars(port))
+        return ports
+
+    @staticmethod
     def GetSerialPorts():
+        if platform.system() == 'Windows':
+            return PortManager.__GetCOMPorts()
         return PortManager.__GetMatchingPorts(PortManager.__GetSerialWildcard())
 
     @staticmethod
@@ -90,7 +104,7 @@ class PortManager(object):
             ports = PortManager.GetModemPorts()
         return ports[0] if ports else None
 
-    def PrintPorts(self, fd = sys.stdout):
+    def PrintPorts(self, fd=sys.stdout):
         print('Serial ports: %s' % PortManager.GetSerialPorts(), file=fd)
         print('Modem ports: %s' % PortManager.GetSerialPorts(), file=fd)
         print('Flash port: %s' % PortManager.GetFlashPort(), file=fd)
@@ -111,11 +125,13 @@ def MakeTargets(targets, port_manager):
     monitor_port = port_manager.GetMonitorPort()
     for target in targets:
         if TargetNeedsMonitorPort(target) and not monitor_port:
-            print("Target \"%s\" needs a monitor port, but can't find one." % target, file=sys.stderr)
+            print("Target \"%s\" needs a monitor port, but can't find one." %
+                  target, file=sys.stderr)
             port_manager.PrintPorts(sys.stderr)
             sys.exit(errno.ENODEV)
         if TargetNeedsFlashPort(target) and not flash_port:
-            print("Target \"%s\" needs a flash port, but can't find one." % target, file=sys.stderr)
+            print("Target \"%s\" needs a flash port, but can't find one." %
+                  target, file=sys.stderr)
             port_manager.PrintPorts(sys.stderr)
             sys.exit(errno.ENODEV)
     if flash_port:
@@ -125,6 +141,7 @@ def MakeTargets(targets, port_manager):
     cmd = ['make', '--file=Makefile-build']
     cmd.extend(targets)
     subprocess.check_call(cmd)
+
 
 if 'IDF_PATH' not in os.environ:
     print('ESP-IDF environment not sourced. Run:', file=sys.stderr)
