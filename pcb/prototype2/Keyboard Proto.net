@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source "C:\\Users\\cmumf\\src\\keyboard\\pcb\\prototype2\\Keyboard Proto.sch")
-    (date "1/24/2021 6:48:35 PM")
+    (date "1/25/2021 7:58:16 PM")
     (tool "Eeschema (5.1.9)-1")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
