@@ -526,7 +526,7 @@ Connection ~ 1450 5650
 Wire Wire Line
 	1450 5650 1450 5900
 Wire Notes Line
-	3400 500  3400 8000
+	3400 550  3400 8050
 Wire Notes Line
 	3400 4500 500  4500
 Wire Notes Line
@@ -593,17 +593,6 @@ Text GLabel 4800 5050 0    50   Input ~ 0
 Enc_DT
 Text GLabel 4800 4950 0    50   Input ~ 0
 Enc_SW
-$Comp
-L Keyboard-Proto-rescue:FeatherS2-FeatherS2 U5
-U 1 1 5FE9446F
-P 5250 5050
-F 0 "U5" H 5225 6015 50  0000 C CNN
-F 1 "FeatherS2-FeatherS2" H 5225 5924 50  0000 C CNN
-F 2 "FeatherS2:FeatherS2" H 5300 4050 50  0001 C CNN
-F 3 "https://www.adafruit.com/product/4062" H 4900 5950 50  0001 C CNN
-	1    5250 5050
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	4800 5650 4500 5650
 Wire Wire Line
@@ -702,4 +691,15 @@ Text GLabel 4800 5450 0    50   Input ~ 0
 MOSI
 Text GLabel 4800 5550 0    50   Input ~ 0
 MISO
+$Comp
+L FeatherS2:FeatherS2 U5
+U 1 1 60105E93
+P 5250 5050
+F 0 "U5" H 5225 6015 50  0000 C CNN
+F 1 "FeatherS2" H 5225 5924 50  0000 C CNN
+F 2 "FeatherS2:FeatherS2" H 5300 4050 50  0001 C CNN
+F 3 "https://www.adafruit.com/product/4062" H 4900 5950 50  0001 C CNN
+	1    5250 5050
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
