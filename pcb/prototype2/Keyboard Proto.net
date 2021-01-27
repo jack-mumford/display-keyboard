@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source "C:\\Users\\cmumf\\src\\keyboard\\pcb\\prototype2\\Keyboard Proto.sch")
-    (date "1/25/2021 8:13:10 PM")
+    (date "1/26/2021 5:26:16 PM")
     (tool "Eeschema (5.1.9)-1")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -474,7 +474,7 @@
       (node (ref U2) (pin 10))
       (node (ref U4) (pin A3))
       (node (ref R1) (pin 1)))
-    (net (code 9) (name Gnd)
+    (net (code 9) (name GND)
       (node (ref U1) (pin 4))
       (node (ref J1) (pin 2))
       (node (ref J3) (pin 5))

@@ -81,7 +81,7 @@ Name=3V3
 Type=1
 Enabled=1
 [pcbnew/Layer.In2.Cu]
-Name=Gnd
+Name=GND
 Type=1
 Enabled=1
 [pcbnew/Layer.In3.Cu]

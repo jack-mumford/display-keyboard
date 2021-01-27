@@ -177,9 +177,9 @@ Text GLabel 4800 4350 0    50   Input ~ 0
 Text GLabel 4800 4450 0    50   Input ~ 0
 3V3
 Text GLabel 4800 4650 0    50   Input ~ 0
-Gnd
+GND
 Text GLabel 8750 3650 3    50   Input ~ 0
-Gnd
+GND
 Text GLabel 8700 1450 1    50   Input ~ 0
 1V8
 Text GLabel 9250 1950 2    50   Input ~ 0
@@ -241,7 +241,7 @@ $EndComp
 Text GLabel 9750 4950 0    50   Input ~ 0
 3V3
 Text GLabel 9750 5050 0    50   Input ~ 0
-Gnd
+GND
 Text GLabel 9750 5150 0    50   Input ~ 0
 D_CS
 Text GLabel 9750 5250 0    50   Input ~ 0
@@ -325,7 +325,7 @@ EN
 Text GLabel 1500 1700 0    50   Input ~ 0
 EN
 Text GLabel 1900 2050 3    50   Input ~ 0
-Gnd
+GND
 Wire Wire Line
 	1900 1900 1900 1950
 $Comp
@@ -382,7 +382,7 @@ Text GLabel 1850 3250 1    50   Input ~ 0
 Text GLabel 1950 3250 1    50   Input ~ 0
 1V8
 Text GLabel 1900 4150 3    50   Input ~ 0
-Gnd
+GND
 Text GLabel 1500 3500 0    50   Input ~ 0
 EN
 Text GLabel 4800 5350 0    50   Input ~ 0
@@ -580,7 +580,7 @@ Rotary Encoder
 Text GLabel 7750 5600 0    50   Input ~ 0
 3V3
 Text GLabel 7750 5700 0    50   Input ~ 0
-Gnd
+GND
 Text GLabel 7750 5300 0    50   Input ~ 0
 Enc_CLK
 Text GLabel 7750 5400 0    50   Input ~ 0
@@ -619,7 +619,7 @@ F 4 "https://www.aliexpress.com/item/32672229793.html" H 5200 6900 50  0001 C CN
 	1    0    0    -1  
 $EndComp
 Text GLabel 4900 7400 0    50   Input ~ 0
-Gnd
+GND
 Text GLabel 4900 7300 0    50   Input ~ 0
 3V3
 Text GLabel 4000 7100 0    50   Input ~ 0
