@@ -4,8 +4,8 @@ CONFIG_PARTITION_TABLE_FILENAME="partitions_keyboard.csv"
 
 CONFIG_LV_DISP_SPI_MOSI=35
 CONFIG_LV_DISP_SPI_CLK=36
-CONFIG_LV_DISP_SPI_CS=5
-CONFIG_LV_DISP_PIN_DC=6
+CONFIG_LV_DISP_SPI_CS=7
+CONFIG_LV_DISP_PIN_DC=5
 CONFIG_LV_DISP_PIN_RST=0
 
 # Required for TinyUSB
@@ -50,6 +50,11 @@ CONFIG_LV_DISPLAY_ORIENTATION=3
 CONFIG_LV_THEME_DEFAULT_FLAG_DARK=y
 # end of Theme usage
 
+#
+# Memory manager settings
+#
+CONFIG_LV_MEM_SIZE=600
+# end of Memory manager settings
 
 ##################################
 ## Below is FeatherS2 Specific: ##
