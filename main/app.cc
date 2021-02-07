@@ -37,7 +37,7 @@ constexpr uint64_t kMaxMainLoopWaitMSecs = 100;
 constexpr uint32_t kMinMainLoopWaitMSecs = 10;
 // Interrupt allocation flags.
 // Combination of  ESP_INTR_FLAG_* flags.
-constexpr int ESP_INTR_FLAG_DEFAULT = 0x0; // No flags set.
+constexpr int ESP_INTR_FLAG_DEFAULT = 0x0;  // No flags set.
 
 // Make sure min wait time is at least one tick.
 static_assert((kMinMainLoopWaitMSecs / portTICK_PERIOD_MS) > 0);
