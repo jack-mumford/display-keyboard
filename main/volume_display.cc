@@ -19,15 +19,20 @@ VolumeDisplay::VolumeDisplay(i2c::Master master)
       display_buf_2_(new lv_color_t[kDisplayWidth * kNumBufferRows]) {}
 
 bool VolumeDisplay::Initialize() {
+  // The lvgl_esp32_drivers library initializes the one configured
+  // display when lvgl_driver_init() is called. We need to manually
+  // initialize supplemental drivers. Maybe that library can support
+  // more than one display type in the future. Bug added at
+  // https://github.com/lvgl/lvgl_esp32_drivers/issues/31
+  ssd1306_init();
+
   lv_disp_buf_init(&disp_buf_, display_buf_1_.get(), display_buf_2_.get(),
                    kNumBufferPixels);
 
   lv_disp_drv_t disp_drv;
   lv_disp_drv_init(&disp_drv);
 
-#if 0
   disp_drv.flush_cb = ssd1306_flush;
-#endif
   disp_drv.buffer = &disp_buf_;
   disp_driver_ = lv_disp_drv_register(&disp_drv);
   if (!disp_driver_)

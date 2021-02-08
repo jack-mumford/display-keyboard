@@ -15,6 +15,7 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/components/lv_lib_png/lv_png.c"
     "${CMAKE_SOURCE_DIR}/components/lv_lib_split_jpg/lv_sjpg.c"
     "${CMAKE_SOURCE_DIR}/components/lv_lib_split_jpg/tjpgd.c"
+    "${CMAKE_SOURCE_DIR}/components/lv_port_esp32/components/lvgl_esp32_drivers/lvgl_tft/ssd1306.c"
   INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/components"
     "${CMAKE_SOURCE_DIR}/components/i2clib/include"

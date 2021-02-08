@@ -39,22 +39,6 @@ constexpr uint32_t kMinMainLoopWaitMSecs = 10;
 // Interrupt allocation flags.
 // Combination of  ESP_INTR_FLAG_* flags.
 constexpr int ESP_INTR_FLAG_DEFAULT = 0x0;  // No flags set.
-constexpr i2c::Master::InitParams kI2C0Config = {
-    .i2c_bus = I2C_NUM_0,
-    .sda_gpio = kI2C0SDA,
-    .scl_gpio = kI2C0SCL,
-    .clk_speed = 400000,
-    .sda_pullup_enable = true,
-    .scl_pullup_enable = true,
-};
-constexpr i2c::Master::InitParams kI2C1Config = {
-    .i2c_bus = I2C_NUM_1,
-    .sda_gpio = kI2C1SDA,
-    .scl_gpio = kI2C1SCL,
-    .clk_speed = 400000,
-    .sda_pullup_enable = true,
-    .scl_pullup_enable = true,
-};
 
 // Make sure min wait time is at least one tick.
 static_assert((kMinMainLoopWaitMSecs / portTICK_PERIOD_MS) > 0);
@@ -287,8 +271,38 @@ esp_err_t App::InstallKeyboardISR() {
   return ESP_OK;
 }
 
+esp_err_t App::InitializeI2C() {
+  constexpr i2c::Master::InitParams i2c_0_config = {
+      .i2c_bus = I2C_NUM_0,
+      .sda_gpio = kI2C0SDA,
+      .scl_gpio = kI2C0SCL,
+      .clk_speed = 400000,
+      .sda_pullup_enable = false,
+      .scl_pullup_enable = false,
+  };
+  if (!i2c::Master::Initialize(i2c_0_config))
+    return ESP_FAIL;
+
+  constexpr i2c::Master::InitParams i2c_1_config = {
+      .i2c_bus = I2C_NUM_1,
+      .sda_gpio = kI2C1SDA,
+      .scl_gpio = kI2C1SCL,
+      .clk_speed = 400000,
+      .sda_pullup_enable = false,
+      .scl_pullup_enable = false,
+  };
+  if (!i2c::Master::Initialize(i2c_1_config))
+    return ESP_FAIL;
+
+  return ESP_OK;
+}
+
 esp_err_t App::Initialize() {
   esp_err_t err = InitNVRAM();
+  if (err != ESP_OK)
+    return err;
+
+  err = InitializeI2C();
   if (err != ESP_OK)
     return err;
 
@@ -322,11 +336,7 @@ esp_err_t App::Initialize() {
     return err;
 
 #if 0
-  i2c::Master kbd_master(I2C_NUM_0, /*mutex=*/nullptr);
-  if (!kbd_master.Initialize(kI2C0Config))
-    return ESP_FAIL;
-
-  keyboard_.reset(new Keyboard(std::move(kbd_master)));
+  keyboard_.reset(new Keyboard(i2c::Master(I2C_NUM_0, /*mutex=*/nullptr)));
   err = keyboard_->Initialize();
   if (err != ESP_OK)
     return err;
@@ -350,11 +360,8 @@ esp_err_t App::Initialize() {
   if (!display_->Initialize())
     return ESP_FAIL;
 
-  i2c::Master vol_disp_master(I2C_NUM_1, /*mutex=*/nullptr);
-  if (!vol_disp_master.Initialize(kI2C1Config))
-    return ESP_FAIL;
-
-  volume_display_.reset(new VolumeDisplay(std::move(vol_disp_master)));
+  volume_display_.reset(
+      new VolumeDisplay(i2c::Master(I2C_NUM_1, /*mutex=*/nullptr)));
   if (!volume_display_->Initialize())
     return ESP_FAIL;
 

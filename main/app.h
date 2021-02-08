@@ -38,6 +38,7 @@ class App {
   esp_err_t CreateUSBTask();
   esp_err_t InitializSNTP();
   esp_err_t InstallKeyboardISR();
+  esp_err_t InitializeI2C();
   esp_err_t SetTimezone();
 
   std::unique_ptr<Config> config_;    // Application config data.
