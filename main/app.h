@@ -13,6 +13,7 @@ class HTTPServer;
 class Keyboard;
 class LEDController;
 class Spotify;
+class VolumeDisplay;
 class WiFi;
 
 class App {
@@ -39,8 +40,9 @@ class App {
   esp_err_t InstallKeyboardISR();
   esp_err_t SetTimezone();
 
-  std::unique_ptr<Config> config_;            // Application config data.
-  std::unique_ptr<Display> display_;          // Object owning main display.
+  std::unique_ptr<Config> config_;    // Application config data.
+  std::unique_ptr<Display> display_;  // Object owning main display.
+  std::unique_ptr<VolumeDisplay> volume_display_;
   std::unique_ptr<Filesystem> fs_;            // Filesystem object.
   std::unique_ptr<HTTPServer> https_server_;  // Local HTTPS server.
   std::unique_ptr<WiFi> wifi_;                // Controls WiFi.
