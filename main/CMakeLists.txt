@@ -54,7 +54,7 @@ target_compile_options(
   ${COMPONENT_TARGET} PUBLIC
   "-DCFG_TUSB_MCU=OPT_MCU_ESP32S2"
   "-DLV_PNG_USE_LV_FILESYSTEM=1"
-  "-DDISP_I2C_PORT=0"
+  "-DDISP_I2C_PORT=1"
 )
 
 spiffs_create_partition_image(storage ../fs FLASH_IN_PROJECT)
