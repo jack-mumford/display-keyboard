@@ -20,7 +20,8 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/components"
     "${CMAKE_SOURCE_DIR}/components/i2clib/include"
     "${CMAKE_SOURCE_DIR}/components/inih"
-    "${CMAKE_SOURCE_DIR}/components/lv_port_esp32/components/lvgl/lvgl/src"
+    "${CMAKE_SOURCE_DIR}/components/lv_port_esp32/components"
+    "${CMAKE_SOURCE_DIR}/components/lv_port_esp32/components/lvgl/src"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src"
     "${CMAKE_SOURCE_DIR}/main"
     "${IDF_PATH}/components/driver/include"
@@ -53,6 +54,7 @@ target_compile_options(
   ${COMPONENT_TARGET} PUBLIC
   "-DCFG_TUSB_MCU=OPT_MCU_ESP32S2"
   "-DLV_PNG_USE_LV_FILESYSTEM=1"
+  "-DDISP_I2C_PORT=0"
 )
 
 spiffs_create_partition_image(storage ../fs FLASH_IN_PROJECT)
