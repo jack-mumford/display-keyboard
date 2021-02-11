@@ -33,7 +33,7 @@ the [pcb](pcb) directory.
 
 ```sh
 git clone https://github.com/BigMumf/display-keyboard.git
-./make.py submodules-update
+./make.py submodules
 ```
 
 **Note**: Because this project makes use of new features (USB) of the ESP32-S2
