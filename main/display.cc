@@ -33,6 +33,7 @@ Display::Display(uint16_t width, uint16_t height)
       display_buf_1_(new lv_color_t[width * kNumBufferRows]),
       display_buf_2_(new lv_color_t[width * kNumBufferRows]),
       disp_driver_(nullptr),
+      lv_screen_(nullptr),
       input_driver_(nullptr) {
   ESP_LOGD(TAG, "Created display %ux%u.", width, height);
 
@@ -105,6 +106,10 @@ bool Display::Initialize() {
   if (!input_driver_)
     return false;
 
+  lv_screen_ = lv_disp_get_scr_act(disp_driver_);
+  if (!lv_screen_)
+    return false;
+
   if (CreateTickTimer() != ESP_OK)
     return false;
 
@@ -127,7 +132,7 @@ bool Display::Update() {
   }
 
   if (!screen_)
-    screen_.reset(new MainScreen());
+    screen_.reset(new MainScreen(*this));
 
   screen_->Update();
   return true;

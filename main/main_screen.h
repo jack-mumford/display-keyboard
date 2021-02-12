@@ -6,7 +6,7 @@
 
 class MainScreen : public Screen {
  public:
-  MainScreen();
+  MainScreen(Display& display);
   ~MainScreen();
 
   void Update() override;

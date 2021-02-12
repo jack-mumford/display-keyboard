@@ -16,6 +16,7 @@ class Display {
   bool Initialize();
   bool Update();
   uint32_t HandleTask();
+  lv_obj_t* screen() { return lv_screen_; }
 
  private:
   static void TickTimerCb(void* arg);
@@ -33,5 +34,6 @@ class Display {
   std::unique_ptr<lv_color_t[]> display_buf_2_;
   lv_disp_buf_t disp_buf_;
   lv_disp_t* disp_driver_;
+  lv_obj_t* lv_screen_;
   lv_indev_t* input_driver_;
 };
