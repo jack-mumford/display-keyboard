@@ -17,6 +17,11 @@ VolumeWidget::VolumeWidget(lv_obj_t* parent,
   _lv_obj_set_style_local_color(
       bar_, LV_OBJ_PART_MAIN,
       LV_STYLE_BG_COLOR | (LV_STATE_DEFAULT << LV_STYLE_STATE_POS), kDrawColor);
+
+  _lv_obj_set_style_local_int(
+      bar_, LV_OBJ_PART_MAIN,
+      LV_STYLE_RADIUS | (LV_STATE_DEFAULT << LV_STYLE_STATE_POS),
+      LV_STYLE_ATTR_NONE);
 }
 
 void VolumeWidget::SetVolume(uint8_t volume) {
