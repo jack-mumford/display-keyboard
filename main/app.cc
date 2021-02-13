@@ -17,7 +17,6 @@
 
 #include "config.h"
 #include "config_reader.h"
-#include "display.h"
 #include "event_ids.h"
 #include "filesystem.h"
 #include "gpio_pins.h"
@@ -25,24 +24,22 @@
 #include "keyboard.h"
 #include "led_controller.h"
 #include "spotify.h"
+#include "ui_task.h"
 #include "usb_device.h"
 #include "usb_hid.h"
-#include "volume_display.h"
 #include "wifi.h"
 
 namespace {
 
 constexpr char TAG[] = "kbd_app";
 
-constexpr uint64_t kMaxMainLoopWaitMSecs = 100;
-constexpr uint32_t kMinMainLoopWaitMSecs = 10;
+constexpr uint32_t kMainLoopWaitMSecs = 1000;
 // Interrupt allocation flags.
 // Combination of  ESP_INTR_FLAG_* flags.
 constexpr int ESP_INTR_FLAG_DEFAULT = 0x0;  // No flags set.
 
 // Make sure min wait time is at least one tick.
-static_assert((kMinMainLoopWaitMSecs / portTICK_PERIOD_MS) > 0);
-static_assert(kMaxMainLoopWaitMSecs > kMinMainLoopWaitMSecs);
+static_assert((kMainLoopWaitMSecs / portTICK_PERIOD_MS) > 0);
 
 App* g_app;
 
@@ -82,10 +79,7 @@ esp_err_t App::SetTimezone() {
 }
 
 // static
-void App::SNTPSyncEventHandler(struct timeval* tv) {
-  if (g_app)
-    g_app->uptate_display_time_ = true;
-}
+void App::SNTPSyncEventHandler(struct timeval* tv) {}
 
 /**
  * Initialize SNTP and get the current time.
@@ -356,16 +350,12 @@ esp_err_t App::Initialize() {
 
   https_server_.reset(new HTTPServer());  // Initialize once online.
 
-  display_.reset(new Display(320, 240));
-  if (!display_->Initialize())
-    return ESP_FAIL;
-
-  volume_display_.reset(new VolumeDisplay());
-  if (!volume_display_->Initialize())
-    return ESP_FAIL;
-
   spotify_.reset(new Spotify(config_.get(), https_server_.get(), wifi_.get(),
                              event_group_));
+
+  err = UITask::Start();
+  if (err != ESP_OK)
+    return err;
 
   CreateKeyboardSimulatorTask();
   if (err != ESP_OK)
@@ -379,46 +369,7 @@ esp_err_t App::Initialize() {
 }
 
 void App::Run() {
-  int vol = 0;
-  int vol_increment = 1;
-  uint32_t loop_count = 0;
-
-  display_->Update();
   while (true) {
-    loop_count++;
-    // Simple test to bounce volume up and down.
-    if ((loop_count % 10) == 0) {
-      vol += vol_increment;
-      if (vol < 0) {
-        vol = 1;
-        vol_increment = 1;
-      } else if (vol > 100) {
-        vol = 99;
-        vol_increment = -1;
-      }
-
-      volume_display_->SetVolume(vol);
-    }
-
-    if (uptate_display_time_) {
-      struct tm now_local;
-      {
-        time_t now_epoch_coordinated_universal = 0;
-        time(&now_epoch_coordinated_universal);
-        localtime_r(&now_epoch_coordinated_universal, &now_local);
-      }
-      char tmbuf[64];
-      asctime_r(&now_local, tmbuf);
-      ESP_LOGI(TAG, "Current time: %s", tmbuf);
-      // TODO: Actually update the display.
-      uptate_display_time_ = false;
-    }
-    uint32_t wait_msecs = display_->HandleTask() / 1000;
-    if (wait_msecs < kMinMainLoopWaitMSecs)
-      wait_msecs = kMinMainLoopWaitMSecs;
-    else if (wait_msecs > kMaxMainLoopWaitMSecs)
-      wait_msecs = kMaxMainLoopWaitMSecs;
-
     if (online_) {
       if (!spotify_->initialized()) {
         ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->Initialize());
@@ -443,7 +394,7 @@ void App::Run() {
       }
     }
     // Need to use vTaskDelay to avoid triggering the task WDT.
-    vTaskDelay(pdMS_TO_TICKS(wait_msecs));
+    vTaskDelay(pdMS_TO_TICKS(kMainLoopWaitMSecs));
     taskYIELD();  // Not sure if this is necessary.
   }
 }

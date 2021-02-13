@@ -13,7 +13,7 @@ class Display {
   Display(uint16_t width, uint16_t height);
   ~Display();
 
-  bool Initialize();
+  esp_err_t Initialize();
   bool Update();
   uint32_t HandleTask();
   lv_obj_t* screen() { return lv_screen_; }

@@ -28,9 +28,9 @@ void VolumeDisplay::SetVolume(uint8_t volume) {
   volume_widget_->SetVolume(volume);
 }
 
-bool VolumeDisplay::Initialize() {
+esp_err_t VolumeDisplay::Initialize() {
   if (!display_buf_1_ || !display_buf_2_)
-    return false;
+    return ESP_ERR_NO_MEM;
 
   // The lvgl_esp32_drivers library initializes the one configured
   // display when lvgl_driver_init() is called. We need to manually
@@ -54,13 +54,13 @@ bool VolumeDisplay::Initialize() {
 
   disp_driver_ = lv_disp_drv_register(&disp_drv);
   if (!disp_driver_)
-    return false;
+    return ESP_FAIL;
 
   screen_ = lv_disp_get_scr_act(disp_driver_);
   if (!screen_)
-    return false;
+    return ESP_FAIL;
 
   volume_widget_.reset(
       new VolumeWidget(screen_, 0, 0, kDisplayWidth, kDisplayHeight));
-  return true;
+  return ESP_OK;
 }

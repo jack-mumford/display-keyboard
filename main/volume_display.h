@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <memory>
 
+#include <esp_err.h>
 #include <lvgl.h>
 
 #include "volume_widget.h"
@@ -16,7 +17,7 @@ class VolumeDisplay {
    * @param volume The volume (0..100). Values outide of range will be clamped.
    */
   void SetVolume(uint8_t volume);
-  bool Initialize();
+  esp_err_t Initialize();
 
  private:
   lv_disp_buf_t disp_buf_;

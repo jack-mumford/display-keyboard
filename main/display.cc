@@ -33,14 +33,7 @@ Display::Display(uint16_t width, uint16_t height)
       display_buf_2_(new lv_color_t[DISP_BUF_SIZE]),
       disp_driver_(nullptr),
       lv_screen_(nullptr),
-      input_driver_(nullptr) {
-  ESP_LOGD(TAG, "Created display %ux%u.", width, height);
-
-  lv_init();
-  lvgl_driver_init();
-  lv_png_init();
-  lv_split_jpeg_init();
-}
+      input_driver_(nullptr) {}
 
 Display::~Display() = default;
 
@@ -76,11 +69,11 @@ esp_err_t Display::CreateTickTimer() {
   return err;
 }
 
-bool Display::Initialize() {
+esp_err_t Display::Initialize() {
   ESP_LOGD(TAG, "Initializing display");
   if (initialized_) {
     ESP_LOGW(TAG, "Already initialized");
-    return true;
+    return ESP_OK;
   }
 
 // Not controllers used by this project, but checking for future flexibility.
@@ -107,7 +100,7 @@ bool Display::Initialize() {
   disp_drv.buffer = &disp_buf_;
   disp_driver_ = lv_disp_drv_register(&disp_drv);
   if (!disp_driver_)
-    return false;
+    return ESP_FAIL;
 
   lv_indev_drv_t indev_drv;
   lv_indev_drv_init(&indev_drv);
@@ -116,21 +109,21 @@ bool Display::Initialize() {
   indev_drv.read_cb = my_touchpad_read;
   input_driver_ = lv_indev_drv_register(&indev_drv);
   if (!input_driver_)
-    return false;
+    return ESP_FAIL;
 
   lv_screen_ = lv_disp_get_scr_act(disp_driver_);
   if (!lv_screen_)
-    return false;
+    return ESP_FAIL;
 
   if (CreateTickTimer() != ESP_OK)
-    return false;
+    return ESP_FAIL;
 
   if (lvgl::Drive::Initialize() != ESP_OK)
-    return false;
+    return ESP_FAIL;
 
   initialized_ = true;
   ESP_LOGD(TAG, "Display successfully initialized");
-  return true;
+  return ESP_OK;
 }
 
 uint32_t Display::HandleTask() {
