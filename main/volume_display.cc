@@ -10,7 +10,7 @@
 namespace {
 constexpr uint16_t kNumBufferRows = 16;
 constexpr uint16_t kDisplayWidth = 128;
-constexpr uint16_t kDisplayHeight = 32;
+constexpr uint16_t kDisplayHeight = 64;
 constexpr uint32_t kNumBufferPixels = kDisplayWidth * kNumBufferRows;
 constexpr int16_t kMaxVolume = 100;
 constexpr int16_t kMinVolume = 0;
@@ -41,6 +41,7 @@ bool VolumeDisplay::Initialize() {
 
   disp_drv.flush_cb = ssd1306_flush;
   disp_drv.rounder_cb = ssd1306_rounder;
+  disp_drv.set_px_cb = ssd1306_set_px_cb;
   disp_drv.buffer = &disp_buf_;
   disp_drv.hor_res = kDisplayWidth;
   disp_drv.ver_res = kDisplayHeight;
