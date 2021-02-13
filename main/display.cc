@@ -16,7 +16,6 @@ namespace {
 
 const char TAG[] = "display";
 const uint64_t kTickTimerPeriodUsec = 1000;
-const uint16_t kNumBufferRows = 20;
 
 bool my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data) {
   return false;
@@ -30,8 +29,8 @@ Display::Display(uint16_t width, uint16_t height)
       tick_timer_(nullptr),
       width_(width),
       height_(height),
-      display_buf_1_(new lv_color_t[width * kNumBufferRows]),
-      display_buf_2_(new lv_color_t[width * kNumBufferRows]),
+      display_buf_1_(new lv_color_t[DISP_BUF_SIZE]),
+      display_buf_2_(new lv_color_t[DISP_BUF_SIZE]),
       disp_driver_(nullptr),
       lv_screen_(nullptr),
       input_driver_(nullptr) {
@@ -84,14 +83,27 @@ bool Display::Initialize() {
     return true;
   }
 
-  const uint32_t num_pixels = width_ * kNumBufferRows;
+// Not controllers used by this project, but checking for future flexibility.
+#if defined CONFIG_LV_TFT_DISPLAY_CONTROLLER_IL3820 ||   \
+    defined CONFIG_LV_TFT_DISPLAY_CONTROLLER_JD79653A || \
+    defined CONFIG_LV_TFT_DISPLAY_CONTROLLER_UC8151D
+  constexpr uint32_t kDispBufSizeInPixels = 8 * DISP_BUF_SIZE;
+#else
+  constexpr uint32_t kDispBufSizeInPixels = DISP_BUF_SIZE;
+#endif
+
   lv_disp_buf_init(&disp_buf_, display_buf_1_.get(), display_buf_2_.get(),
-                   num_pixels);
+                   kDispBufSizeInPixels);
 
   lv_disp_drv_t disp_drv;
   lv_disp_drv_init(&disp_drv);
 
   disp_drv.flush_cb = disp_driver_flush;
+#ifdef CONFIG_LV_TFT_DISPLAY_MONOCHROME
+  // Only needed for monochrome displays.
+  disp_drv.rounder_cb = disp_driver_rounder;
+  disp_drv.set_px_cb = disp_driver_set_px;
+#endif
   disp_drv.buffer = &disp_buf_;
   disp_driver_ = lv_disp_drv_register(&disp_drv);
   if (!disp_driver_)
