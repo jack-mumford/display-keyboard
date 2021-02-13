@@ -360,8 +360,7 @@ esp_err_t App::Initialize() {
   if (!display_->Initialize())
     return ESP_FAIL;
 
-  volume_display_.reset(
-      new VolumeDisplay(i2c::Master(I2C_NUM_1, /*mutex=*/nullptr)));
+  volume_display_.reset(new VolumeDisplay());
   if (!volume_display_->Initialize())
     return ESP_FAIL;
 
