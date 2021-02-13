@@ -25,9 +25,11 @@ VolumeWidget::VolumeWidget(lv_obj_t* parent,
 }
 
 void VolumeWidget::SetVolume(uint8_t volume) {
+  if (volume > kMaxVolume)
+    volume = kMaxVolume;
   if (volume == volume_)
     return;
-  volume_ = volume > kMaxVolume ? kMaxVolume : volume;
+  volume_ = volume;
   SetVolumeWidgetSize();
 }
 
