@@ -6,33 +6,26 @@
 
 #include "volume_display.h"
 
+#include "volume_widget.h"
+
 namespace {
 constexpr uint16_t kNumBufferRows = 16;
 constexpr uint16_t kDisplayWidth = 128;
 constexpr uint16_t kDisplayHeight = 64;
 constexpr uint32_t kNumBufferPixels = kDisplayWidth * kNumBufferRows;
-constexpr int16_t kMaxVolume = 100;
 constexpr uint16_t kMaxVolumeWidgetWidth = kDisplayWidth;
-constexpr lv_color_t kDrawColor = LV_COLOR_BLACK;
 }  // namespace
 
 VolumeDisplay::VolumeDisplay()
     : disp_driver_(nullptr),
       display_buf_1_(new lv_color_t[kNumBufferPixels]),
       display_buf_2_(new lv_color_t[kNumBufferPixels]),
-      bar_(nullptr),
-      screen_(nullptr),
-      volume_(25) {}
+      screen_(nullptr) {}
 
 void VolumeDisplay::SetVolume(uint8_t volume) {
-  volume_ = volume > kMaxVolume ? kMaxVolume : volume;
-  SetVolumeWidgetSize();
-}
-
-void VolumeDisplay::SetVolumeWidgetSize() {
-  const int widget_width =
-      (static_cast<int>(volume_) * kMaxVolumeWidgetWidth) / kMaxVolume;
-  lv_obj_set_size(bar_, widget_width, kDisplayHeight);
+  if (!volume_widget_)
+    return;
+  volume_widget_->SetVolume(volume);
 }
 
 bool VolumeDisplay::Initialize() {
@@ -67,16 +60,7 @@ bool VolumeDisplay::Initialize() {
   if (!screen_)
     return false;
 
-  bar_ = lv_obj_create(screen_, nullptr);
-  lv_obj_set_pos(bar_, 0, 0);
-  SetVolumeWidgetSize();
-  _lv_obj_set_style_local_color(
-      bar_, LV_OBJ_PART_MAIN,
-      LV_STYLE_BG_COLOR | (LV_STATE_DEFAULT << LV_STYLE_STATE_POS), kDrawColor);
-
+  volume_widget_.reset(
+      new VolumeWidget(screen_, 0, 0, kDisplayWidth, kDisplayHeight));
   return true;
-}
-
-void VolumeDisplay::Update() {
-  // lv_bar_set_value(bar, new_value, LV_ANIM_ON/OFF)
 }

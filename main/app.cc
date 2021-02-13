@@ -379,8 +379,27 @@ esp_err_t App::Initialize() {
 }
 
 void App::Run() {
+  int vol = 0;
+  int vol_increment = 1;
+  uint32_t loop_count = 0;
+
   display_->Update();
   while (true) {
+    loop_count++;
+    // Simple test to bounce volume up and down.
+    if ((loop_count % 10) == 0) {
+      vol += vol_increment;
+      if (vol < 0) {
+        vol = 1;
+        vol_increment = 1;
+      } else if (vol > 100) {
+        vol = 99;
+        vol_increment = -1;
+      }
+
+      volume_display_->SetVolume(vol);
+    }
+
     if (uptate_display_time_) {
       struct tm now_local;
       {
