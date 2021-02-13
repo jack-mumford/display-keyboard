@@ -11,11 +11,16 @@ charset = utf-8
 
 [*.{cc,c,h}]
 indent_style = space
-indent_size = 2
+indent_size = unset
 
 [*.py]
 indent_style = space
 indent_size = 4
+
+[*.{net,sch}]
+end_of_line = unset
+trim_trailing_whitespace = unset
+insert_final_newline = unset
 
 [Makefile]
 indent_style = tab
