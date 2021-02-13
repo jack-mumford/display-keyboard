@@ -19,8 +19,8 @@ constexpr int16_t kMinVolume = 0;
 VolumeDisplay::VolumeDisplay(i2c::Master master)
     : i2c_master_(std::move(master)),
       disp_driver_(nullptr),
-      display_buf_1_(new lv_color_t[kDisplayWidth * kNumBufferRows]),
-      display_buf_2_(new lv_color_t[kDisplayWidth * kNumBufferRows]),
+      display_buf_1_(new lv_color_t[kNumBufferPixels]),
+      display_buf_2_(new lv_color_t[kNumBufferPixels]),
       screen_(nullptr),
       bar_(nullptr),
       volume_(25) {}
@@ -54,21 +54,10 @@ bool VolumeDisplay::Initialize() {
   if (!screen_)
     return false;
 
-#if 0
-  bar_ = lv_bar_create(screen_, nullptr);
-  if (!bar_)
-    return false;
-
-  lv_obj_set_pos(bar_, 0, 0);
-  lv_obj_set_size(bar_, kDisplayWidth, kDisplayHeight);
-
-  lv_bar_set_range(bar_, kMinVolume, kMaxVolume);
-  lv_bar_set_value(bar_, volume_, LV_ANIM_OFF);
-#else
   bar_ = lv_label_create(screen_, nullptr);
-  lv_label_set_text(bar_, "Hello World");
+  lv_label_set_text(bar_, "before #000000 white# after");
+  lv_label_set_recolor(bar_, true);
   lv_obj_set_pos(bar_, 0, 0);
-#endif
 
   return true;
 }
