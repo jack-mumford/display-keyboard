@@ -2,7 +2,7 @@
 #include <utility>
 
 #include <lv_core/lv_obj.h>
-#include <lv_widgets/lv_bar.h>
+#include <lv_widgets/lv_canvas.h>
 #include <lvgl_tft/ssd1306.h>
 
 #include "volume_display.h"
@@ -11,6 +11,8 @@ namespace {
 constexpr uint16_t kNumBufferRows = 16;
 constexpr uint16_t kDisplayWidth = 128;
 constexpr uint16_t kDisplayHeight = 64;
+constexpr uint16_t kCanvasWidth = 40;
+constexpr uint16_t kCanvasHeight = 40;
 constexpr uint32_t kNumBufferPixels = kDisplayWidth * kNumBufferRows;
 constexpr int16_t kMaxVolume = 100;
 constexpr int16_t kMinVolume = 0;
@@ -21,11 +23,17 @@ VolumeDisplay::VolumeDisplay(i2c::Master master)
       disp_driver_(nullptr),
       display_buf_1_(new lv_color_t[kNumBufferPixels]),
       display_buf_2_(new lv_color_t[kNumBufferPixels]),
+      canvas_buffer_(
+          new lv_color_t[LV_CANVAS_BUF_SIZE_TRUE_COLOR(kCanvasWidth,
+                                                       kCanvasHeight)]),
       screen_(nullptr),
-      bar_(nullptr),
+      canvas_(nullptr),
       volume_(25) {}
 
 bool VolumeDisplay::Initialize() {
+  if (!display_buf_1_ || !display_buf_2_ || !canvas_buffer_)
+    return false;
+
   // The lvgl_esp32_drivers library initializes the one configured
   // display when lvgl_driver_init() is called. We need to manually
   // initialize supplemental drivers. Maybe that library can support
@@ -54,10 +62,31 @@ bool VolumeDisplay::Initialize() {
   if (!screen_)
     return false;
 
-  bar_ = lv_label_create(screen_, nullptr);
-  lv_label_set_text(bar_, "before #000000 white# after");
-  lv_label_set_recolor(bar_, true);
-  lv_obj_set_pos(bar_, 0, 0);
+#if 0
+  canvas_ = lv_canvas_create(screen_, nullptr);
+  if (!canvas_)
+    return true;
+  static lv_color_t
+      cbuf[LV_CANVAS_BUF_SIZE_TRUE_COLOR(kCanvasWidth, kCanvasHeight)];
+  lv_canvas_set_buffer(canvas_, cbuf, kCanvasWidth, kCanvasHeight,
+                       LV_IMG_CF_TRUE_COLOR);
+  lv_canvas_fill_bg(canvas_, LV_COLOR_WHITE, LV_OPA_COVER);
+#endif
+
+#if 0
+  canvas_ = lv_canvas_create(screen_, nullptr);
+  if (!canvas_)
+    return true;
+  lv_canvas_set_buffer(canvas_, canvas_buffer_.get(), kCanvasWidth,
+                       kCanvasHeight, LV_IMG_CF_TRUE_COLOR);
+  lv_canvas_fill_bg(canvas_, LV_COLOR_WHITE, LV_OPA_COVER);
+#endif
+#if 0
+  lv_draw_rect_dsc_t draw_dsc;
+  lv_draw_rect_dsc_init(&draw_dsc);
+  draw_dsc.bg_color = LV_COLOR_BLACK;
+  lv_canvas_draw_rect(canvas_, 0, 0, 60, 20, &draw_dsc);
+#endif
 
   return true;
 }

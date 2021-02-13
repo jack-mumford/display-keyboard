@@ -18,7 +18,8 @@ class VolumeDisplay {
   lv_disp_t* disp_driver_;
   std::unique_ptr<lv_color_t[]> display_buf_1_;
   std::unique_ptr<lv_color_t[]> display_buf_2_;
+  std::unique_ptr<lv_color_t[]> canvas_buffer_;
   lv_obj_t* screen_;
-  lv_obj_t* bar_;
+  lv_obj_t* canvas_;
   int16_t volume_;
 };
