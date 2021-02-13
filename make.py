@@ -116,8 +116,7 @@ def TargetNeedsMonitorPort(target):
 
 
 def TargetNeedsFlashPort(target):
-    return target in ('flash', 'flash-erase', 'manual-flash',
-                      'flash-feathers2-stock-bootloader')
+    return target in ('flash', 'flash-erase', 'manual-flash', flash-feathers2-stock-bootloader')
 
 
 def MakeTargets(targets, port_manager):
@@ -125,13 +124,11 @@ def MakeTargets(targets, port_manager):
     monitor_port = port_manager.GetMonitorPort()
     for target in targets:
         if TargetNeedsMonitorPort(target) and not monitor_port:
-            print("Target \"%s\" needs a monitor port, but can't find one." %
-                  target, file=sys.stderr)
+            print("Target \"%s\" needs a monitor port, but can't find one." % target, file=sys.stderr)
             port_manager.PrintPorts(sys.stderr)
             sys.exit(errno.ENODEV)
         if TargetNeedsFlashPort(target) and not flash_port:
-            print("Target \"%s\" needs a flash port, but can't find one." %
-                  target, file=sys.stderr)
+            print("Target \"%s\" needs a flash port, but can't find one." % target, file=sys.stderr)
             port_manager.PrintPorts(sys.stderr)
             sys.exit(errno.ENODEV)
     if flash_port:
