@@ -116,7 +116,7 @@ def TargetNeedsMonitorPort(target):
 
 
 def TargetNeedsFlashPort(target):
-    return target in ('flash', 'flash-erase', 'manual-flash', flash-feathers2-stock-bootloader')
+    return target in ('flash', 'flash-erase', 'manual-flash', 'flash-feathers2-stock-bootloader')
 
 
 def MakeTargets(targets, port_manager):
