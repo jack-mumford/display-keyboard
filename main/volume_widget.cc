@@ -12,7 +12,7 @@ VolumeWidget::VolumeWidget(lv_obj_t* parent,
                            int height)
     : volume_(0), x_(x), y_(y), width_(width), height_(height) {
   bar_ = lv_obj_create(parent, nullptr);
-  lv_obj_set_pos(bar_, 0, 0);
+  lv_obj_set_pos(bar_, x_, y_);
   SetVolumeWidgetSize();
   _lv_obj_set_style_local_color(
       bar_, LV_OBJ_PART_MAIN,
