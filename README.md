@@ -34,7 +34,7 @@ the [pcb](pcb) directory.
 ```sh
 git clone https://github.com/BigMumf/display-keyboard.git
 cd display-keyboard
-./make.py submodules
+./make submodules
 ```
 
 **Note**: Because this project makes use of new features (USB) of the ESP32-S2
@@ -47,12 +47,12 @@ Configuration (GPIO pins, etc.) is stored in the sdkconfig file. This is
 set using menuconfig as so:
 
 ```sh
-./make.py config
+./make config
 ```
 
 Build and flash to the attached ESP32-S2 device as so:
 
 ```sh
 . $HOME/esp/esp-idf/export.sh # only do this once
-./make.py build && ./make.py flash
+./make build && ./make flash
 ```
