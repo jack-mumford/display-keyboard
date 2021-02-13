@@ -33,6 +33,7 @@ the [pcb](pcb) directory.
 
 ```sh
 git clone https://github.com/BigMumf/display-keyboard.git
+cd display-keyboard
 ./make.py submodules
 ```
 
