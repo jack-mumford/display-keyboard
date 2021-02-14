@@ -213,7 +213,8 @@ esp_err_t WiFi::Inititialize() {
   return err;
 }
 
-esp_err_t WiFi::Connect(const std::string& ssid, const std::string& key) {
+esp_err_t WiFi::InitiateConnection(const std::string& ssid,
+                                   const std::string& key) {
   ESP_LOGI(TAG, "Attempting connection to WiFi network: \"%s\"", ssid.c_str());
 
   esp_wifi_stop();

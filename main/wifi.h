@@ -13,7 +13,7 @@ class WiFi {
   ~WiFi();
 
   esp_err_t Inititialize();
-  esp_err_t Connect(const std::string& ssid, const std::string& key);
+  esp_err_t InitiateConnection(const std::string& ssid, const std::string& key);
   esp_err_t GetHostname(std::string* hostname) const;
   esp_err_t GetIPAddress(esp_ip4_addr_t* addr) const;
 

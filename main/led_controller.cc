@@ -27,20 +27,7 @@ constexpr uint64_t kLEDOffDelayUsec = 50 * 1000;
 }  // namespace
 
 LEDController::LEDController(gpio_num_t activity_gpio)
-    : activity_gpio_(activity_gpio), led_off_timer_(nullptr) {
-#if (BOARD_FEATHERS2 == 1)
-  const gpio_config_t config = {
-      .pin_bit_mask = (1UL << activity_gpio_),
-      .mode = GPIO_MODE_OUTPUT,
-      .pull_up_en = GPIO_PULLUP_DISABLE,
-      .pull_down_en = GPIO_PULLDOWN_DISABLE,
-      .intr_type = GPIO_INTR_DISABLE,
-  };
-  ESP_ERROR_CHECK_WITHOUT_ABORT(gpio_config(&config));
-#endif
-  gpio_set_level(activity_gpio_, 0);
-  ESP_ERROR_CHECK_WITHOUT_ABORT(CreateActivityTimer());
-}
+    : activity_gpio_(activity_gpio), led_off_timer_(nullptr) {}
 
 LEDController::~LEDController() {
   esp_timer_stop(led_off_timer_);
@@ -50,6 +37,26 @@ LEDController::~LEDController() {
 // static:
 void IRAM_ATTR LEDController::ActivityTimerCb(void* param) {
   gpio_set_level(static_cast<LEDController*>(param)->activity_gpio_, 0);
+}
+
+esp_err_t LEDController::Initialize() {
+  esp_err_t err;
+#if (BOARD_FEATHERS2 == 1)
+  const gpio_config_t config = {
+      .pin_bit_mask = (1UL << activity_gpio_),
+      .mode = GPIO_MODE_OUTPUT,
+      .pull_up_en = GPIO_PULLUP_DISABLE,
+      .pull_down_en = GPIO_PULLDOWN_DISABLE,
+      .intr_type = GPIO_INTR_DISABLE,
+  };
+  err = gpio_config(&config);
+  if (err != ESP_OK)
+    return err;
+#endif
+  err = gpio_set_level(activity_gpio_, 0);
+  if (err != ESP_OK)
+    return err;
+  return CreateActivityTimer();
 }
 
 esp_err_t LEDController::CreateActivityTimer() {

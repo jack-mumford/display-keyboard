@@ -23,6 +23,7 @@ class LEDController {
   LEDController(gpio_num_t activity_gpio);
   ~LEDController();
 
+  esp_err_t Initialize();
   void FlashActivityLED();
 
  private:

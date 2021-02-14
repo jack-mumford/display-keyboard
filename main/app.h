@@ -36,11 +36,12 @@ class App {
   esp_err_t CreateUSBTask();
   esp_err_t InitializSNTP();
   esp_err_t InstallKeyboardISR();
+  esp_err_t InitializeKeyboard();
   esp_err_t InitializeI2C();
   esp_err_t SetTimezone();
 
   std::unique_ptr<Config> config_;            // Application config data.
-  std::unique_ptr<Filesystem> fs_;            // Filesystem object.
+  std::unique_ptr<Filesystem> filesystem_;    // Filesystem object.
   std::unique_ptr<HTTPServer> https_server_;  // Local HTTPS server.
   std::unique_ptr<WiFi> wifi_;                // Controls WiFi.
   std::unique_ptr<Spotify> spotify_;          // All interracitons w/Spotify.

@@ -55,7 +55,12 @@ esp_err_t InitNVRAM() {
 
 }  // namespace
 
-App::App() : config_(new Config()) {
+App::App()
+    : config_(new Config()),
+      filesystem_(new Filesystem()),
+      https_server_(new HTTPServer()),
+      keyboard_(new Keyboard(i2c::Master(I2C_NUM_1, /*mutex=*/nullptr))),
+      led_controller_(new LEDController(kActivityGPIO)) {
   g_app = this;
 }
 
@@ -70,7 +75,7 @@ esp_err_t App::SetTimezone() {
     ESP_LOGE(TAG, "No timezone");
     return ESP_FAIL;
   }
-  ESP_LOGI(TAG, "Setting timezone to %s", config_->time.timezone.c_str());
+  ESP_LOGI(TAG, "Setting timezone: %s", config_->time.timezone.c_str());
 
   setenv("TZ", config_->time.timezone.c_str(), 1);
   tzset();
@@ -80,27 +85,6 @@ esp_err_t App::SetTimezone() {
 
 // static
 void App::SNTPSyncEventHandler(struct timeval* tv) {}
-
-/**
- * Initialize SNTP and get the current time.
- *
- * Call once online.
- */
-esp_err_t App::InitializSNTP() {
-  if (config_->time.ntp_server.empty()) {
-    ESP_LOGE(TAG, "No NTP server");
-    return ESP_FAIL;
-  }
-  ESP_LOGI(TAG, "Initializing SNTP using server: %s",
-           config_->time.ntp_server.c_str());
-  sntp_setoperatingmode(SNTP_OPMODE_POLL);
-  sntp_setservername(0, config_->time.ntp_server.c_str());
-  sntp_set_time_sync_notification_cb(SNTPSyncEventHandler);
-  sntp_set_sync_mode(SNTP_SYNC_MODE_SMOOTH);
-  sntp_init();
-  sntp_initialized_ = true;
-  return ESP_OK;
-}
 
 esp_err_t App::CreateAppEventTask() {
   // https://www.freertos.org/FAQMem.html#StackSize
@@ -265,6 +249,27 @@ esp_err_t App::InstallKeyboardISR() {
   return ESP_OK;
 }
 
+/**
+ * Initialize SNTP and get the current time.
+ *
+ * Call once online.
+ */
+esp_err_t App::InitializSNTP() {
+  if (config_->time.ntp_server.empty()) {
+    ESP_LOGE(TAG, "No NTP server");
+    return ESP_FAIL;
+  }
+  ESP_LOGI(TAG, "Initializing SNTP using server: %s",
+           config_->time.ntp_server.c_str());
+  sntp_setoperatingmode(SNTP_OPMODE_POLL);
+  sntp_setservername(0, config_->time.ntp_server.c_str());
+  sntp_set_time_sync_notification_cb(SNTPSyncEventHandler);
+  sntp_set_sync_mode(SNTP_SYNC_MODE_SMOOTH);
+  sntp_init();
+  sntp_initialized_ = true;
+  return ESP_OK;
+}
+
 esp_err_t App::InitializeI2C() {
   constexpr i2c::Master::InitParams i2c_0_config = {
       .i2c_bus = I2C_NUM_0,
@@ -291,6 +296,29 @@ esp_err_t App::InitializeI2C() {
   return ESP_OK;
 }
 
+esp_err_t App::InitializeKeyboard() {
+  if (!keyboard_)
+    return ESP_ERR_NO_MEM;
+
+  esp_err_t err;
+
+#if 0
+  err = keyboard_->Initialize();
+  if (err != ESP_OK)
+    return err;
+#endif
+
+  err = CreateKeyboardSimulatorTask();
+  if (err != ESP_OK)
+    return err;
+
+  err = InstallKeyboardISR();
+  if (err != ESP_OK)
+    return err;
+
+  return ESP_OK;
+}
+
 esp_err_t App::Initialize() {
   esp_err_t err = InitNVRAM();
   if (err != ESP_OK)
@@ -304,8 +332,11 @@ esp_err_t App::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  fs_.reset(new Filesystem());
-  err = fs_->Initialize();
+  err = InitializeKeyboard();
+  if (err != ESP_OK)
+    return err;
+
+  err = filesystem_->Initialize();
   if (err != ESP_OK)
     return err;
 
@@ -314,9 +345,11 @@ esp_err_t App::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  led_controller_.reset(new LEDController(kActivityGPIO));
+  ESP_ERROR_CHECK_WITHOUT_ABORT(SetTimezone());
 
-  SetTimezone();  // Ignore return value - not critical.
+  err = led_controller_->Initialize();
+  if (err != ESP_OK)
+    return err;
 
   ESP_LOGI(TAG, "Wi-Fi SSID: \"%s\"", config_->wifi.ssid.c_str());
   event_group_ = xEventGroupCreate();
@@ -329,18 +362,11 @@ esp_err_t App::Initialize() {
   if (err != ESP_OK)
     return err;
 
-#if 0
-  keyboard_.reset(new Keyboard(i2c::Master(I2C_NUM_0, /*mutex=*/nullptr)));
-  err = keyboard_->Initialize();
-  if (err != ESP_OK)
-    return err;
-#endif
-
   err = wifi_->Inititialize();
   if (err != ESP_OK)
     return err;
 
-  err = wifi_->Connect(config_->wifi.ssid, config_->wifi.key);
+  err = wifi_->InitiateConnection(config_->wifi.ssid, config_->wifi.key);
   if (err != ESP_OK)
     return err;
 
@@ -348,20 +374,10 @@ esp_err_t App::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  https_server_.reset(new HTTPServer());  // Initialize once online.
-
   spotify_.reset(new Spotify(config_.get(), https_server_.get(), wifi_.get(),
                              event_group_));
 
   err = UITask::Start();
-  if (err != ESP_OK)
-    return err;
-
-  CreateKeyboardSimulatorTask();
-  if (err != ESP_OK)
-    return err;
-
-  err = InstallKeyboardISR();
   if (err != ESP_OK)
     return err;
 

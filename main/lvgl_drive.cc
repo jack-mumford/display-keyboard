@@ -89,7 +89,9 @@ lv_fs_res_t file_read_cb(struct _lv_fs_drv_t* drv,
     return LV_FS_RES_OK;
   }
   const lv_fs_res_t err = ErrnoToLVGL(errno);
-  ESP_LOGW(TAG, "Error %u reading %u bytes from file.", err, btr);
+  if (err != LV_FS_RES_OK)
+    ESP_LOGW(TAG, "Error %u reading %u bytes from file.", err, btr);
+
   return err;
 }
 
