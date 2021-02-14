@@ -31,7 +31,7 @@ UITask::UITask()
 esp_err_t UITask::Start() {
   static UITask* task = nullptr;
 
-  ESP_LOGI(TAG, "Starting UI task");
+  ESP_LOGD(TAG, "Starting UI task");
   if (task)
     return ESP_FAIL;
 
@@ -40,7 +40,7 @@ esp_err_t UITask::Start() {
 }
 
 esp_err_t UITask::Initialize() {
-  ESP_LOGI(TAG, "Initializing UI task");
+  ESP_LOGD(TAG, "Initializing UI task");
   if (!display_ || !volume_display_)
     return ESP_ERR_NO_MEM;
 
@@ -55,6 +55,7 @@ esp_err_t UITask::Initialize() {
 }
 
 void IRAM_ATTR UITask::Run() {
+  ESP_LOGD(TAG, "Running.");
   lv_init();
   lvgl_driver_init();
   lv_png_init();

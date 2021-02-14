@@ -75,7 +75,7 @@ esp_err_t App::SetTimezone() {
     ESP_LOGE(TAG, "No timezone");
     return ESP_FAIL;
   }
-  ESP_LOGI(TAG, "Setting timezone: %s", config_->time.timezone.c_str());
+  ESP_LOGD(TAG, "Setting timezone: %s", config_->time.timezone.c_str());
 
   setenv("TZ", config_->time.timezone.c_str(), 1);
   tzset();
@@ -107,7 +107,7 @@ void IRAM_ATTR App::AppEventTask(void* arg) {
                                            pdFALSE, pdFALSE, portMAX_DELAY);
     xEventGroupClearBits(app->event_group_, EVENT_ALL);
     if (bits & EVENT_NETWORK_GOT_IP) {
-      ESP_LOGI(TAG, "Wi-Fi is connected.");
+      ESP_LOGD(TAG, "Wi-Fi is connected.");
       app->online_ = true;
       if (!app->sntp_initialized_)
         app->InitializSNTP();
@@ -117,13 +117,13 @@ void IRAM_ATTR App::AppEventTask(void* arg) {
       // TODO: Set a timer so that we can retry in a little while.
     }
     if (bits & EVENT_SPOTIFY_GOT_AUTHORIZATION_CODE) {
-      ESP_LOGI(TAG, "Have authorization code");
+      ESP_LOGD(TAG, "Have authorization code");
     }
     if (bits & EVENT_SPOTIFY_ACCESS_TOKEN_GOOD) {
-      ESP_LOGI(TAG, "Have access token");
+      ESP_LOGD(TAG, "Have access token");
     }
     if (bits & EVENT_SPOTIFY_ACCESS_TOKEN_EXPIRE) {
-      ESP_LOGI(TAG, "Access token needs refresh");
+      ESP_LOGD(TAG, "Access token needs refresh");
       app->spotify_need_access_token_refresh_ = true;
     }
     if (bits & EVENT_KEYBOARD_EVENT) {
@@ -244,7 +244,7 @@ esp_err_t App::InstallKeyboardISR() {
     ESP_LOGE(TAG, "gpio_isr_handler_add failure: %s.", esp_err_to_name(err));
     return err;
   }
-  ESP_LOGI(TAG, "Keyboard interrupt handler installed on GPIO %u.",
+  ESP_LOGD(TAG, "Keyboard interrupt handler installed on GPIO %u.",
            kKeyboardINTGPIO);
   return ESP_OK;
 }
@@ -259,7 +259,7 @@ esp_err_t App::InitializSNTP() {
     ESP_LOGE(TAG, "No NTP server");
     return ESP_FAIL;
   }
-  ESP_LOGI(TAG, "Initializing SNTP using server: %s",
+  ESP_LOGD(TAG, "Initializing SNTP using server: %s",
            config_->time.ntp_server.c_str());
   sntp_setoperatingmode(SNTP_OPMODE_POLL);
   sntp_setservername(0, config_->time.ntp_server.c_str());
@@ -271,10 +271,11 @@ esp_err_t App::InitializSNTP() {
 }
 
 esp_err_t App::InitializeI2C() {
+  // The volume display (SSD1306) is on port 0. It supports 100kHz and 400kHz.
   constexpr i2c::Master::InitParams i2c_0_config = {
       .i2c_bus = I2C_NUM_0,
-      .sda_gpio = kI2C0SDA,
-      .scl_gpio = kI2C0SCL,
+      .sda_gpio = kI2C0_SDA_GPIO,
+      .scl_gpio = kI2C0_SCL_GPIO,
       .clk_speed = 400000,
       .sda_pullup_enable = false,
       .scl_pullup_enable = false,
@@ -282,11 +283,12 @@ esp_err_t App::InitializeI2C() {
   if (!i2c::Master::Initialize(i2c_0_config))
     return ESP_FAIL;
 
+  // The keyboard IC (LM8330) is on port 1. It supports 100kHz and 400kHz.
   constexpr i2c::Master::InitParams i2c_1_config = {
       .i2c_bus = I2C_NUM_1,
-      .sda_gpio = kI2C1SDA,
-      .scl_gpio = kI2C1SCL,
-      .clk_speed = 400000,
+      .sda_gpio = kI2C1_SDA_GPIO,
+      .scl_gpio = kI2C1_SCL_GPIO,
+      .clk_speed = 100000,
       .sda_pullup_enable = false,
       .scl_pullup_enable = false,
   };
@@ -302,11 +304,8 @@ esp_err_t App::InitializeKeyboard() {
 
   esp_err_t err;
 
-#if 0
-  err = keyboard_->Initialize();
-  if (err != ESP_OK)
-    return err;
-#endif
+  // TODO: This should be a checked error.
+  ESP_ERROR_CHECK_WITHOUT_ABORT(keyboard_->Initialize());
 
   err = CreateKeyboardSimulatorTask();
   if (err != ESP_OK)

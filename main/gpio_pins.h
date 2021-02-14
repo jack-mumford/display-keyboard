@@ -8,11 +8,11 @@
 #if (BOARD_FEATHERS2 == 1)
 
 constexpr gpio_num_t kActivityGPIO = GPIO_NUM_13;     // Pin for activity LED.
-constexpr gpio_num_t kI2C0SDA = GPIO_NUM_8;           // I2C port 0 SDA GPIO.
-constexpr gpio_num_t kI2C0SCL = GPIO_NUM_9;           // I2C port 0 SCL GPIO.
-constexpr gpio_num_t kKeyboardINTGPIO = GPIO_NUM_38;  // Keyboard event INT.
-constexpr gpio_num_t kI2C1SDA = GPIO_NUM_1;           // I2C port 1 SDA GPIO.
-constexpr gpio_num_t kI2C1SCL = GPIO_NUM_3;           // I2C port 1 SCL GPIO.
+constexpr gpio_num_t kI2C0_SDA_GPIO = GPIO_NUM_8;     // I2C port 0 SDA pin.
+constexpr gpio_num_t kI2C0_SCL_GPIO = GPIO_NUM_9;     // I2C port 0 SCL pin.
+constexpr gpio_num_t kKeyboardINTGPIO = GPIO_NUM_38;  // Keyboard event INT pin.
+constexpr gpio_num_t kI2C1_SDA_GPIO = GPIO_NUM_1;     // I2C port 1 SDA pin.
+constexpr gpio_num_t kI2C1_SCL_GPIO = GPIO_NUM_3;     // I2C port 1 SCL pin.
 
 /*
  * The SPI pins, used for display/touch, are specified in sdkconfig.
