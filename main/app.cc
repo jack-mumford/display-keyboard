@@ -27,6 +27,8 @@
 #include "ui_task.h"
 #include "usb_device.h"
 #include "usb_hid.h"
+#include "usb_task.h"
+
 #include "wifi.h"
 
 namespace {
@@ -180,25 +182,6 @@ void IRAM_ATTR App::KeyboardSimulatorTask(void* arg) {
       ESP_LOGD(TAG, "USB not mounted");
       vTaskDelay(pdMS_TO_TICKS(1000));
     }
-  }
-}
-
-esp_err_t App::CreateUSBTask() {
-  // https://www.freertos.org/FAQMem.html#StackSize
-  constexpr uint32_t kStackDepthWords = 2048;
-
-  return xTaskCreate(USBTask, "usb-tick", kStackDepthWords, this,
-                     tskIDLE_PRIORITY + 1, &main_task_) == pdPASS
-             ? ESP_OK
-             : ESP_FAIL;
-}
-
-// static
-void IRAM_ATTR App::USBTask(void* arg) {
-  // App* app = static_cast<App*>(arg);
-  while (true) {
-    usb::Device::Tick();
-    vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
 
@@ -357,7 +340,7 @@ esp_err_t App::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  err = CreateUSBTask();
+  err = USBTask::Start();
   if (err != ESP_OK)
     return err;
 
@@ -366,10 +349,6 @@ esp_err_t App::Initialize() {
     return err;
 
   err = wifi_->InitiateConnection(config_->wifi.ssid, config_->wifi.key);
-  if (err != ESP_OK)
-    return err;
-
-  err = usb::Device::Initialize();
   if (err != ESP_OK)
     return err;
 
