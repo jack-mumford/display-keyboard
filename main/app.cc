@@ -62,7 +62,13 @@ App::App()
       filesystem_(new Filesystem()),
       https_server_(new HTTPServer()),
       keyboard_(new Keyboard(i2c::Master(I2C_NUM_1, /*mutex=*/nullptr))),
-      led_controller_(new LEDController(kActivityGPIO)) {
+      led_controller_(new LEDController(kActivityGPIO)),
+      event_group_(xEventGroupCreate()),
+      wifi_(new WiFi(event_group_)),
+      spotify_(new Spotify(config_.get(),
+                           https_server_.get(),
+                           wifi_.get(),
+                           event_group_)) {
   g_app = this;
 }
 
@@ -302,6 +308,9 @@ esp_err_t App::InitializeKeyboard() {
 }
 
 esp_err_t App::Initialize() {
+  if (!event_group_)
+    return ESP_FAIL;
+
   esp_err_t err = InitNVRAM();
   if (err != ESP_OK)
     return err;
@@ -334,8 +343,6 @@ esp_err_t App::Initialize() {
     return err;
 
   ESP_LOGI(TAG, "Wi-Fi SSID: \"%s\"", config_->wifi.ssid.c_str());
-  event_group_ = xEventGroupCreate();
-  wifi_.reset(new WiFi(event_group_));
   err = CreateAppEventTask();
   if (err != ESP_OK)
     return err;
@@ -351,9 +358,6 @@ esp_err_t App::Initialize() {
   err = wifi_->InitiateConnection(config_->wifi.ssid, config_->wifi.key);
   if (err != ESP_OK)
     return err;
-
-  spotify_.reset(new Spotify(config_.get(), https_server_.get(), wifi_.get(),
-                             event_group_));
 
   err = UITask::Start();
   if (err != ESP_OK)
