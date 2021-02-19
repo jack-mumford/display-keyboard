@@ -9,12 +9,9 @@
 #include "config.h"
 #include "filesystem.h"
 #include "http_server.h"
-
-class HTTPServer;
-class Keyboard;
-class LEDController;
-class Spotify;
-class WiFi;
+#include "led_controller.h"
+#include "spotify.h"
+#include "wifi.h"
 
 class App {
  public:
@@ -33,15 +30,15 @@ class App {
   esp_err_t InitializeI2C();
   esp_err_t SetTimezone();
 
-  Config config_;                                  // Application config data.
-  Filesystem filesystem_;                          // Filesystem object.
-  HTTPServer https_server_;                        // Local HTTPS server.
-  std::unique_ptr<LEDController> led_controller_;  // Set all LED's.
-  EventGroupHandle_t event_group_;                 // Application events.
-  std::unique_ptr<WiFi> wifi_;                     // Controls WiFi.
-  std::unique_ptr<Spotify> spotify_;               // All Spotify interracitons.
-  TaskHandle_t main_task_ = nullptr;               // Event task.
-  bool online_ = false;                            // Is device on the network?
+  Config config_;                     // Application config data.
+  Filesystem filesystem_;             // Filesystem object.
+  HTTPServer https_server_;           // Local HTTPS server.
+  LEDController led_controller_;      // Set all LED's.
+  EventGroupHandle_t event_group_;    // Application events.
+  WiFi wifi_;                         // Controls WiFi.
+  Spotify spotify_;                   // All Spotify interracitons.
+  TaskHandle_t main_task_ = nullptr;  // Event task.
+  bool online_ = false;               // Is device on the network?
   bool started_spotify_currently_playing_ = false;
   bool spotify_need_access_token_refresh_ = false;
   bool sntp_initialized_ = false;

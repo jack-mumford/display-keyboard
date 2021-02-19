@@ -20,8 +20,6 @@
 #include "gpio_pins.h"
 #include "keyboard_simulator_task.h"
 #include "keyboard_task.h"
-#include "led_controller.h"
-#include "spotify.h"
 #include "ui_task.h"
 #include "usb_device.h"
 #include "usb_hid.h"
@@ -53,18 +51,17 @@ esp_err_t InitNVRAM() {
 }  // namespace
 
 App::App()
-    : led_controller_(new LEDController(kActivityGPIO)),
+    : led_controller_(kActivityGPIO),
       event_group_(xEventGroupCreate()),
-      wifi_(new WiFi(event_group_)),
-      spotify_(
-          new Spotify(&config_, &https_server_, wifi_.get(), event_group_)) {
+      wifi_(event_group_),
+      spotify_(&config_, &https_server_, &wifi_, event_group_) {
   g_app = this;
 }
 
 App::~App() {
-  g_app = nullptr;
   if (event_group_)
     vEventGroupDelete(event_group_);
+  g_app = nullptr;
 }
 
 esp_err_t App::SetTimezone() {
@@ -202,7 +199,7 @@ esp_err_t App::Initialize() {
 
   ESP_ERROR_CHECK_WITHOUT_ABORT(SetTimezone());
 
-  err = led_controller_->Initialize();
+  err = led_controller_.Initialize();
   if (err != ESP_OK)
     return err;
 
@@ -222,11 +219,11 @@ esp_err_t App::Initialize() {
   // Just for testing.
   KeyboardSimulatorTask::Start();
 
-  err = wifi_->Inititialize();
+  err = wifi_.Inititialize();
   if (err != ESP_OK)
     return err;
 
-  err = wifi_->InitiateConnection(config_.wifi.ssid, config_.wifi.key);
+  err = wifi_.InitiateConnection(config_.wifi.ssid, config_.wifi.key);
   if (err != ESP_OK)
     return err;
 
@@ -240,25 +237,25 @@ esp_err_t App::Initialize() {
 void App::Run() {
   while (true) {
     if (online_) {
-      if (!spotify_->initialized()) {
-        ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->Initialize());
-        std::string auth_start_url = spotify_->GetAuthStartURL();
+      if (!spotify_.initialized()) {
+        ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_.Initialize());
+        std::string auth_start_url = spotify_.GetAuthStartURL();
         ESP_LOGI(TAG, "To login to Spotify navigate to %s",
                  auth_start_url.c_str());
       }
 
-      if (spotify_->initialized()) {
-        if (spotify_->HaveAuthorizatonCode()) {
+      if (spotify_.initialized()) {
+        if (spotify_.HaveAuthorizatonCode()) {
           ESP_LOGD(TAG, "Got authorization code, getting token.");
-          ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->ContinueLogin());
+          ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_.ContinueLogin());
         } else if (spotify_need_access_token_refresh_) {
           spotify_need_access_token_refresh_ = false;
-          spotify_->RefreshAccessToken();
+          spotify_.RefreshAccessToken();
         } else if (!started_spotify_currently_playing_ &&
-                   spotify_->HaveAccessToken()) {
+                   spotify_.HaveAccessToken()) {
           ESP_LOGD(TAG, "Getting Spotify currently playing info.");
           started_spotify_currently_playing_ = true;
-          ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_->GetCurrentlyPlaying());
+          ESP_ERROR_CHECK_WITHOUT_ABORT(spotify_.GetCurrentlyPlaying());
         }
       }
     }
