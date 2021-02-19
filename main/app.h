@@ -7,8 +7,8 @@
 #include <freertos/event_groups.h>
 
 #include "config.h"
+#include "filesystem.h"
 
-class Filesystem;
 class HTTPServer;
 class Keyboard;
 class LEDController;
@@ -33,7 +33,7 @@ class App {
   esp_err_t SetTimezone();
 
   Config config_;                                  // Application config data.
-  std::unique_ptr<Filesystem> filesystem_;         // Filesystem object.
+  Filesystem filesystem_;                          // Filesystem object.
   std::unique_ptr<HTTPServer> https_server_;       // Local HTTPS server.
   std::unique_ptr<LEDController> led_controller_;  // Set all LED's.
   EventGroupHandle_t event_group_;                 // Application events.

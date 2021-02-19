@@ -17,7 +17,6 @@
 
 #include "config_reader.h"
 #include "event_ids.h"
-#include "filesystem.h"
 #include "gpio_pins.h"
 #include "http_server.h"
 #include "keyboard_simulator_task.h"
@@ -55,8 +54,7 @@ esp_err_t InitNVRAM() {
 }  // namespace
 
 App::App()
-    : filesystem_(new Filesystem()),
-      https_server_(new HTTPServer()),
+    : https_server_(new HTTPServer()),
       led_controller_(new LEDController(kActivityGPIO)),
       event_group_(xEventGroupCreate()),
       wifi_(new WiFi(event_group_)),
@@ -197,7 +195,7 @@ esp_err_t App::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  err = filesystem_->Initialize();
+  err = filesystem_.Initialize();
   if (err != ESP_OK)
     return err;
 
