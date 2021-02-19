@@ -24,22 +24,16 @@ class App {
 
  private:
   static void IRAM_ATTR AppEventTask(void*);
-  static void IRAM_ATTR KeyboardSimulatorTask(void* arg);
-  static void IRAM_ATTR KeyboardISR(void* arg);
   static void IRAM_ATTR SNTPSyncEventHandler(struct timeval* tv);
 
   esp_err_t CreateAppEventTask();
-  esp_err_t CreateKeyboardSimulatorTask();
   esp_err_t InitializSNTP();
-  esp_err_t InstallKeyboardISR();
-  esp_err_t InitializeKeyboard();
   esp_err_t InitializeI2C();
   esp_err_t SetTimezone();
 
-  std::unique_ptr<Config> config_;            // Application config data.
-  std::unique_ptr<Filesystem> filesystem_;    // Filesystem object.
-  std::unique_ptr<HTTPServer> https_server_;  // Local HTTPS server.
-  std::unique_ptr<Keyboard> keyboard_;        // All interaction with keyboard.
+  std::unique_ptr<Config> config_;                 // Application config data.
+  std::unique_ptr<Filesystem> filesystem_;         // Filesystem object.
+  std::unique_ptr<HTTPServer> https_server_;       // Local HTTPS server.
   std::unique_ptr<LEDController> led_controller_;  // Set all LED's.
   EventGroupHandle_t event_group_;                 // Application events.
   std::unique_ptr<WiFi> wifi_;                     // Controls WiFi.

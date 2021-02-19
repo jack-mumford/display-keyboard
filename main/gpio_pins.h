@@ -1,6 +1,6 @@
 #pragma once
 
-#include <esp_types.h>
+#include <hal/gpio_types.h>
 
 #define BOARD_FEATHERS2 1
 #define BOARD_CUCUMBER 0

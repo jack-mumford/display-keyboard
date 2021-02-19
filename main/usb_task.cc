@@ -39,6 +39,17 @@ esp_err_t USBTask::Initialize() {
 
 void IRAM_ATTR USBTask::Run() {
   while (true) {
+    if (usb::Device::Suspended()) {
+      if (usb::Device::RemoteWakup() != ESP_OK)
+        ESP_LOGE(TAG, "Error waking up");
+      vTaskDelay(pdMS_TO_TICKS(500));
+      continue;
+    }
+    if (!usb::HID::Ready()) {
+      ESP_LOGV(TAG, "USB not ready.");
+      vTaskDelay(pdMS_TO_TICKS(1000));
+      continue;
+    }
     usb::Device::Tick();
     vTaskDelay(pdMS_TO_TICKS(1));
   }
