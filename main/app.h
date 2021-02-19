@@ -6,7 +6,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
 
-class Config;
+#include "config.h"
+
 class Filesystem;
 class HTTPServer;
 class Keyboard;
@@ -31,7 +32,7 @@ class App {
   esp_err_t InitializeI2C();
   esp_err_t SetTimezone();
 
-  std::unique_ptr<Config> config_;                 // Application config data.
+  Config config_;                                  // Application config data.
   std::unique_ptr<Filesystem> filesystem_;         // Filesystem object.
   std::unique_ptr<HTTPServer> https_server_;       // Local HTTPS server.
   std::unique_ptr<LEDController> led_controller_;  // Set all LED's.

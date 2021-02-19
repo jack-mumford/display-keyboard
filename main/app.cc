@@ -15,7 +15,6 @@
 #include <i2clib/master.h>
 #include <nvs_flash.h>
 
-#include "config.h"
 #include "config_reader.h"
 #include "event_ids.h"
 #include "filesystem.h"
@@ -56,13 +55,12 @@ esp_err_t InitNVRAM() {
 }  // namespace
 
 App::App()
-    : config_(new Config()),
-      filesystem_(new Filesystem()),
+    : filesystem_(new Filesystem()),
       https_server_(new HTTPServer()),
       led_controller_(new LEDController(kActivityGPIO)),
       event_group_(xEventGroupCreate()),
       wifi_(new WiFi(event_group_)),
-      spotify_(new Spotify(config_.get(),
+      spotify_(new Spotify(&config_,
                            https_server_.get(),
                            wifi_.get(),
                            event_group_)) {
@@ -76,13 +74,13 @@ App::~App() {
 }
 
 esp_err_t App::SetTimezone() {
-  if (config_->time.timezone.empty()) {
+  if (config_.time.timezone.empty()) {
     ESP_LOGE(TAG, "No timezone");
     return ESP_FAIL;
   }
-  ESP_LOGD(TAG, "Setting timezone: %s", config_->time.timezone.c_str());
+  ESP_LOGD(TAG, "Setting timezone: %s", config_.time.timezone.c_str());
 
-  setenv("TZ", config_->time.timezone.c_str(), 1);
+  setenv("TZ", config_.time.timezone.c_str(), 1);
   tzset();
 
   return ESP_OK;
@@ -140,14 +138,14 @@ void IRAM_ATTR App::AppEventTask(void* arg) {
  * Call once online.
  */
 esp_err_t App::InitializSNTP() {
-  if (config_->time.ntp_server.empty()) {
+  if (config_.time.ntp_server.empty()) {
     ESP_LOGE(TAG, "No NTP server");
     return ESP_FAIL;
   }
   ESP_LOGD(TAG, "Initializing SNTP using server: %s",
-           config_->time.ntp_server.c_str());
+           config_.time.ntp_server.c_str());
   sntp_setoperatingmode(SNTP_OPMODE_POLL);
-  sntp_setservername(0, config_->time.ntp_server.c_str());
+  sntp_setservername(0, config_.time.ntp_server.c_str());
   sntp_set_time_sync_notification_cb(SNTPSyncEventHandler);
   sntp_set_sync_mode(SNTP_SYNC_MODE_SMOOTH);
   sntp_init();
@@ -204,7 +202,7 @@ esp_err_t App::Initialize() {
     return err;
 
   ConfigReader config_reader;
-  err = config_reader.Read(config_.get());
+  err = config_reader.Read(&config_);
   if (err != ESP_OK)
     return err;
 
@@ -214,7 +212,7 @@ esp_err_t App::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  ESP_LOGI(TAG, "Wi-Fi SSID: \"%s\"", config_->wifi.ssid.c_str());
+  ESP_LOGI(TAG, "Wi-Fi SSID: \"%s\"", config_.wifi.ssid.c_str());
   err = CreateAppEventTask();
   if (err != ESP_OK)
     return err;
@@ -234,7 +232,7 @@ esp_err_t App::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  err = wifi_->InitiateConnection(config_->wifi.ssid, config_->wifi.key);
+  err = wifi_->InitiateConnection(config_.wifi.ssid, config_.wifi.key);
   if (err != ESP_OK)
     return err;
 

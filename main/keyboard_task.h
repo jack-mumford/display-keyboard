@@ -8,6 +8,10 @@
 
 #include "keyboard.h"
 
+/**
+ * Task responsible for detecting keyboard events from the IC
+ * and dispatching them to the USB HID.
+ */
 class KeyboardTask {
  public:
   static esp_err_t Start();

@@ -5,6 +5,9 @@
 
 #include <esp_err.h>
 
+/**
+ * Task used only for testing to simulate key presses.
+ */
 class KeyboardSimulatorTask {
  public:
   static esp_err_t Start();
