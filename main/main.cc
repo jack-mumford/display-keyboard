@@ -8,9 +8,8 @@
 #include <nvs_flash.h>
 #include <sdkconfig.h>
 
-#include "app.h"
 #include "gpio_pins.h"
-#include "keyboard.h"
+#include "main_task.h"
 
 namespace {
 
@@ -49,7 +48,5 @@ extern "C" void app_main(void) {
   ESP_LOGI(TAG, "Keyboard app!");
   LogHardwareInfo();
 
-  App app;
-  ESP_ERROR_CHECK(app.Initialize());
-  app.Run();
+  ESP_ERROR_CHECK(MainTask::Start());
 }
