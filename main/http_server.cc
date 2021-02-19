@@ -3,7 +3,7 @@
 #include <esp_log.h>
 
 namespace {
-constexpr char TAG[] = "kbd_httpd";
+constexpr char TAG[] = "HTTPServer";
 }
 
 HTTPServer::HTTPServer() : server_(nullptr) {}

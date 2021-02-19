@@ -14,7 +14,7 @@
 
 namespace {
 
-const char TAG[] = "display";
+const char TAG[] = "Disp";
 const uint64_t kTickTimerPeriodUsec = 1000;
 
 bool my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data) {

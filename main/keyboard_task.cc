@@ -9,7 +9,7 @@
 #include "usb_hid.h"
 
 namespace {
-constexpr char TAG[] = "Kbd";
+constexpr char TAG[] = "KbdTask";
 
 // Interrupt allocation flags.
 // Combination of  ESP_INTR_FLAG_* flags.

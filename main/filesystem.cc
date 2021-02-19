@@ -4,7 +4,7 @@
 #include <esp_spiffs.h>
 
 namespace {
-constexpr char TAG[] = "kbd_fs";
+constexpr char TAG[] = "FS";
 }
 
 Filesystem::Filesystem() = default;

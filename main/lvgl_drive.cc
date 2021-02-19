@@ -15,7 +15,7 @@ namespace lvgl {
 
 namespace {
 
-constexpr char TAG[] = "kbd_drive";
+constexpr char TAG[] = "LVGLDrive";
 
 lv_fs_res_t ErrnoToLVGL(int errno_value) {
   switch (errno_value) {

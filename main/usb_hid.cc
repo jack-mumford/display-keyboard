@@ -15,7 +15,7 @@ constexpr uint8_t HID::kHIDDescriptorConfig[];
 
 namespace {
 
-constexpr char TAG[] = "kbd_hid";
+constexpr char TAG[] = "HID";
 constexpr uint8_t kASCII2KeyCode[128][2] = {HID_ASCII_TO_KEYCODE};
 
 extern "C" {

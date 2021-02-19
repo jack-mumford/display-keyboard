@@ -21,7 +21,7 @@
 
 namespace {
 
-constexpr char TAG[] = "led-controller";
+constexpr char TAG[] = "LED";
 constexpr uint64_t kLEDOffDelayUsec = 50 * 1000;
 
 }  // namespace

@@ -9,7 +9,7 @@
 #include "usb_hid.h"
 
 namespace {
-constexpr char TAG[] = "Kbd_sim";
+constexpr char TAG[] = "KbdSimTask";
 }
 
 KeyboardSimulatorTask::KeyboardSimulatorTask() = default;

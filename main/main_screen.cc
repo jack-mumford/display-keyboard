@@ -8,7 +8,7 @@
 #include "main_screen.h"
 
 namespace {
-constexpr char TAG[] = "kbd_screen";
+constexpr char TAG[] = "MainScreen";
 }
 
 MainScreen::MainScreen(Display& display) : Screen(display) {}

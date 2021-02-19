@@ -38,7 +38,7 @@ struct RequestData {
   } image;
 };
 
-constexpr char TAG[] = "kbd_spotify";
+constexpr char TAG[] = "Spotify";
 constexpr char kApiHost[] = "api.spotify.com";
 constexpr char kCurrentlyPlayingResource[] = "/v1/me/player/currently-playing";
 constexpr char kRootURI[] = "/";

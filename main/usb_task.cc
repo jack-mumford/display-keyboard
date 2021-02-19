@@ -6,7 +6,7 @@
 #include "usb_hid.h"
 
 namespace {
-constexpr char TAG[] = "USB";
+constexpr char TAG[] = "USBTask";
 }
 
 USBTask::USBTask() = default;

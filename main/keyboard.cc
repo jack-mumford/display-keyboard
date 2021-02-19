@@ -13,7 +13,7 @@
 #include "lm8330_registers.h"
 
 namespace {
-constexpr char TAG[] = "kbd_kbd";
+constexpr char TAG[] = "Keyboard";
 constexpr uint8_t kSlaveAddress = 0x88;  // I2C address of LM8330 IC.
 constexpr uint8_t k12msec = 0x80;
 constexpr uint8_t kInvalidEventCode = 0x7F;

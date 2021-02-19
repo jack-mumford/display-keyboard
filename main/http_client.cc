@@ -8,7 +8,7 @@
 #include <esp_tls.h>
 
 namespace {
-constexpr char TAG[] = "kbd_httpc";
+constexpr char TAG[] = "HTTPClient";
 }  // namespace
 
 esp_http_client_config_t HTTPClient::CreateClientConfig(

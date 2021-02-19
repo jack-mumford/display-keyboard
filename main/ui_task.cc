@@ -18,7 +18,7 @@ namespace {
 constexpr uint32_t kStackDepthWords = 16 * 1024;
 constexpr uint64_t kMaxMainLoopWaitMSecs = 100;
 constexpr uint32_t kMinMainLoopWaitMSecs = 10;
-constexpr char TAG[] = "UI";
+constexpr char TAG[] = "UITask";
 
 // Make sure min wait time is at least one tick.
 static_assert((kMinMainLoopWaitMSecs / portTICK_PERIOD_MS) > 0);

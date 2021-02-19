@@ -13,7 +13,7 @@
 
 namespace {
 
-constexpr char TAG[] = "kbd_main";
+constexpr char TAG[] = "App";
 
 void WaitForDebugMonitor() {
   // Poor man's way of waiting till the monitor has connected.

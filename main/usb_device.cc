@@ -29,7 +29,7 @@ static_assert(sizeof(ConfigDescriptors) ==
               sizeof(tusb_desc_configuration_t) +
                   sizeof(HID::kHIDDescriptorConfig));
 
-constexpr char TAG[] = "kbd_usb";
+constexpr char TAG[] = "USB";
 // TODO: These are from random.org. Need to get actual VID/PID numbers to
 //       avoid conflicts with other products.
 constexpr uint16_t kVendorID = 0xae9b;

@@ -19,7 +19,7 @@
 
 namespace {
 
-constexpr char TAG[] = "Main";
+constexpr char TAG[] = "MainTask";
 
 MainTask* g_main_task;
 

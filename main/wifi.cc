@@ -10,7 +10,7 @@
 #include "event_ids.h"
 
 namespace {
-constexpr char TAG[] = "kbd_wifi";
+constexpr char TAG[] = "WiFi";
 constexpr size_t kMaxSSIDLen = 31;
 constexpr size_t kMaxKeyLen = 63;
 constexpr int kMaxNumConnectRetry = 10;
