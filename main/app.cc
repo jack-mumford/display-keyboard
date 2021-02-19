@@ -18,7 +18,6 @@
 #include "config_reader.h"
 #include "event_ids.h"
 #include "gpio_pins.h"
-#include "http_server.h"
 #include "keyboard_simulator_task.h"
 #include "keyboard_task.h"
 #include "led_controller.h"
@@ -54,14 +53,11 @@ esp_err_t InitNVRAM() {
 }  // namespace
 
 App::App()
-    : https_server_(new HTTPServer()),
-      led_controller_(new LEDController(kActivityGPIO)),
+    : led_controller_(new LEDController(kActivityGPIO)),
       event_group_(xEventGroupCreate()),
       wifi_(new WiFi(event_group_)),
-      spotify_(new Spotify(&config_,
-                           https_server_.get(),
-                           wifi_.get(),
-                           event_group_)) {
+      spotify_(
+          new Spotify(&config_, &https_server_, wifi_.get(), event_group_)) {
   g_app = this;
 }
 

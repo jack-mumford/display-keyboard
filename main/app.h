@@ -8,6 +8,7 @@
 
 #include "config.h"
 #include "filesystem.h"
+#include "http_server.h"
 
 class HTTPServer;
 class Keyboard;
@@ -34,7 +35,7 @@ class App {
 
   Config config_;                                  // Application config data.
   Filesystem filesystem_;                          // Filesystem object.
-  std::unique_ptr<HTTPServer> https_server_;       // Local HTTPS server.
+  HTTPServer https_server_;                        // Local HTTPS server.
   std::unique_ptr<LEDController> led_controller_;  // Set all LED's.
   EventGroupHandle_t event_group_;                 // Application events.
   std::unique_ptr<WiFi> wifi_;                     // Controls WiFi.
