@@ -28,10 +28,7 @@ UITask* g_ui_task = nullptr;
 
 }  // namespace
 
-UITask::UITask()
-    : mutex_(xSemaphoreCreateMutex()),
-      main_display_(new MainDisplay(320, 240)),
-      volume_display_(new VolumeDisplay()) {}
+UITask::UITask() : mutex_(xSemaphoreCreateMutex()), main_display_(320, 240) {}
 
 // static
 esp_err_t UITask::Start() {
@@ -44,8 +41,6 @@ esp_err_t UITask::Start() {
 
 esp_err_t UITask::Initialize() {
   ESP_LOGD(TAG, "Initializing UI task");
-  if (!main_display_ || !volume_display_)
-    return ESP_ERR_NO_MEM;
 
   // Create a new task for LVGL drawing. Don't believe this needs to
   // be pinned to a single core, but doing so on a dual-core MCU
@@ -64,8 +59,8 @@ void IRAM_ATTR UITask::Run() {
   lv_png_init();
   lv_split_jpeg_init();
 
-  ESP_ERROR_CHECK(main_display_->Initialize());
-  ESP_ERROR_CHECK(volume_display_->Initialize());
+  ESP_ERROR_CHECK(main_display_.Initialize());
+  ESP_ERROR_CHECK(volume_display_.Initialize());
 
   int vol = 0;
   int vol_increment = 1;
@@ -84,7 +79,7 @@ void IRAM_ATTR UITask::Run() {
         vol_increment = -1;
       }
 
-      volume_display_->SetVolume(vol);
+      volume_display_.SetVolume(vol);
     }
 
 #if 0
@@ -104,7 +99,7 @@ void IRAM_ATTR UITask::Run() {
 #endif
 
     bool release_mutex = xSemaphoreTake(mutex_, portMAX_DELAY);
-    uint32_t wait_msecs = main_display_->HandleTask() / 1000;
+    uint32_t wait_msecs = main_display_.HandleTask() / 1000;
     if (release_mutex)
       xSemaphoreGive(mutex_);
     if (wait_msecs < kMinMainLoopWaitMSecs)
@@ -127,7 +122,7 @@ void IRAM_ATTR UITask::TaskFunc(void* arg) {
 void UITask::SetWiFiStatus(WiFiStatus status) {
   const bool release_mutex = xSemaphoreTake(g_ui_task->mutex_, portMAX_DELAY);
   g_ui_task->wifi_status_ = status;
-  g_ui_task->main_display_->SetWiFiStatus(status);
+  g_ui_task->main_display_.SetWiFiStatus(status);
   if (release_mutex)
     xSemaphoreGive(g_ui_task->mutex_);
 }

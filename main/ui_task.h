@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
@@ -9,9 +7,8 @@
 #include <esp_err.h>
 
 #include "event_ids.h"
-
-class MainDisplay;
-class VolumeDisplay;
+#include "main_display.h"
+#include "volume_display.h"
 
 /**
  * The task responsible for doing **all** UI rendering to screens.
@@ -36,8 +33,8 @@ class UITask {
   void IRAM_ATTR Run();
 
   SemaphoreHandle_t mutex_;
-  std::unique_ptr<MainDisplay> main_display_;
-  std::unique_ptr<VolumeDisplay> volume_display_;
+  MainDisplay main_display_;
+  VolumeDisplay volume_display_;
   TaskHandle_t task_ = nullptr;
   WiFiStatus wifi_status_ = WiFiStatus::Offline;
 };
