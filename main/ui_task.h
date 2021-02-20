@@ -8,13 +8,10 @@
 
 #include <esp_err.h>
 
+#include "event_ids.h"
+
 class Display;
 class VolumeDisplay;
-
-enum class WiFiStatus {
-  Offline,
-  Online,
-};
 
 /**
  * The task responsible for doing **all** UI rendering to screens.
@@ -39,7 +36,7 @@ class UITask {
   void IRAM_ATTR Run();
 
   SemaphoreHandle_t mutex_;
-  std::unique_ptr<Display> display_;
+  std::unique_ptr<Display> main_display_;
   std::unique_ptr<VolumeDisplay> volume_display_;
   TaskHandle_t task_ = nullptr;
   WiFiStatus wifi_status_ = WiFiStatus::Offline;

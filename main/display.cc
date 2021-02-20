@@ -142,3 +142,7 @@ bool Display::Update() {
   screen_->Update();
   return true;
 }
+
+void Display::SetWiFiStatus(WiFiStatus status) {
+  screen_->SetWiFiStatus(status);
+}

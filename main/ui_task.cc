@@ -30,7 +30,7 @@ UITask* g_ui_task = nullptr;
 
 UITask::UITask()
     : mutex_(xSemaphoreCreateMutex()),
-      display_(new Display(320, 240)),
+      main_display_(new Display(320, 240)),
       volume_display_(new VolumeDisplay()) {}
 
 // static
@@ -44,10 +44,10 @@ esp_err_t UITask::Start() {
 
 esp_err_t UITask::Initialize() {
   ESP_LOGD(TAG, "Initializing UI task");
-  if (!display_ || !volume_display_)
+  if (!main_display_ || !volume_display_)
     return ESP_ERR_NO_MEM;
 
-  esp_err_t err = display_->Initialize();
+  esp_err_t err = main_display_->Initialize();
   if (err != ESP_OK)
     return err;
 
@@ -68,20 +68,14 @@ void IRAM_ATTR UITask::Run() {
   lv_png_init();
   lv_split_jpeg_init();
 
-  ESP_ERROR_CHECK(display_->Initialize());
+  ESP_ERROR_CHECK(main_display_->Initialize());
   ESP_ERROR_CHECK(volume_display_->Initialize());
 
   int vol = 0;
   int vol_increment = 1;
   uint32_t loop_count = 0;
-  WiFiStatus current_wifi_status = wifi_status_;
 
   while (true) {
-    bool release_mutex = xSemaphoreTake(mutex_, portMAX_DELAY);
-    current_wifi_status = wifi_status_;
-    if (release_mutex)
-      xSemaphoreGive(mutex_);
-
     loop_count++;
     // Simple test to bounce volume up and down.
     if ((loop_count % 10) == 0) {
@@ -113,7 +107,10 @@ void IRAM_ATTR UITask::Run() {
     }
 #endif
 
-    uint32_t wait_msecs = display_->HandleTask() / 1000;
+    bool release_mutex = xSemaphoreTake(mutex_, portMAX_DELAY);
+    uint32_t wait_msecs = main_display_->HandleTask() / 1000;
+    if (release_mutex)
+      xSemaphoreGive(mutex_);
     if (wait_msecs < kMinMainLoopWaitMSecs)
       wait_msecs = kMinMainLoopWaitMSecs;
     else if (wait_msecs > kMaxMainLoopWaitMSecs)
@@ -134,6 +131,7 @@ void IRAM_ATTR UITask::TaskFunc(void* arg) {
 void UITask::SetWiFiStatus(WiFiStatus status) {
   const bool release_mutex = xSemaphoreTake(g_ui_task->mutex_, portMAX_DELAY);
   g_ui_task->wifi_status_ = status;
+  g_ui_task->main_display_->SetWiFiStatus(status);
   if (release_mutex)
     xSemaphoreGive(g_ui_task->mutex_);
 }

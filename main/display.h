@@ -6,6 +6,8 @@
 #include <esp_timer.h>
 #include <lvgl.h>
 
+#include "event_ids.h"
+
 class MainScreen;
 
 class Display {
@@ -17,6 +19,7 @@ class Display {
   bool Update();
   uint32_t HandleTask();
   lv_obj_t* screen() { return lv_screen_; }
+  void SetWiFiStatus(WiFiStatus status);
 
  private:
   static void TickTimerCb(void* arg);
