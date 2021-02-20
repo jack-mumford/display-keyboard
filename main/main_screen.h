@@ -8,7 +8,7 @@
 
 class MainScreen : public Screen {
  public:
-  MainScreen(Display& display);
+  MainScreen(MainDisplay& display);
   ~MainScreen();
 
   esp_err_t Initialize();

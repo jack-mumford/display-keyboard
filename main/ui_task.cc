@@ -10,7 +10,7 @@
 #include <lvgl.h>
 #include <lvgl_helpers.h>
 
-#include "display.h"
+#include "main_display.h"
 #include "volume_display.h"
 
 namespace {
@@ -30,7 +30,7 @@ UITask* g_ui_task = nullptr;
 
 UITask::UITask()
     : mutex_(xSemaphoreCreateMutex()),
-      main_display_(new Display(320, 240)),
+      main_display_(new MainDisplay(320, 240)),
       volume_display_(new VolumeDisplay()) {}
 
 // static

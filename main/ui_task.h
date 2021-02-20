@@ -10,7 +10,7 @@
 
 #include "event_ids.h"
 
-class Display;
+class MainDisplay;
 class VolumeDisplay;
 
 /**
@@ -36,7 +36,7 @@ class UITask {
   void IRAM_ATTR Run();
 
   SemaphoreHandle_t mutex_;
-  std::unique_ptr<Display> main_display_;
+  std::unique_ptr<MainDisplay> main_display_;
   std::unique_ptr<VolumeDisplay> volume_display_;
   TaskHandle_t task_ = nullptr;
   WiFiStatus wifi_status_ = WiFiStatus::Offline;

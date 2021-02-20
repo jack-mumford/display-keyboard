@@ -10,10 +10,10 @@
 
 class MainScreen;
 
-class Display {
+class MainDisplay {
  public:
-  Display(uint16_t width, uint16_t height);
-  ~Display();
+  MainDisplay(uint16_t width, uint16_t height);
+  ~MainDisplay();
 
   esp_err_t Initialize();
   bool Update();

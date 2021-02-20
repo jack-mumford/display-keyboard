@@ -1,14 +1,14 @@
 #pragma once
 
-class Display;
+class MainDisplay;
 
 class Screen {
  public:
-  Screen(Display& display) : display_(display) {}
+  Screen(MainDisplay& display) : display_(display) {}
 
-  Display& disp() const { return display_; }
+  MainDisplay& disp() const { return display_; }
   virtual void Update() = 0;
 
  protected:
-  Display& display_;
+  MainDisplay& display_;
 };

@@ -1,4 +1,4 @@
-#include "display.h"
+#include "main_display.h"
 
 #include <esp_err.h>
 #include <esp_idf_version.h>
@@ -14,7 +14,7 @@
 
 namespace {
 
-const char TAG[] = "Disp";
+const char TAG[] = "MainDisp";
 const uint64_t kTickTimerPeriodUsec = 1000;
 
 bool my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data) {
@@ -23,7 +23,7 @@ bool my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data) {
 
 }  // namespace
 
-Display::Display(uint16_t width, uint16_t height)
+MainDisplay::MainDisplay(uint16_t width, uint16_t height)
     : initialized_(false),
       last_tick_time_(-1),
       tick_timer_(nullptr),
@@ -35,20 +35,20 @@ Display::Display(uint16_t width, uint16_t height)
       lv_screen_(nullptr),
       input_driver_(nullptr) {}
 
-Display::~Display() = default;
+MainDisplay::~MainDisplay() = default;
 
-void Display::Tick() {
+void MainDisplay::Tick() {
   int64_t now = esp_timer_get_time();
   uint32_t tick_period = last_tick_time_ == -1 ? 0 : now - last_tick_time_;
   lv_tick_inc(tick_period);
   last_tick_time_ = now;
 }
 
-void Display::TickTimerCb(void* arg) {
-  static_cast<Display*>(arg)->Tick();
+void MainDisplay::TickTimerCb(void* arg) {
+  static_cast<MainDisplay*>(arg)->Tick();
 }
 
-esp_err_t Display::CreateTickTimer() {
+esp_err_t MainDisplay::CreateTickTimer() {
   const esp_timer_create_args_t timer_args = {
     .callback = TickTimerCb,
     .arg = this,
@@ -69,7 +69,7 @@ esp_err_t Display::CreateTickTimer() {
   return err;
 }
 
-esp_err_t Display::Initialize() {
+esp_err_t MainDisplay::Initialize() {
   ESP_LOGD(TAG, "Initializing display");
   if (initialized_) {
     ESP_LOGW(TAG, "Already initialized");
@@ -126,11 +126,11 @@ esp_err_t Display::Initialize() {
   return ESP_OK;
 }
 
-uint32_t Display::HandleTask() {
+uint32_t MainDisplay::HandleTask() {
   return lv_task_handler();
 }
 
-bool Display::Update() {
+bool MainDisplay::Update() {
   if (!initialized_) {
     ESP_LOGE(TAG, "Display not initialized (or failed).");
     return false;
@@ -143,6 +143,6 @@ bool Display::Update() {
   return true;
 }
 
-void Display::SetWiFiStatus(WiFiStatus status) {
+void MainDisplay::SetWiFiStatus(WiFiStatus status) {
   screen_->SetWiFiStatus(status);
 }

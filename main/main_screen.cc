@@ -1,17 +1,17 @@
+#include "main_screen.h"
 
 #include <esp_log.h>
 #include <lv_core/lv_disp.h>
 #include <lv_widgets/lv_img.h>
 #include <lv_widgets/lv_label.h>
 
-#include "display.h"
-#include "main_screen.h"
+#include "main_display.h"
 
 namespace {
 constexpr char TAG[] = "MainScreen";
 }
 
-MainScreen::MainScreen(Display& display) : Screen(display) {}
+MainScreen::MainScreen(MainDisplay& display) : Screen(display) {}
 
 esp_err_t MainScreen::Initialize() {
   constexpr int kStatusBarHeight = 13;
