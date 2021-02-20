@@ -47,10 +47,6 @@ esp_err_t UITask::Initialize() {
   if (!main_display_ || !volume_display_)
     return ESP_ERR_NO_MEM;
 
-  esp_err_t err = main_display_->Initialize();
-  if (err != ESP_OK)
-    return err;
-
   // Create a new task for LVGL drawing. Don't believe this needs to
   // be pinned to a single core, but doing so on a dual-core MCU
   // will reserve the other core for WiFi and other activities.
