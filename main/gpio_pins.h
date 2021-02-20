@@ -2,6 +2,8 @@
 
 #include <hal/gpio_types.h>
 
+#define DRAW_VOLUME_DISPLAY 1
+
 #define BOARD_FEATHERS2 1
 #define BOARD_CUCUMBER 0
 

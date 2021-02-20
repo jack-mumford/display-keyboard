@@ -97,7 +97,8 @@ esp_err_t MainTask::InitializSNTP() {
 }
 
 esp_err_t MainTask::InitializeI2C() {
-  // The volume display (SSD1306) is on port 0. It supports 100kHz and 400kHz.
+// The volume display (SSD1306) is on port 0. It supports 100kHz and 400kHz.
+#if DRAW_VOLUME_DISPLAY == 1
   constexpr i2c::Master::InitParams i2c_0_config = {
       .i2c_bus = I2C_NUM_0,
       .sda_gpio = kI2C0_SDA_GPIO,
@@ -108,6 +109,7 @@ esp_err_t MainTask::InitializeI2C() {
   };
   if (!i2c::Master::Initialize(i2c_0_config))
     return ESP_FAIL;
+#endif
 
   // The keyboard IC (LM8330) is on port 1. It supports 100kHz and 400kHz.
   constexpr i2c::Master::InitParams i2c_1_config = {

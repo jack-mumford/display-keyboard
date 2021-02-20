@@ -93,14 +93,16 @@ void IRAM_ATTR UITask::Run() {
   lv_split_jpeg_init();
 
   ESP_ERROR_CHECK(main_display_.Initialize());
-  ESP_ERROR_CHECK(volume_display_.Initialize());
-  ESP_ERROR_CHECK(CreateTickTimer());
-
+#if DRAW_VOLUME_DISPLAY == 1
   int vol = 0;
   int vol_increment = 1;
   uint32_t loop_count = 0;
+  ESP_ERROR_CHECK(volume_display_.Initialize());
+#endif
+  ESP_ERROR_CHECK(CreateTickTimer());
 
   while (true) {
+#if DRAW_VOLUME_DISPLAY == 1
     loop_count++;
     // Simple test to bounce volume up and down.
     if ((loop_count % 10) == 0) {
@@ -115,6 +117,7 @@ void IRAM_ATTR UITask::Run() {
 
       volume_display_.SetVolume(vol);
     }
+#endif
 
 #if 0
     if (uptate_display_time_) {
