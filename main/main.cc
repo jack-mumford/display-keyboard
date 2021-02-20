@@ -15,12 +15,14 @@ namespace {
 
 constexpr char TAG[] = "App";
 
+#if (BOARD_FEATHERS2 == 0)
 void WaitForDebugMonitor() {
   // Poor man's way of waiting till the monitor has connected.
   const TickType_t kStartupDelay = 1000 / portTICK_PERIOD_MS;
   ESP_LOGI(TAG, "Waiting for debug monitor connection");
   vTaskDelay(kStartupDelay);
 }
+#endif  // BOARD_FEATHERS2
 
 void LogHardwareInfo() {
   esp_chip_info_t chip_info;
@@ -43,7 +45,11 @@ void LogHardwareInfo() {
 }  // namespace
 
 extern "C" void app_main(void) {
+#if (BOARD_FEATHERS2 == 0)
+  // The serial UART is used for Feather S2 debugging (which is always setup)
+  // so no need to wait.
   WaitForDebugMonitor();
+#endif
 
   ESP_LOGI(TAG, "Keyboard app!");
   LogHardwareInfo();
