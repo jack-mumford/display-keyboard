@@ -35,8 +35,7 @@ esp_err_t InitNVRAM() {
 
 // static
 void SNTPSyncEventHandler(struct timeval* tv) {
-  if (g_main_task) {
-  }
+  ESP_LOGD(TAG, "NTP sync complete.");
 }
 
 }  // namespace

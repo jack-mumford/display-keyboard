@@ -14,6 +14,7 @@
 #include "volume_display.h"
 
 namespace {
+
 constexpr uint32_t kStackDepthWords = 16 * 1024;
 constexpr uint64_t kMaxMainLoopWaitMSecs = 100;
 constexpr uint32_t kMinMainLoopWaitMSecs = 10;
@@ -22,6 +23,9 @@ constexpr char TAG[] = "UI";
 // Make sure min wait time is at least one tick.
 static_assert((kMinMainLoopWaitMSecs / portTICK_PERIOD_MS) > 0);
 static_assert(kMaxMainLoopWaitMSecs > kMinMainLoopWaitMSecs);
+
+UITask* g_ui_task = nullptr;
+
 }  // namespace
 
 UITask::UITask()
@@ -29,14 +33,11 @@ UITask::UITask()
 
 // static
 esp_err_t UITask::Start() {
-  static UITask* task = nullptr;
-
-  ESP_LOGD(TAG, "Starting UI task");
-  if (task)
+  if (g_ui_task)
     return ESP_FAIL;
-
-  task = new UITask();
-  return task->Initialize();
+  ESP_LOGD(TAG, "Starting UI task");
+  g_ui_task = new UITask();
+  return g_ui_task->Initialize();
 }
 
 esp_err_t UITask::Initialize() {
