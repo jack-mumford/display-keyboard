@@ -218,18 +218,20 @@ void MainTask::UpdateSpotify() {
 void IRAM_ATTR MainTask::Run() {
   ESP_LOGW(TAG, "In Wi-Fi status task handler.");
   while (true) {
-    EventBits_t bits = xEventGroupWaitBits(event_group_, EVENT_ALL, pdFALSE,
-                                           pdFALSE, portMAX_DELAY);
-    xEventGroupClearBits(event_group_, EVENT_ALL);
+    EventBits_t bits =
+        xEventGroupWaitBits(event_group_, EVENT_ALL, /*xClearOnExit=*/pdTRUE,
+                            /*xWaitForAllBits=*/pdFALSE, portMAX_DELAY);
     if (bits & EVENT_NETWORK_GOT_IP) {
       ESP_LOGD(TAG, "Wi-Fi is connected.");
       online_ = true;
+      UITask::SetWiFiStatus(WiFiStatus::Online);
       if (!sntp_initialized_)
         InitializSNTP();
       UpdateSpotify();
     } else if (bits & EVENT_NETWORK_DISCONNECTED) {
       ESP_LOGW(TAG, "Wi-Fi connection failed.");
       online_ = false;
+      UITask::SetWiFiStatus(WiFiStatus::Offline);
       // TODO: Set a timer so that we can retry in a little while.
     }
     if (bits & EVENT_SPOTIFY_GOT_AUTHORIZATION_CODE) {

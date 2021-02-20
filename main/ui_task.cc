@@ -29,7 +29,9 @@ UITask* g_ui_task = nullptr;
 }  // namespace
 
 UITask::UITask()
-    : display_(new Display(320, 240)), volume_display_(new VolumeDisplay()) {}
+    : mutex_(xSemaphoreCreateMutex()),
+      display_(new Display(320, 240)),
+      volume_display_(new VolumeDisplay()) {}
 
 // static
 esp_err_t UITask::Start() {
@@ -68,10 +70,17 @@ void IRAM_ATTR UITask::Run() {
   int vol = 0;
   int vol_increment = 1;
   uint32_t loop_count = 0;
+  WiFiStatus current_wifi_status = wifi_status_;
 
   // TODO: Move this.
   display_->Update();
   while (true) {
+
+    bool release_mutex = xSemaphoreTake(mutex_, portMAX_DELAY);
+    current_wifi_status = wifi_status_;
+    if (release_mutex)
+      xSemaphoreGive(mutex_);
+
     loop_count++;
     // Simple test to bounce volume up and down.
     if ((loop_count % 10) == 0) {
@@ -118,4 +127,12 @@ void IRAM_ATTR UITask::Run() {
 // static
 void IRAM_ATTR UITask::TaskFunc(void* arg) {
   static_cast<UITask*>(arg)->Run();
+}
+
+// static
+void UITask::SetWiFiStatus(WiFiStatus status) {
+  const bool release_mutex = xSemaphoreTake(g_ui_task->mutex_, portMAX_DELAY);
+  g_ui_task->wifi_status_ = status;
+  if (release_mutex)
+    xSemaphoreGive(g_ui_task->mutex_);
 }
