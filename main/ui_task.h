@@ -5,6 +5,7 @@
 #include <freertos/task.h>
 
 #include <esp_err.h>
+#include <esp_timer.h>
 
 #include "event_ids.h"
 #include "main_display.h"
@@ -26,9 +27,12 @@ class UITask {
 
  private:
   static void IRAM_ATTR TaskFunc(void* arg);
+  static void TickTimerCb(void* arg);
 
   UITask();
 
+  esp_err_t CreateTickTimer();
+  void Tick();
   esp_err_t Initialize();
   void IRAM_ATTR Run();
 
@@ -36,5 +40,7 @@ class UITask {
   MainDisplay main_display_;
   VolumeDisplay volume_display_;
   TaskHandle_t task_ = nullptr;
+  esp_timer_handle_t tick_timer_ = nullptr;
   WiFiStatus wifi_status_ = WiFiStatus::Offline;
+  int64_t last_tick_time_ = -1;
 };

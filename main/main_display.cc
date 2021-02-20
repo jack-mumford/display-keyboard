@@ -1,9 +1,10 @@
 #include "main_display.h"
 
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+
 #include <esp_err.h>
 #include <esp_idf_version.h>
 #include <esp_log.h>
-#include <esp_timer.h>
 #include <lv_lib_png/lv_png.h>
 #include <lv_lib_split_jpg/lv_sjpg.h>
 #include <lvgl.h>
@@ -15,7 +16,6 @@
 namespace {
 
 const char TAG[] = "MainDisp";
-const uint64_t kTickTimerPeriodUsec = 1000;
 
 bool my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data) {
   return false;
@@ -26,8 +26,6 @@ bool my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data) {
 MainDisplay::MainDisplay(uint16_t width, uint16_t height)
     : screen_(new MainScreen(*this)),
       initialized_(false),
-      last_tick_time_(-1),
-      tick_timer_(nullptr),
       width_(width),
       height_(height),
       display_buf_1_(new lv_color_t[DISP_BUF_SIZE]),
@@ -37,38 +35,6 @@ MainDisplay::MainDisplay(uint16_t width, uint16_t height)
       input_driver_(nullptr) {}
 
 MainDisplay::~MainDisplay() = default;
-
-void MainDisplay::Tick() {
-  int64_t now = esp_timer_get_time();
-  uint32_t tick_period = last_tick_time_ == -1 ? 0 : now - last_tick_time_;
-  lv_tick_inc(tick_period);
-  last_tick_time_ = now;
-}
-
-void MainDisplay::TickTimerCb(void* arg) {
-  static_cast<MainDisplay*>(arg)->Tick();
-}
-
-esp_err_t MainDisplay::CreateTickTimer() {
-  const esp_timer_create_args_t timer_args = {
-    .callback = TickTimerCb,
-    .arg = this,
-    .dispatch_method = ESP_TIMER_TASK,
-    .name = "RadioDisplay::TickTimer",
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
-    .skip_unhandled_events = true,
-#endif
-  };
-  esp_err_t err = esp_timer_create(&timer_args, &tick_timer_);
-  if (err != ESP_OK) {
-    ESP_LOGE(TAG, "Unable to create the periodic tick timer");
-    return err;
-  }
-  err = esp_timer_start_periodic(tick_timer_, kTickTimerPeriodUsec);
-  if (err != ESP_OK)
-    ESP_LOGE(TAG, "Unable to install the periodic tick timer");
-  return err;
-}
 
 esp_err_t MainDisplay::Initialize() {
   ESP_LOGD(TAG, "Initializing display");
@@ -114,9 +80,6 @@ esp_err_t MainDisplay::Initialize() {
 
   lv_screen_ = lv_disp_get_scr_act(disp_driver_);
   if (!lv_screen_)
-    return ESP_FAIL;
-
-  if (CreateTickTimer() != ESP_OK)
     return ESP_FAIL;
 
   if (lvgl::Drive::Initialize() != ESP_OK)

@@ -1,6 +1,6 @@
 #include "ui_task.h"
 
-#define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
 #include <esp_log.h>
 #include <freertos/FreeRTOS.h>
@@ -18,6 +18,7 @@ namespace {
 constexpr uint32_t kStackDepthWords = 16 * 1024;
 constexpr uint64_t kMaxMainLoopWaitMSecs = 100;
 constexpr uint32_t kMinMainLoopWaitMSecs = 10;
+constexpr uint64_t kTickTimerPeriodUsec = 1000;
 constexpr char TAG[] = "UITask";
 
 // Make sure min wait time is at least one tick.
@@ -37,6 +38,38 @@ esp_err_t UITask::Start() {
   ESP_LOGD(TAG, "Starting UI task");
   g_ui_task = new UITask();
   return g_ui_task->Initialize();
+}
+
+void UITask::Tick() {
+  int64_t now = esp_timer_get_time();
+  uint32_t tick_period = last_tick_time_ == -1 ? 0 : now - last_tick_time_;
+  lv_tick_inc(tick_period);
+  last_tick_time_ = now;
+}
+
+void UITask::TickTimerCb(void* arg) {
+  static_cast<UITask*>(arg)->Tick();
+}
+
+esp_err_t UITask::CreateTickTimer() {
+  const esp_timer_create_args_t timer_args = {
+    .callback = TickTimerCb,
+    .arg = this,
+    .dispatch_method = ESP_TIMER_TASK,
+    .name = "RadioDisplay::TickTimer",
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
+    .skip_unhandled_events = true,
+#endif
+  };
+  esp_err_t err = esp_timer_create(&timer_args, &tick_timer_);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "Unable to create the periodic tick timer");
+    return err;
+  }
+  err = esp_timer_start_periodic(tick_timer_, kTickTimerPeriodUsec);
+  if (err != ESP_OK)
+    ESP_LOGE(TAG, "Unable to start the periodic tick timer");
+  return err;
 }
 
 esp_err_t UITask::Initialize() {
@@ -61,6 +94,7 @@ void IRAM_ATTR UITask::Run() {
 
   ESP_ERROR_CHECK(main_display_.Initialize());
   ESP_ERROR_CHECK(volume_display_.Initialize());
+  ESP_ERROR_CHECK(CreateTickTimer());
 
   int vol = 0;
   int vol_increment = 1;
