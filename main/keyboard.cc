@@ -25,6 +25,7 @@ Keyboard::Keyboard(i2c::Master i2c_master)
 Keyboard::~Keyboard() = default;
 
 esp_err_t Keyboard::Initialize() {
+  ESP_LOGD(TAG, "Initializing keyboard");
   esp_err_t err = WriteByte(Register::KBDSETTLE, k12msec);
   if (err != ESP_OK)
     return err;
@@ -111,6 +112,8 @@ esp_err_t Keyboard::Initialize() {
                                    });
   if (err != ESP_OK)
     return err;
+
+  ESP_LOGD(TAG, "keyboard successfully initialized");
   return ESP_OK;
 }
 

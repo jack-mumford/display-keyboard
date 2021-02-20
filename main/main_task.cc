@@ -163,9 +163,8 @@ esp_err_t MainTask::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  err = KeyboardTask::Start();
-  if (err != ESP_OK)
-    return err;
+  // TODO: Fail on error.
+  ESP_ERROR_CHECK_WITHOUT_ABORT(KeyboardTask::Start());
 
   // Just for testing.
   KeyboardSimulatorTask::Start();

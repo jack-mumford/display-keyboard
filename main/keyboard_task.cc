@@ -44,10 +44,11 @@ esp_err_t KeyboardTask::Initialize() {
   // https://www.freertos.org/FAQMem.html#StackSize
   constexpr uint32_t kStackDepthWords = 2048;
 
-  // TODO: This should be a checked error.
-  ESP_ERROR_CHECK_WITHOUT_ABORT(keyboard_.HandleEvents());
-
   esp_err_t err = InstallKeyboardISR();
+  if (err != ESP_OK)
+    return err;
+
+  err = keyboard_.Initialize();
   if (err != ESP_OK)
     return err;
 
@@ -58,7 +59,7 @@ esp_err_t KeyboardTask::Initialize() {
 }
 
 void IRAM_ATTR KeyboardTask::Run() {
-  ESP_LOGW(TAG, "In keyboard simulator task.");
+  ESP_LOGW(TAG, "In keyboard task.");
   while (true) {
     EventBits_t bits = xEventGroupWaitBits(event_group_, EVENT_ALL, pdFALSE,
                                            pdFALSE, portMAX_DELAY);
