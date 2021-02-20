@@ -99,7 +99,7 @@ void IRAM_ATTR UITask::Run() {
 #endif
 
     bool release_mutex = xSemaphoreTake(mutex_, portMAX_DELAY);
-    uint32_t wait_msecs = main_display_.HandleTask() / 1000;
+    uint32_t wait_msecs = lv_task_handler() / 1000;
     if (release_mutex)
       xSemaphoreGive(mutex_);
     if (wait_msecs < kMinMainLoopWaitMSecs)

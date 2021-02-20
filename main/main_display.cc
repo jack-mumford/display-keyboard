@@ -131,10 +131,6 @@ esp_err_t MainDisplay::Initialize() {
   return ESP_OK;
 }
 
-uint32_t MainDisplay::HandleTask() {
-  return lv_task_handler();
-}
-
 void MainDisplay::SetWiFiStatus(WiFiStatus status) {
   screen_->SetWiFiStatus(status);
 }
