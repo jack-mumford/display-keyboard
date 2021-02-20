@@ -23,11 +23,9 @@ bool my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data) {
 
 }  // namespace
 
-MainDisplay::MainDisplay(uint16_t width, uint16_t height)
+MainDisplay::MainDisplay()
     : screen_(new MainScreen(*this)),
       initialized_(false),
-      width_(width),
-      height_(height),
       display_buf_1_(new lv_color_t[DISP_BUF_SIZE]),
       display_buf_2_(new lv_color_t[DISP_BUF_SIZE]),
       disp_driver_(nullptr),

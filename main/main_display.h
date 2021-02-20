@@ -11,7 +11,7 @@ class MainScreen;
 
 class MainDisplay {
  public:
-  MainDisplay(uint16_t width, uint16_t height);
+  MainDisplay();
   ~MainDisplay();
 
   esp_err_t Initialize();
@@ -21,8 +21,6 @@ class MainDisplay {
  private:
   std::unique_ptr<MainScreen> screen_;
   bool initialized_;
-  const uint16_t width_;
-  const uint16_t height_;
   std::unique_ptr<lv_color_t[]> display_buf_1_;
   std::unique_ptr<lv_color_t[]> display_buf_2_;
   lv_disp_buf_t disp_buf_;

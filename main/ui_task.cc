@@ -29,7 +29,7 @@ UITask* g_ui_task = nullptr;
 
 }  // namespace
 
-UITask::UITask() : mutex_(xSemaphoreCreateMutex()), main_display_(320, 240) {}
+UITask::UITask() : mutex_(xSemaphoreCreateMutex()) {}
 
 // static
 esp_err_t UITask::Start() {
