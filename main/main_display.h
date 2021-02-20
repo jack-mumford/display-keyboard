@@ -16,7 +16,6 @@ class MainDisplay {
   ~MainDisplay();
 
   esp_err_t Initialize();
-  bool Update();
   uint32_t HandleTask();
   lv_obj_t* screen() { return lv_screen_; }
   void SetWiFiStatus(WiFiStatus status);

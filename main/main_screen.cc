@@ -51,8 +51,6 @@ esp_err_t MainScreen::Initialize() {
 
 MainScreen::~MainScreen() = default;
 
-void MainScreen::Update() {}
-
 void MainScreen::SetWiFiStatus(WiFiStatus status) {
   if (wifi_status_ == status)
     return;

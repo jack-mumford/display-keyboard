@@ -24,7 +24,8 @@ bool my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data) {
 }  // namespace
 
 MainDisplay::MainDisplay(uint16_t width, uint16_t height)
-    : initialized_(false),
+    : screen_(new MainScreen(*this)),
+      initialized_(false),
       last_tick_time_(-1),
       tick_timer_(nullptr),
       width_(width),
@@ -121,6 +122,10 @@ esp_err_t MainDisplay::Initialize() {
   if (lvgl::Drive::Initialize() != ESP_OK)
     return ESP_FAIL;
 
+  esp_err_t err = screen_->Initialize();
+  if (err != ESP_OK)
+    return err;
+
   initialized_ = true;
   ESP_LOGD(TAG, "Display successfully initialized");
   return ESP_OK;
@@ -128,19 +133,6 @@ esp_err_t MainDisplay::Initialize() {
 
 uint32_t MainDisplay::HandleTask() {
   return lv_task_handler();
-}
-
-bool MainDisplay::Update() {
-  if (!initialized_) {
-    ESP_LOGE(TAG, "Display not initialized (or failed).");
-    return false;
-  }
-
-  if (!screen_)
-    screen_.reset(new MainScreen(*this));
-
-  screen_->Update();
-  return true;
 }
 
 void MainDisplay::SetWiFiStatus(WiFiStatus status) {

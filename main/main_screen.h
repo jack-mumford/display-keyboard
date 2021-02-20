@@ -12,7 +12,6 @@ class MainScreen : public Screen {
   ~MainScreen();
 
   esp_err_t Initialize();
-  void Update() override;
   void SetWiFiStatus(WiFiStatus status);
 
  private:
