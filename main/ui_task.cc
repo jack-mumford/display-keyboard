@@ -47,6 +47,10 @@ esp_err_t UITask::Initialize() {
   if (!display_ || !volume_display_)
     return ESP_ERR_NO_MEM;
 
+  esp_err_t err = display_->Initialize();
+  if (err != ESP_OK)
+    return err;
+
   // Create a new task for LVGL drawing. Don't believe this needs to
   // be pinned to a single core, but doing so on a dual-core MCU
   // will reserve the other core for WiFi and other activities.
@@ -72,10 +76,7 @@ void IRAM_ATTR UITask::Run() {
   uint32_t loop_count = 0;
   WiFiStatus current_wifi_status = wifi_status_;
 
-  // TODO: Move this.
-  display_->Update();
   while (true) {
-
     bool release_mutex = xSemaphoreTake(mutex_, portMAX_DELAY);
     current_wifi_status = wifi_status_;
     if (release_mutex)
