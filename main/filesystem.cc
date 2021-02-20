@@ -30,7 +30,7 @@ esp_err_t Filesystem::Initialize() {
   if (err != ESP_OK)
     ESP_LOGE(TAG, "Failed to get partition info: %s", esp_err_to_name(err));
   else
-    ESP_LOGI(TAG, "Partition size: total: %d, used: %d", total, used);
+    ESP_LOGI(TAG, "Partition size: total: %zu, used: %zu", total, used);
 
   return err;
 }

@@ -33,10 +33,10 @@ void LogHardwareInfo() {
   ESP_LOGI(TAG, "Silicon revision %u.", chip_info.revision);
 
   ESP_LOGI(
-      TAG, "%dMB %s flash", spi_flash_get_chip_size() / (1024 * 1024),
+      TAG, "%zu MB %s flash", spi_flash_get_chip_size() / (1024 * 1024),
       (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
 
-  ESP_LOGI(TAG, "Minimum free heap size: %d bytes.",
+  ESP_LOGI(TAG, "Minimum free heap size: %u bytes.",
            esp_get_minimum_free_heap_size());
 }
 

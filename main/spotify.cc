@@ -437,7 +437,7 @@ esp_err_t Spotify::GetAccessToken(TokenGrantType grant_type, string code) {
 
   cJSON_Delete(json);
 
-  ESP_LOGI(TAG, "%s access code. Refreshing in %d secs.",
+  ESP_LOGI(TAG, "%s access code. Refreshing in %u secs.",
            grant_type == TokenGrantType::Refresh ? "Refreshed" : "Got",
            expires_in_secs);
   esp_timer_start_once(token_refresh_timer_,
