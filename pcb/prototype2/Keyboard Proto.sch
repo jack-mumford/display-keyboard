@@ -384,7 +384,7 @@ Text GLabel 1950 3250 1    50   Input ~ 0
 Text GLabel 1900 4150 3    50   Input ~ 0
 GND
 Text GLabel 1500 3500 0    50   Input ~ 0
-EN
+GND
 Text GLabel 4800 5350 0    50   Input ~ 0
 SCK
 Text GLabel 1500 3600 0    50   Input ~ 0
