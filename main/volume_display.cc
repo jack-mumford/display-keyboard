@@ -32,13 +32,6 @@ esp_err_t VolumeDisplay::Initialize() {
   if (!display_buf_1_ || !display_buf_2_)
     return ESP_ERR_NO_MEM;
 
-  // The lvgl_esp32_drivers library initializes the one configured
-  // display when lvgl_driver_init() is called. We need to manually
-  // initialize supplemental drivers. Maybe that library can support
-  // more than one display type in the future. Bug added at
-  // https://github.com/lvgl/lvgl_esp32_drivers/issues/31
-  ssd1306_init();
-
   lv_disp_buf_init(&disp_buf_, display_buf_1_.get(), display_buf_2_.get(),
                    kNumBufferPixels);
 
@@ -62,5 +55,5 @@ esp_err_t VolumeDisplay::Initialize() {
 
   volume_widget_.reset(
       new VolumeWidget(screen_, 0, 0, kDisplayWidth, kDisplayHeight));
-  return ESP_OK;
+  return volume_widget_->Initialize();
 }

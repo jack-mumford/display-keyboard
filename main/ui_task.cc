@@ -9,6 +9,7 @@
 #include <lv_lib_split_jpg/lv_sjpg.h>
 #include <lvgl.h>
 #include <lvgl_helpers.h>
+#include <lvgl_tft/ssd1306.h>
 
 #include "gpio_pins.h"
 #include "main_display.h"
@@ -94,6 +95,13 @@ void IRAM_ATTR UITask::Run() {
   ESP_LOGD(TAG, "Running.");
   lv_init();
   lvgl_driver_init();
+  // The lvgl_esp32_drivers library initializes the one configured
+  // display when lvgl_driver_init() is called. We need to manually
+  // initialize supplemental drivers. Maybe that library can support
+  // more than one display type in the future. Bug added at
+  // https://github.com/lvgl/lvgl_esp32_drivers/issues/31
+  ssd1306_init();
+
   lv_png_init();
   lv_split_jpeg_init();
 
