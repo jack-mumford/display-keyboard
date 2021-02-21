@@ -21,7 +21,7 @@ constexpr EventBits_t EVENT_ALL = BIT0;
 
 KeyboardTask::KeyboardTask()
     : event_group_(xEventGroupCreate()),
-      keyboard_(i2c::Master(I2C_NUM_1, /*mutex=*/nullptr)) {}
+      keyboard_(i2c::Master(kKeyboardPort, /*mutex=*/nullptr)) {}
 
 KeyboardTask::~KeyboardTask() {
   if (event_group_)

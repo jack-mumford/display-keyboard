@@ -17,6 +17,10 @@
 #include "usb_hid.h"
 #include "usb_task.h"
 
+#ifndef DRAW_VOLUME_DISPLAY
+#error Define DRAW_VOLUME_DISPLAY
+#endif
+
 namespace {
 
 constexpr char TAG[] = "MainTask";
@@ -97,31 +101,33 @@ esp_err_t MainTask::InitializSNTP() {
 }
 
 esp_err_t MainTask::InitializeI2C() {
-// The volume display (SSD1306) is on port 0. It supports 100kHz and 400kHz.
-#if DRAW_VOLUME_DISPLAY == 1
+  // Used for Keyboard.
   constexpr i2c::Master::InitParams i2c_0_config = {
       .i2c_bus = I2C_NUM_0,
       .sda_gpio = kI2C0_SDA_GPIO,
       .scl_gpio = kI2C0_SCL_GPIO,
-      .clk_speed = 400000,
-      .sda_pullup_enable = false,
-      .scl_pullup_enable = false,
-  };
-  if (!i2c::Master::Initialize(i2c_0_config))
-    return ESP_FAIL;
-#endif
-
-  // The keyboard IC (LM8330) is on port 1. It supports 100kHz and 400kHz.
-  constexpr i2c::Master::InitParams i2c_1_config = {
-      .i2c_bus = I2C_NUM_1,
-      .sda_gpio = kI2C1_SDA_GPIO,
-      .scl_gpio = kI2C1_SCL_GPIO,
       .clk_speed = 100000,
       .sda_pullup_enable = false,
       .scl_pullup_enable = false,
   };
-  if (!i2c::Master::Initialize(i2c_1_config))
+  if (!i2c::Master::Initialize(i2c_0_config)) {
+    ESP_LOGE(TAG, "Can't initialize I2C0");
     return ESP_FAIL;
+  }
+
+  // Used for volume display.
+  constexpr i2c::Master::InitParams i2c_1_config = {
+      .i2c_bus = I2C_NUM_1,
+      .sda_gpio = kI2C1_SDA_GPIO,
+      .scl_gpio = kI2C1_SCL_GPIO,
+      .clk_speed = 400000,
+      .sda_pullup_enable = false,
+      .scl_pullup_enable = false,
+  };
+  if (!i2c::Master::Initialize(i2c_1_config)) {
+    ESP_LOGE(TAG, "Can't initialize I2C1");
+    return ESP_FAIL;
+  }
 
   return ESP_OK;
 }

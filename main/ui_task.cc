@@ -10,8 +10,13 @@
 #include <lvgl.h>
 #include <lvgl_helpers.h>
 
+#include "gpio_pins.h"
 #include "main_display.h"
 #include "volume_display.h"
+
+#ifndef DRAW_VOLUME_DISPLAY
+#error Define DRAW_VOLUME_DISPLAY
+#endif
 
 namespace {
 
@@ -56,7 +61,7 @@ esp_err_t UITask::CreateTickTimer() {
     .callback = TickTimerCb,
     .arg = this,
     .dispatch_method = ESP_TIMER_TASK,
-    .name = "RadioDisplay::TickTimer",
+    .name = "UITask::TickTimer",
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
     .skip_unhandled_events = true,
 #endif
