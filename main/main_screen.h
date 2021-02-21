@@ -16,6 +16,7 @@ class MainScreen : public Screen {
 
  private:
   lv_obj_t* lbl_test_ = nullptr;
-  lv_obj_t* img_test_ = nullptr;
+  lv_obj_t* img_album_ = nullptr;
+  lv_obj_t* img_wifi_ = nullptr;
   WiFiStatus wifi_status_ = WiFiStatus::Offline;
 };

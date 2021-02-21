@@ -9,12 +9,16 @@
 
 namespace {
 constexpr char TAG[] = "MainScreen";
-}
+constexpr lv_coord_t kScreenWidth = 320;
+constexpr lv_coord_t kScreenHeight = 240;
+constexpr lv_coord_t kWiFiWidth = 16;
+constexpr lv_coord_t kWiFiHeight = 16;
+constexpr int kStatusBarHeight = 16;
+}  // namespace
 
 MainScreen::MainScreen(MainDisplay& display) : Screen(display) {}
 
 esp_err_t MainScreen::Initialize() {
-  constexpr int kStatusBarHeight = 13;
   constexpr int kLineHeight = 18;
   constexpr int kMargin = 10;
 
@@ -34,16 +38,27 @@ esp_err_t MainScreen::Initialize() {
   lv_label_set_text(song, "Song: <Name of song>");
   lv_obj_set_pos(song, kMargin, top += kLineHeight);
 
-  img_test_ = lv_img_create(screen, nullptr);
-  if (img_test_) {
+  img_album_ = lv_img_create(screen, nullptr);
+  if (img_album_) {
     constexpr char fname[] = "S:/spiffs/album_2_cover.jpg";
     ESP_LOGI(TAG, "Loading image \"%s\".", fname);
-    constexpr int kImageWidth = 320 / 2;
-    constexpr int kImageHeight = 240 / 2;
-    constexpr int kImageLeft = (320 - kImageWidth) / 2;
-    lv_img_set_src(img_test_, fname);
-    lv_obj_set_pos(img_test_, kImageLeft, top + 26);
-    lv_obj_set_size(img_test_, kImageWidth, kImageHeight);
+    constexpr int kImageWidth = kScreenWidth / 2;
+    constexpr int kImageHeight = kScreenHeight / 2;
+    constexpr int kImageLeft = (kScreenWidth - kImageWidth) / 2;
+    lv_img_set_src(img_album_, fname);
+    lv_obj_set_pos(img_album_, kImageLeft, top + 26);
+    lv_obj_set_size(img_album_, kImageWidth, kImageHeight);
+  }
+
+  img_wifi_ = lv_img_create(screen, nullptr);
+  if (img_wifi_) {
+    constexpr char fname[] = "S:/spiffs/wifi-online.png";
+    ESP_LOGI(TAG, "Loading image \"%s\".", fname);
+    lv_img_set_src(img_wifi_, fname);
+    // For some reason this image can't be put higher than y=40 - LVGL will
+    // hang.
+    lv_obj_set_pos(img_wifi_, kScreenWidth - kWiFiWidth, 40);
+    lv_obj_set_size(img_wifi_, kWiFiWidth, kWiFiHeight);
   }
 
   return ESP_OK;
