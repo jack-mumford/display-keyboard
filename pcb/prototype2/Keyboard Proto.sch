@@ -180,7 +180,7 @@ Text GLabel 4800 4650 0    50   Input ~ 0
 GND
 Text GLabel 8750 3650 3    50   Input ~ 0
 GND
-Text GLabel 8700 1450 1    50   Input ~ 0
+Text GLabel 8700 1200 1    50   Input ~ 0
 1V8
 Text GLabel 9250 1950 2    50   Input ~ 0
 ROW0
@@ -702,4 +702,37 @@ F 3 "https://www.adafruit.com/product/4062" H 4900 5950 50  0001 C CNN
 	1    5250 5050
 	1    0    0    -1  
 $EndComp
+Wire Wire Line
+	8700 1200 8700 1300
+$Comp
+L Device:C_Small C3
+U 1 1 60362264
+P 9100 1300
+F 0 "C3" V 8871 1300 50  0000 C CNN
+F 1 "0.1μF" V 8962 1300 50  0000 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric" H 9100 1300 50  0001 C CNN
+F 3 "~" H 9100 1300 50  0001 C CNN
+	1    9100 1300
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GND #PWR0101
+U 1 1 603638A2
+P 9450 1350
+F 0 "#PWR0101" H 9450 1100 50  0001 C CNN
+F 1 "GND" H 9455 1177 50  0000 C CNN
+F 2 "" H 9450 1350 50  0001 C CNN
+F 3 "" H 9450 1350 50  0001 C CNN
+	1    9450 1350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9000 1300 8700 1300
+Connection ~ 8700 1300
+Wire Wire Line
+	8700 1300 8700 1450
+Wire Wire Line
+	9200 1300 9450 1300
+Wire Wire Line
+	9450 1300 9450 1350
 $EndSCHEMATC
