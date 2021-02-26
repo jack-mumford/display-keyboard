@@ -16,3 +16,6 @@
 [submodule "components/lv_lib_split_jpg"]
 	path = components/lv_lib_split_jpg
 	url = https://github.com/lvgl/lv_lib_split_jpg.git
+[submodule "components/tarablessd1306"]
+	path = components/tarablessd1306
+	url = https://github.com/TaraHoleInIt/tarablessd1306.git
