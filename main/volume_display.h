@@ -4,7 +4,7 @@
 #include <memory>
 
 #include <esp_err.h>
-#include <lvgl.h>
+#include <ssd1306.h>
 
 #include "volume_widget.h"
 
@@ -21,10 +21,6 @@ class VolumeDisplay {
   esp_err_t Initialize();
 
  private:
-  lv_disp_buf_t disp_buf_;
-  lv_disp_t* disp_driver_;
-  std::unique_ptr<lv_color_t[]> display_buf_1_;
-  std::unique_ptr<lv_color_t[]> display_buf_2_;
-  lv_obj_t* screen_;
+  SSD1306_Device ssd_device_;
   std::unique_ptr<VolumeWidget> volume_widget_;
 };

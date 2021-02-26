@@ -22,6 +22,7 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/components/inih"
     "${CMAKE_SOURCE_DIR}/components/lv_port_esp32/components"
     "${CMAKE_SOURCE_DIR}/components/lv_port_esp32/components/lvgl/src"
+    "${CMAKE_SOURCE_DIR}/components/tarablessd1306"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src"
     "${CMAKE_SOURCE_DIR}/main"
     "${IDF_PATH}/components/driver/include"

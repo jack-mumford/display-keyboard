@@ -115,6 +115,8 @@ esp_err_t MainTask::InitializeI2C() {
     return ESP_FAIL;
   }
 
+// Initialize if not using tarablessd1306 for volume display.
+#ifndef CONFIG_SSD1306_ENABLE_DEFAULT_I2C_INTERFACE
   // Used for volume display.
   constexpr i2c::Master::InitParams i2c_1_config = {
       .i2c_bus = I2C_NUM_1,
@@ -128,6 +130,7 @@ esp_err_t MainTask::InitializeI2C() {
     ESP_LOGE(TAG, "Can't initialize I2C1");
     return ESP_FAIL;
   }
+#endif  // CONFIG_SSD1306_ENABLE_DEFAULT_I2C_INTERFACE
 
   return ESP_OK;
 }

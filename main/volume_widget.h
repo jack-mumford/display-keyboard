@@ -5,15 +5,12 @@
 #include <memory>
 
 #include <esp_err.h>
-#include <lvgl.h>
 
-// The canvas implementation of this widget currently crashes LVGL. Probably
-// a bug in this app or issue in LVGL's nascent multi-screen implementation.
-#undef USE_CANVAS
+struct SSD1306_Device;
 
 class VolumeWidget {
  public:
-  VolumeWidget(lv_obj_t* parent, int x, int y, int width, int height);
+  VolumeWidget(SSD1306_Device* display, int x, int y, int width, int height);
 
   /**
    * @brief Set the Volume.
@@ -25,17 +22,12 @@ class VolumeWidget {
   esp_err_t Initialize();
 
  private:
-  void SetVolumeWidgetSize();
+  int CalcWidth(uint8_t volume) const;
 
-  lv_obj_t* parent_;
+  SSD1306_Device* display_;
   uint8_t volume_;
   const int x_;
   const int y_;
   const int width_;
   const int height_;
-#ifdef USE_CANVAS
-  std::unique_ptr<lv_color_t> cbuf_;
-#else
-  lv_obj_t* bar_ = nullptr;
-#endif
 };
