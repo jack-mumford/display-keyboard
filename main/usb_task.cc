@@ -37,7 +37,8 @@ esp_err_t USBTask::Initialize() {
              : ESP_FAIL;
 }
 
-void IRAM_ATTR USBTask::Run() {
+// static
+void IRAM_ATTR USBTask::TaskFunc(void* arg) {
   while (true) {
     if (usb::Device::Suspended()) {
       if (usb::Device::RemoteWakup() != ESP_OK)
@@ -53,9 +54,4 @@ void IRAM_ATTR USBTask::Run() {
     usb::Device::Tick();
     vTaskDelay(pdMS_TO_TICKS(1));
   }
-}
-
-// static
-void IRAM_ATTR USBTask::TaskFunc(void* arg) {
-  static_cast<USBTask*>(arg)->Run();
 }

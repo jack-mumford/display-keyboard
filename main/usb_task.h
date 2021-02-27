@@ -15,7 +15,6 @@ class USBTask {
   USBTask();
 
   esp_err_t Initialize();
-  void IRAM_ATTR Run();
 
   TaskHandle_t task_ = nullptr;
 };
