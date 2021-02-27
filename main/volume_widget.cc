@@ -24,7 +24,7 @@ esp_err_t VolumeWidget::Initialize() {
 }
 
 int VolumeWidget::CalcWidth(uint8_t volume) const {
-  return (static_cast<int>(volume) * width_) / kMaxVolume;
+  return (static_cast<int>(volume) * (width_ - 1)) / kMaxVolume;
 }
 
 void VolumeWidget::SetVolume(uint8_t volume) {
@@ -40,11 +40,11 @@ void VolumeWidget::SetVolume(uint8_t volume) {
 
   if (new_width > prev_width) {
     // Nothing to erase. Fill the delta between prior value and new.
-    SSD1306_DrawBox(display_, prev_width, y_, new_width, height_,
+    SSD1306_DrawBox(display_, prev_width, y_, new_width, height_ - 1,
                     SSD_COLOR_WHITE,
                     /*Fill=*/true);
   } else {
-    SSD1306_DrawBox(display_, new_width, y_, prev_width, height_,
+    SSD1306_DrawBox(display_, new_width, y_, prev_width, height_ - 1,
                     SSD_COLOR_BLACK,
                     /*Fill=*/true);
   }
