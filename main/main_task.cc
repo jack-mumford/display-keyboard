@@ -173,8 +173,10 @@ esp_err_t MainTask::Initialize() {
   // TODO: Fail on error.
   ESP_ERROR_CHECK_WITHOUT_ABORT(KeyboardTask::Start());
 
+#if 0
   // Just for testing.
   KeyboardSimulatorTask::Start();
+#endif
 
   err = wifi_.Inititialize();
   if (err != ESP_OK)
