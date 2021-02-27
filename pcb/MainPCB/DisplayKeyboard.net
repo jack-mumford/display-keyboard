@@ -1,6 +1,6 @@
 (export (version D)
   (design
-    (source "C:\\Users\\cmumf\\src\\keyboard\\pcb\\prototype2\\Keyboard Proto.sch")
+    (source "C:\\Users\\cmumf\\src\\keyboard\\pcb\\prototype2\\DisplayKeyboard.sch")
     (date "2/23/2021 8:45:58 PM")
     (tool "Eeschema (5.1.9)-1")
     (sheet (number 1) (name /) (tstamps /)
@@ -9,7 +9,7 @@
         (company "Prototype Schematic")
         (rev 2)
         (date 2020-12-27)
-        (source "Keyboard Proto.sch")
+        (source "DisplayKeyboard.sch")
         (comment (number 1) (value "Based on FeatherS2 and LM8330 keyboard IC"))
         (comment (number 2) (value ""))
         (comment (number 3) (value "License: MIT"))
