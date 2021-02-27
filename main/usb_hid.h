@@ -37,11 +37,6 @@ class HID {
   ~HID() = delete;
 
   /**
-   * Initialize the USB instance.
-   */
-  static esp_err_t Initialize();
-
-  /**
    * Standard HID Boot Protocol Keyboard Report.
    *
    * @param report_id // Can be zero.
