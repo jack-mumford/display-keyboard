@@ -9,7 +9,6 @@
 
 #include "event_ids.h"
 #include "main_display.h"
-#include "volume_display.h"
 
 /**
  * The task responsible for doing **all** UI rendering to screens.
@@ -38,7 +37,6 @@ class UITask {
 
   SemaphoreHandle_t mutex_;
   MainDisplay main_display_;
-  VolumeDisplay volume_display_;
   TaskHandle_t task_ = nullptr;
   esp_timer_handle_t tick_timer_ = nullptr;
   WiFiStatus wifi_status_ = WiFiStatus::Offline;

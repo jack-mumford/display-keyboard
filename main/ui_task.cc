@@ -11,7 +11,6 @@
 
 #include "gpio_pins.h"
 #include "main_display.h"
-#include "volume_display.h"
 
 namespace {
 
@@ -93,23 +92,9 @@ void IRAM_ATTR UITask::Run() {
   lv_split_jpeg_init();
 
   ESP_ERROR_CHECK(main_display_.Initialize());
-  int vol = 0;
-  int vol_increment = 1;
-  ESP_ERROR_CHECK(volume_display_.Initialize());
   ESP_ERROR_CHECK(CreateTickTimer());
 
   while (true) {
-    // Simple test to bounce volume up and down.
-    vol += vol_increment;
-    if (vol < 0) {
-      vol = 1;
-      vol_increment = 1;
-    } else if (vol > 100) {
-      vol = 99;
-      vol_increment = -1;
-    }
-    volume_display_.SetVolume(vol);
-
 #if 0
     if (uptate_display_time_) {
       struct tm now_local;

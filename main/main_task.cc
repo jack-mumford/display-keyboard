@@ -15,6 +15,7 @@
 #include "usb_device.h"
 #include "usb_hid.h"
 #include "usb_task.h"
+#include "volume_task.h"
 
 namespace {
 
@@ -176,6 +177,10 @@ esp_err_t MainTask::Initialize() {
   // Just for testing.
   KeyboardSimulatorTask::Start();
 #endif
+
+  err = VolumeTask::Start();
+  if (err != ESP_OK)
+    return err;
 
   err = wifi_.Inititialize();
   if (err != ESP_OK)
