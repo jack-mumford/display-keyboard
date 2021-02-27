@@ -26,6 +26,8 @@ void VolumeDisplay::SetVolume(uint8_t volume) {
   if (!volume_widget_)
     return;
   volume_widget_->SetVolume(volume);
+  // Set contrast just for testing.
+  SSD1306_SetContrast(&ssd_device_, volume > 50 ? 255 : 10);
   SSD1306_Update(&ssd_device_);
 }
 
@@ -43,6 +45,7 @@ esp_err_t VolumeDisplay::Initialize() {
   }
 
   SSD1306_Clear(&ssd_device_, SSD_COLOR_BLACK);
+  SSD1306_SetHFlip(&ssd_device_, true);
 
   volume_widget_.reset(
       new VolumeWidget(&ssd_device_, 0, 0, kDisplayWidth, kDisplayHeight));
