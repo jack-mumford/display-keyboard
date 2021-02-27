@@ -44,6 +44,9 @@ esp_err_t KeyboardTask::Initialize() {
   // https://www.freertos.org/FAQMem.html#StackSize
   constexpr uint32_t kStackDepthWords = 2048;
 
+  if (!event_group_)
+    return ESP_FAIL;
+
   esp_err_t err = InstallKeyboardISR();
   if (err != ESP_OK)
     return err;
