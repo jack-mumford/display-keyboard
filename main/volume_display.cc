@@ -17,12 +17,9 @@
 namespace {
 constexpr char TAG[] = "VolDisp";
 constexpr int kSSD1306_I2C_ADDR = 0x3C;
-constexpr uint16_t kNumBufferRows = 16;
 constexpr uint16_t kDisplayWidth = 128;
 constexpr uint16_t kDisplayHeight = 64;
 constexpr int kResetPin = -1;
-constexpr uint32_t kNumBufferPixels = kDisplayWidth * kNumBufferRows;
-constexpr uint16_t kMaxVolumeWidgetWidth = kDisplayWidth;
 }  // namespace
 
 VolumeDisplay::VolumeDisplay() = default;
