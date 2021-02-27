@@ -17,10 +17,6 @@
 #include "usb_hid.h"
 #include "usb_task.h"
 
-#ifndef DRAW_VOLUME_DISPLAY
-#error Define DRAW_VOLUME_DISPLAY
-#endif
-
 namespace {
 
 constexpr char TAG[] = "MainTask";
