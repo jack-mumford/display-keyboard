@@ -32,7 +32,8 @@ void VolumeDisplay::SetVolume(uint8_t volume) {
     return;
   volume_widget_->SetVolume(volume);
   // Set contrast just for testing.
-  SSD1306_SetContrast(&ssd_device_, volume > 50 ? 255 : 10);
+  const int contrast = (255 * volume) / 255;
+  SSD1306_SetContrast(&ssd_device_, contrast);
   SSD1306_Update(&ssd_device_);
 }
 
