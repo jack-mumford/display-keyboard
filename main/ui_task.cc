@@ -94,25 +94,20 @@ void IRAM_ATTR UITask::Run() {
   ESP_ERROR_CHECK(main_display_.Initialize());
   int vol = 0;
   int vol_increment = 1;
-  uint32_t loop_count = 0;
   ESP_ERROR_CHECK(volume_display_.Initialize());
   ESP_ERROR_CHECK(CreateTickTimer());
 
   while (true) {
-    loop_count++;
     // Simple test to bounce volume up and down.
-    if ((loop_count % 10) == 0) {
-      vol += vol_increment;
-      if (vol < 0) {
-        vol = 1;
-        vol_increment = 1;
-      } else if (vol > 100) {
-        vol = 99;
-        vol_increment = -1;
-      }
-
-      volume_display_.SetVolume(vol);
+    vol += vol_increment;
+    if (vol < 0) {
+      vol = 1;
+      vol_increment = 1;
+    } else if (vol > 100) {
+      vol = 99;
+      vol_increment = -1;
     }
+    volume_display_.SetVolume(vol);
 
 #if 0
     if (uptate_display_time_) {
