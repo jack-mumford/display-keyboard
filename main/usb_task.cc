@@ -40,6 +40,10 @@ esp_err_t USBTask::Initialize() {
 // static
 void IRAM_ATTR USBTask::TaskFunc(void* arg) {
   while (true) {
+    // Doing this at such a high frequency causes problems.
+    // Also, not sure it is necessary, keyboard simulator seems to run
+    // fine without it.
+#if 0
     if (usb::Device::Suspended()) {
       if (usb::Device::RemoteWakup() != ESP_OK)
         ESP_LOGE(TAG, "Error waking up");
@@ -51,6 +55,7 @@ void IRAM_ATTR USBTask::TaskFunc(void* arg) {
       vTaskDelay(pdMS_TO_TICKS(1000));
       continue;
     }
+#endif
     usb::Device::Tick();
     vTaskDelay(pdMS_TO_TICKS(1));
   }
