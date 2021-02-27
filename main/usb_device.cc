@@ -2,6 +2,7 @@
 
 #include <cstring>
 
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <esp_log.h>
 #include <freertos/task.h>
 #include <tusb.h>

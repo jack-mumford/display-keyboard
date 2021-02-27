@@ -13,6 +13,7 @@
 
 #include "led_controller.h"
 
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <driver/gpio.h>
 #include <esp_idf_version.h>
 #include <esp_timer.h>

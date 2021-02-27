@@ -3,6 +3,11 @@
 
 #include "volume_display.h"
 
+#ifdef LOG_LOCAL_LEVEL
+// <ssd1306.h> defines this (incorrectly), so undefine.
+#undef LOG_LOCAL_LEVEL
+#endif
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <esp_log.h>
 #include <ssd1306_default_if.h>
 #include <ssd1306_draw.h>

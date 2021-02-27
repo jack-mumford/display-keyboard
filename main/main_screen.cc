@@ -1,5 +1,6 @@
 #include "main_screen.h"
 
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <esp_log.h>
 #include <lv_core/lv_disp.h>
 #include <lv_widgets/lv_img.h>

@@ -1,7 +1,6 @@
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
-
 #include "http_client.h"
 
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <esp_crt_bundle.h>
 #include <esp_http_client.h>
 #include <esp_log.h>

@@ -6,7 +6,6 @@
 #include <string>
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
-
 #include <cJSON/cJSON.h>
 #include <esp_err.h>
 #include <esp_log.h>

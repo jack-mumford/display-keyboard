@@ -26,6 +26,7 @@
 
 #include "usb_board.h"
 
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <freertos/FreeRTOS.h>
 
 #include <class/hid/hid.h>

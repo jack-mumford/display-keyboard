@@ -1,7 +1,6 @@
 #include "main_task.h"
 
 #define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
-
 #include <esp_log.h>
 #include <esp_sntp.h>
 #include <i2clib/master.h>

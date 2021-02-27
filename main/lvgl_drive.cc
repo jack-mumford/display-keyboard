@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
 #include <esp_err.h>
 #include <esp_log.h>
 #include <lv_misc/lv_fs.h>
