@@ -64,9 +64,9 @@ esp_err_t KeyboardTask::Initialize() {
 void IRAM_ATTR KeyboardTask::Run() {
   ESP_LOGW(TAG, "In keyboard task.");
   while (true) {
-    EventBits_t bits = xEventGroupWaitBits(event_group_, EVENT_ALL, pdFALSE,
-                                           pdFALSE, portMAX_DELAY);
-    xEventGroupClearBits(event_group_, EVENT_ALL);
+    EventBits_t bits =
+        xEventGroupWaitBits(event_group_, EVENT_ALL, /*xClearOnExit=*/pdTRUE,
+                            /*xWaitForAllBits=*/pdFALSE, portMAX_DELAY);
     if (bits & EVENT_KEYBOARD_EVENT) {
       keyboard_.HandleEvents();
     }
