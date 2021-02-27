@@ -56,9 +56,7 @@ esp_err_t MainScreen::Initialize() {
     constexpr char fname[] = "S:/spiffs/wifi-online.png";
     ESP_LOGI(TAG, "Loading image \"%s\".", fname);
     lv_img_set_src(img_wifi_, fname);
-    // For some reason this image can't be put higher than y=40 - LVGL will
-    // hang.
-    lv_obj_set_pos(img_wifi_, kScreenWidth - kWiFiWidth, 40);
+    lv_obj_set_pos(img_wifi_, kScreenWidth - kWiFiWidth, 0);
     lv_obj_set_size(img_wifi_, kWiFiWidth, kWiFiHeight);
   }
 
