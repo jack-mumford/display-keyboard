@@ -12,8 +12,8 @@ namespace {
 constexpr char TAG[] = "MainScreen";
 constexpr lv_coord_t kScreenWidth = 320;
 constexpr lv_coord_t kScreenHeight = 240;
-constexpr lv_coord_t kWiFiWidth = 20;
-constexpr lv_coord_t kWiFiHeight = 20;
+constexpr lv_coord_t kStatusBarIconWidth = 20;
+constexpr lv_coord_t kStatusBarIconHeight = 20;
 constexpr int kStatusBarHeight = 20;
 }  // namespace
 
@@ -42,15 +42,15 @@ esp_err_t MainScreen::LoadWiFiImages() {
   img_wifi_online_ = lv_img_create(screen, nullptr);
   if (!img_wifi_online_)
     return ESP_FAIL;
-  lv_obj_set_pos(img_wifi_online_, kScreenWidth - kWiFiWidth, 0);
-  lv_obj_set_size(img_wifi_online_, kWiFiWidth, kWiFiHeight);
+  lv_obj_set_pos(img_wifi_online_, kScreenWidth - kStatusBarIconWidth, 0);
+  lv_obj_set_size(img_wifi_online_, kStatusBarIconWidth, kStatusBarIconHeight);
   lv_img_set_src(img_wifi_online_, "S:/spiffs/wifi-online.png");
 
   img_wifi_offline_ = lv_img_create(screen, nullptr);
   if (!img_wifi_offline_)
     return ESP_FAIL;
-  lv_obj_set_pos(img_wifi_offline_, kScreenWidth - kWiFiWidth, 0);
-  lv_obj_set_size(img_wifi_offline_, kWiFiWidth, kWiFiHeight);
+  lv_obj_set_pos(img_wifi_offline_, kScreenWidth - kStatusBarIconWidth, 0);
+  lv_obj_set_size(img_wifi_offline_, kStatusBarIconWidth, kStatusBarIconHeight);
   lv_img_set_src(img_wifi_offline_, "S:/spiffs/wifi-offline.png");
 
   return ESP_OK;
@@ -65,7 +65,7 @@ esp_err_t MainScreen::InitializeStatusBar() {
   if (!lbl_time_)
     return ESP_FAIL;
   UpdateTime();
-  lv_obj_set_pos(lbl_time_, kScreenWidth - kWiFiWidth - kTimeWidth, 0);
+  lv_obj_set_pos(lbl_time_, kScreenWidth - kStatusBarIconWidth - kTimeWidth, 0);
 
   esp_err_t err = LoadWiFiImages();
   if (err != ESP_OK)
@@ -77,14 +77,14 @@ esp_err_t MainScreen::InitializeStatusBar() {
     return ESP_FAIL;
   lv_img_set_src(img_gear_, "S:/spiffs/gear_icon.png");
   lv_obj_set_pos(img_gear_, 2, 0);
-  lv_obj_set_size(img_gear_, 20, 20);
+  lv_obj_set_size(img_gear_, kStatusBarIconWidth, kStatusBarIconHeight);
 
   img_spotify_ = lv_img_create(screen, nullptr);
   if (!img_spotify_)
     return ESP_FAIL;
   lv_img_set_src(img_spotify_, "S:/spiffs/spotify-logo.png");
-  lv_obj_set_pos(img_spotify_, (kScreenWidth - 20) / 2, 0);
-  lv_obj_set_size(img_spotify_, 20, 20);
+  lv_obj_set_pos(img_spotify_, (kScreenWidth - kStatusBarIconWidth) / 2, 0);
+  lv_obj_set_size(img_spotify_, kStatusBarIconWidth, kStatusBarIconHeight);
 
   return ESP_OK;
 }
