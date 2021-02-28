@@ -27,6 +27,7 @@ class MainScreen : public Screen {
   lv_obj_t* img_album_ = nullptr;
   lv_obj_t* img_wifi_online_ = nullptr;
   lv_obj_t* img_wifi_offline_ = nullptr;
+  lv_obj_t* img_spotify_ = nullptr;
   lv_obj_t* img_gear_ = nullptr;
   std::string last_time_;
   WiFiStatus wifi_status_ = WiFiStatus::Offline;

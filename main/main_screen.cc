@@ -79,6 +79,13 @@ esp_err_t MainScreen::InitializeStatusBar() {
   lv_obj_set_pos(img_gear_, 2, 0);
   lv_obj_set_size(img_gear_, 20, 20);
 
+  img_spotify_ = lv_img_create(screen, nullptr);
+  if (!img_spotify_)
+    return ESP_FAIL;
+  lv_img_set_src(img_spotify_, "S:/spiffs/spotify-logo.png");
+  lv_obj_set_pos(img_spotify_, (kScreenWidth - 20) / 2, 0);
+  lv_obj_set_size(img_spotify_, 20, 20);
+
   return ESP_OK;
 }
 
