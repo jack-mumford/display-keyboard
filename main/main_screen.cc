@@ -14,7 +14,7 @@ constexpr lv_coord_t kScreenWidth = 320;
 constexpr lv_coord_t kScreenHeight = 240;
 constexpr lv_coord_t kWiFiWidth = 16;
 constexpr lv_coord_t kWiFiHeight = 16;
-constexpr int kStatusBarHeight = 16;
+constexpr int kStatusBarHeight = 20;
 }  // namespace
 
 MainScreen::MainScreen(MainDisplay& display) : Screen(display) {}
@@ -46,11 +46,16 @@ esp_err_t MainScreen::InitializeStatusBar() {
   img_wifi_ = lv_img_create(screen, nullptr);
   if (!img_wifi_)
     return ESP_FAIL;
-  constexpr char fname[] = "S:/spiffs/wifi-online.png";
-  ESP_LOGI(TAG, "Loading image \"%s\".", fname);
-  lv_img_set_src(img_wifi_, fname);
+  lv_img_set_src(img_wifi_, "S:/spiffs/wifi-online.png");
   lv_obj_set_pos(img_wifi_, kScreenWidth - kWiFiWidth, 0);
   lv_obj_set_size(img_wifi_, kWiFiWidth, kWiFiHeight);
+
+  img_gear_ = lv_img_create(screen, nullptr);
+  if (!img_gear_)
+    return ESP_FAIL;
+  lv_img_set_src(img_gear_, "S:/spiffs/gear_icon.png");
+  lv_obj_set_pos(img_gear_, 2, 0);
+  lv_obj_set_size(img_gear_, 20, 20);
 
   return ESP_OK;
 }
