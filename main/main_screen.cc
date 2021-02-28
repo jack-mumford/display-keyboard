@@ -14,6 +14,8 @@ constexpr lv_coord_t kScreenWidth = 320;
 constexpr lv_coord_t kScreenHeight = 240;
 constexpr lv_coord_t kStatusBarIconWidth = 20;
 constexpr lv_coord_t kStatusBarIconHeight = 20;
+constexpr lv_coord_t kSpotifyIconWidth = 66;
+constexpr lv_coord_t kSpotifyIconHeight = 20;
 constexpr int kStatusBarHeight = 20;
 }  // namespace
 
@@ -82,9 +84,9 @@ esp_err_t MainScreen::InitializeStatusBar() {
   img_spotify_ = lv_img_create(screen, nullptr);
   if (!img_spotify_)
     return ESP_FAIL;
-  lv_img_set_src(img_spotify_, "S:/spiffs/spotify-logo.png");
-  lv_obj_set_pos(img_spotify_, (kScreenWidth - kStatusBarIconWidth) / 2, 0);
-  lv_obj_set_size(img_spotify_, kStatusBarIconWidth, kStatusBarIconHeight);
+  lv_img_set_src(img_spotify_, "S:/spiffs/spotify-norm.png");
+  lv_obj_set_pos(img_spotify_, (kScreenWidth - kSpotifyIconWidth) / 2 - 10, 0);
+  lv_obj_set_size(img_spotify_, kSpotifyIconWidth, kSpotifyIconHeight);
 
   return ESP_OK;
 }
@@ -122,7 +124,6 @@ esp_err_t MainScreen::Initialize() {
   }
 
   return InitializeStatusBar();
-  ;
 }
 
 MainScreen::~MainScreen() = default;
