@@ -51,6 +51,16 @@ CONFIG_LV_THEME_DEFAULT_FLAG_DARK=y
 # end of Theme usage
 
 #
+# Touchpanel (XPT2046) Pin Assignments
+#
+CONFIG_LV_TOUCH_SPI_MISO=37
+CONFIG_LV_TOUCH_SPI_MOSI=35
+CONFIG_LV_TOUCH_SPI_CLK=36
+CONFIG_LV_TOUCH_SPI_CS=10
+CONFIG_LV_TOUCH_PIN_IRQ=11
+# end of Touchpanel (XPT2046) Pin Assignments
+
+#
 # Memory manager settings
 #
 CONFIG_LV_MEM_SIZE=600
