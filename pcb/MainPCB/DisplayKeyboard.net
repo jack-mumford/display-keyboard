@@ -1,12 +1,12 @@
 (export (version D)
   (design
-    (source "C:\\Users\\cmumf\\src\\keyboard\\pcb\\prototype2\\DisplayKeyboard.sch")
+    (source "C:\\Users\\cmumf\\src\\keyboard\\pcb\\MainPCB\\DisplayKeyboard.sch")
     (date "2/23/2021 8:45:58 PM")
     (tool "Eeschema (5.1.9)-1")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
-        (title "Keyboard Prototype Board")
-        (company "Prototype Schematic")
+        (title "Display Keyboard")
+        (company "BigMumf")
         (rev 2)
         (date 2020-12-27)
         (source "DisplayKeyboard.sch")
