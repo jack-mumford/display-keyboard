@@ -71,6 +71,41 @@ esp_err_t UITask::CreateTickTimer() {
   return err;
 }
 
+void UITask::UpdateTime() {
+  constexpr TickType_t kUpdateTimeTimeout = 2000 / portTICK_PERIOD_MS;
+  if (xSemaphoreTake(mutex_, kUpdateTimeTimeout)) {
+    main_display_.UpdateTime();
+    xSemaphoreGive(mutex_);
+  }
+}
+
+// static
+void IRAM_ATTR UITask::UpdateTimeCb(void* arg) {
+  static_cast<UITask*>(arg)->UpdateTime();
+}
+
+esp_err_t UITask::CreateUpdateTimeTimer() {
+  const esp_timer_create_args_t timer_args = {
+    .callback = UpdateTimeCb,
+    .arg = this,
+    .dispatch_method = ESP_TIMER_TASK,
+    .name = "UITask::UpdateTimeCb",
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
+    .skip_unhandled_events = true,
+#endif
+  };
+  esp_err_t err = esp_timer_create(&timer_args, &time_update_timer_);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "Unable to create the periodic tick timer");
+    return err;
+  }
+  constexpr uint64_t kUpdateTimePeriodUsec = 1000000;  // every second.
+  err = esp_timer_start_periodic(time_update_timer_, kUpdateTimePeriodUsec);
+  if (err != ESP_OK)
+    ESP_LOGE(TAG, "Unable to start the time update timer");
+  return err;
+}
+
 esp_err_t UITask::Initialize() {
   ESP_LOGD(TAG, "Initializing UI task");
 
@@ -93,24 +128,9 @@ void IRAM_ATTR UITask::Run() {
 
   ESP_ERROR_CHECK(main_display_.Initialize());
   ESP_ERROR_CHECK(CreateTickTimer());
+  ESP_ERROR_CHECK(CreateUpdateTimeTimer());
 
   while (true) {
-#if 0
-    if (uptate_display_time_) {
-      struct tm now_local;
-      {
-        time_t now_epoch_coordinated_universal = 0;
-        time(&now_epoch_coordinated_universal);
-        localtime_r(&now_epoch_coordinated_universal, &now_local);
-      }
-      char tmbuf[64];
-      asctime_r(&now_local, tmbuf);
-      ESP_LOGI(TAG, "Current time: %s", tmbuf);
-      // TODO: Actually update the display.
-      uptate_display_time_ = false;
-    }
-#endif
-
     bool release_mutex = xSemaphoreTake(mutex_, portMAX_DELAY);
     uint32_t wait_msecs = lv_task_handler() / 1000;
     if (release_mutex)

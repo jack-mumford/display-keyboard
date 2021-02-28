@@ -94,3 +94,9 @@ esp_err_t MainDisplay::Initialize() {
 void MainDisplay::SetWiFiStatus(WiFiStatus status) {
   screen_->SetWiFiStatus(status);
 }
+
+void MainDisplay::UpdateTime() {
+  if (!screen_)
+    return;
+  screen_->UpdateTime();
+}

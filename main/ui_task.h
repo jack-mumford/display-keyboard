@@ -26,10 +26,13 @@ class UITask {
 
  private:
   static void IRAM_ATTR TaskFunc(void* arg);
-  static void TickTimerCb(void* arg);
+  static void IRAM_ATTR TickTimerCb(void* arg);
+  static void IRAM_ATTR UpdateTimeCb(void* arg);
 
   UITask();
 
+  void UpdateTime();
+  esp_err_t CreateUpdateTimeTimer();
   esp_err_t CreateTickTimer();
   void Tick();
   esp_err_t Initialize();
@@ -39,6 +42,7 @@ class UITask {
   MainDisplay main_display_;
   TaskHandle_t task_ = nullptr;
   esp_timer_handle_t tick_timer_ = nullptr;
+  esp_timer_handle_t time_update_timer_ = nullptr;
   WiFiStatus wifi_status_ = WiFiStatus::Offline;
   int64_t last_tick_time_ = -1;
 };

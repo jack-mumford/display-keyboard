@@ -17,6 +17,7 @@ class MainDisplay {
   esp_err_t Initialize();
   lv_obj_t* screen() { return lv_screen_; }
   void SetWiFiStatus(WiFiStatus status);
+  void UpdateTime();
 
  private:
   std::unique_ptr<MainScreen> screen_;

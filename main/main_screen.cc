@@ -19,6 +19,42 @@ constexpr int kStatusBarHeight = 16;
 
 MainScreen::MainScreen(MainDisplay& display) : Screen(display) {}
 
+void MainScreen::UpdateTime() {
+  struct tm now_local;
+  {
+    time_t now_epoch_coordinated_universal = 0;
+    time(&now_epoch_coordinated_universal);
+    localtime_r(&now_epoch_coordinated_universal, &now_local);
+  }
+  char tmbuf[32];
+  strftime(tmbuf, sizeof(tmbuf), "%r", &now_local);
+  lv_label_set_text(lbl_time_, tmbuf);
+  last_time_ = tmbuf;
+}
+
+esp_err_t MainScreen::InitializeStatusBar() {
+  constexpr lv_coord_t kTimeWidth = 105;
+
+  lv_obj_t* screen = disp().screen();
+
+  lbl_time_ = lv_label_create(screen, nullptr);
+  if (!lbl_time_)
+    return ESP_FAIL;
+  UpdateTime();
+  lv_obj_set_pos(lbl_time_, kScreenWidth - kWiFiWidth - kTimeWidth, 0);
+
+  img_wifi_ = lv_img_create(screen, nullptr);
+  if (!img_wifi_)
+    return ESP_FAIL;
+  constexpr char fname[] = "S:/spiffs/wifi-online.png";
+  ESP_LOGI(TAG, "Loading image \"%s\".", fname);
+  lv_img_set_src(img_wifi_, fname);
+  lv_obj_set_pos(img_wifi_, kScreenWidth - kWiFiWidth, 0);
+  lv_obj_set_size(img_wifi_, kWiFiWidth, kWiFiHeight);
+
+  return ESP_OK;
+}
+
 esp_err_t MainScreen::Initialize() {
   constexpr int kLineHeight = 18;
   constexpr int kMargin = 10;
@@ -51,16 +87,8 @@ esp_err_t MainScreen::Initialize() {
     lv_obj_set_size(img_album_, kImageWidth, kImageHeight);
   }
 
-  img_wifi_ = lv_img_create(screen, nullptr);
-  if (img_wifi_) {
-    constexpr char fname[] = "S:/spiffs/wifi-online.png";
-    ESP_LOGI(TAG, "Loading image \"%s\".", fname);
-    lv_img_set_src(img_wifi_, fname);
-    lv_obj_set_pos(img_wifi_, kScreenWidth - kWiFiWidth, 0);
-    lv_obj_set_size(img_wifi_, kWiFiWidth, kWiFiHeight);
-  }
-
-  return ESP_OK;
+  return InitializeStatusBar();
+  ;
 }
 
 MainScreen::~MainScreen() = default;
