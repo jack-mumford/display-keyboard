@@ -121,17 +121,21 @@ esp_err_t UITask::Initialize() {
 
 void IRAM_ATTR UITask::Run() {
   ESP_LOGD(TAG, "Running.");
+  bool release_mutex = xSemaphoreTake(mutex_, portMAX_DELAY);
   lv_init();
   lvgl_driver_init();
   lv_png_init();
   lv_split_jpeg_init();
 
   ESP_ERROR_CHECK(main_display_.Initialize());
+  if (release_mutex)
+    xSemaphoreGive(mutex_);
+
   ESP_ERROR_CHECK(CreateTickTimer());
   ESP_ERROR_CHECK(CreateUpdateTimeTimer());
 
   while (true) {
-    bool release_mutex = xSemaphoreTake(mutex_, portMAX_DELAY);
+    release_mutex = xSemaphoreTake(mutex_, portMAX_DELAY);
     uint32_t wait_msecs = lv_task_handler() / 1000;
     if (release_mutex)
       xSemaphoreGive(mutex_);

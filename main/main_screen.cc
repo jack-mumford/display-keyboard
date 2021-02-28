@@ -12,8 +12,8 @@ namespace {
 constexpr char TAG[] = "MainScreen";
 constexpr lv_coord_t kScreenWidth = 320;
 constexpr lv_coord_t kScreenHeight = 240;
-constexpr lv_coord_t kWiFiWidth = 16;
-constexpr lv_coord_t kWiFiHeight = 16;
+constexpr lv_coord_t kWiFiWidth = 20;
+constexpr lv_coord_t kWiFiHeight = 20;
 constexpr int kStatusBarHeight = 20;
 }  // namespace
 
@@ -32,6 +32,30 @@ void MainScreen::UpdateTime() {
   last_time_ = tmbuf;
 }
 
+void MainScreen::UpdateWiFi() {
+  lv_obj_set_hidden(img_wifi_online_, wifi_status_ != WiFiStatus::Online);
+  lv_obj_set_hidden(img_wifi_offline_, wifi_status_ != WiFiStatus::Offline);
+}
+
+esp_err_t MainScreen::LoadWiFiImages() {
+  lv_obj_t* screen = disp().screen();
+  img_wifi_online_ = lv_img_create(screen, nullptr);
+  if (!img_wifi_online_)
+    return ESP_FAIL;
+  lv_obj_set_pos(img_wifi_online_, kScreenWidth - kWiFiWidth, 0);
+  lv_obj_set_size(img_wifi_online_, kWiFiWidth, kWiFiHeight);
+  lv_img_set_src(img_wifi_online_, "S:/spiffs/wifi-online.png");
+
+  img_wifi_offline_ = lv_img_create(screen, nullptr);
+  if (!img_wifi_offline_)
+    return ESP_FAIL;
+  lv_obj_set_pos(img_wifi_offline_, kScreenWidth - kWiFiWidth, 0);
+  lv_obj_set_size(img_wifi_offline_, kWiFiWidth, kWiFiHeight);
+  lv_img_set_src(img_wifi_offline_, "S:/spiffs/wifi-offline.png");
+
+  return ESP_OK;
+}
+
 esp_err_t MainScreen::InitializeStatusBar() {
   constexpr lv_coord_t kTimeWidth = 105;
 
@@ -43,12 +67,10 @@ esp_err_t MainScreen::InitializeStatusBar() {
   UpdateTime();
   lv_obj_set_pos(lbl_time_, kScreenWidth - kWiFiWidth - kTimeWidth, 0);
 
-  img_wifi_ = lv_img_create(screen, nullptr);
-  if (!img_wifi_)
-    return ESP_FAIL;
-  lv_img_set_src(img_wifi_, "S:/spiffs/wifi-online.png");
-  lv_obj_set_pos(img_wifi_, kScreenWidth - kWiFiWidth, 0);
-  lv_obj_set_size(img_wifi_, kWiFiWidth, kWiFiHeight);
+  esp_err_t err = LoadWiFiImages();
+  if (err != ESP_OK)
+    return err;
+  UpdateWiFi();
 
   img_gear_ = lv_img_create(screen, nullptr);
   if (!img_gear_)
@@ -102,4 +124,5 @@ void MainScreen::SetWiFiStatus(WiFiStatus status) {
   if (wifi_status_ == status)
     return;
   wifi_status_ = status;
+  UpdateWiFi();
 }
