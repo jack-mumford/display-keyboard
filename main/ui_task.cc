@@ -119,6 +119,22 @@ esp_err_t UITask::Initialize() {
              : ESP_FAIL;
 }
 
+void UITask::SetDarkMode() {
+  // TODO: Set dark mode and background color at compile-time.
+  // This should be do-able, but the theme in sdkconfig seems to
+  // be ignored. Maybe lv_conf.h will work.
+  lv_theme_material_init(
+      lv_theme_get_color_primary(), lv_theme_get_color_secondary(),
+      LV_THEME_MATERIAL_FLAG_DARK, lv_theme_get_font_small(),
+      lv_theme_get_font_normal(), lv_theme_get_font_subtitle(),
+      lv_theme_get_font_title());
+
+  static lv_style_t style;
+  lv_style_init(&style);
+  lv_style_set_bg_color(&style, LV_STATE_DEFAULT, LV_COLOR_BLACK);
+  lv_obj_add_style(main_display_.screen(), LV_OBJ_PART_MAIN, &style);
+}
+
 void IRAM_ATTR UITask::Run() {
   ESP_LOGD(TAG, "Running.");
   bool release_mutex = xSemaphoreTake(mutex_, portMAX_DELAY);
@@ -128,6 +144,7 @@ void IRAM_ATTR UITask::Run() {
   lv_split_jpeg_init();
 
   ESP_ERROR_CHECK(main_display_.Initialize());
+  SetDarkMode();
   if (release_mutex)
     xSemaphoreGive(mutex_);
 

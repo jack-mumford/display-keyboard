@@ -31,6 +31,7 @@ class UITask {
 
   UITask();
 
+  void SetDarkMode();
   void UpdateTime();
   esp_err_t CreateUpdateTimeTimer();
   esp_err_t CreateTickTimer();
