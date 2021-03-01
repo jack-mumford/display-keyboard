@@ -8,6 +8,7 @@
 #include <lv_lib_split_jpg/lv_sjpg.h>
 #include <lvgl.h>
 #include <lvgl_helpers.h>
+#include <lvgl_touch/touch_driver.h>
 
 #include "gpio_pins.h"
 #include "main_display.h"
@@ -109,6 +110,9 @@ esp_err_t UITask::CreateUpdateTimeTimer() {
 esp_err_t UITask::Initialize() {
   ESP_LOGD(TAG, "Initializing UI task");
 
+  if (!mutex_)
+    return ESP_FAIL;
+
   // Create a new task for LVGL drawing. Don't believe this needs to
   // be pinned to a single core, but doing so on a dual-core MCU
   // will reserve the other core for WiFi and other activities.
@@ -135,9 +139,22 @@ void UITask::SetDarkMode() {
   lv_obj_add_style(main_display_.screen(), LV_OBJ_PART_MAIN, &style);
 }
 
+esp_err_t UITask::InitializeTouchPanel() {
+#if CONFIG_LV_TOUCH_CONTROLLER != TOUCH_CONTROLLER_NONE
+  lv_indev_drv_init(&indev_drv_);
+  indev_drv_.read_cb = touch_driver_read;
+  indev_drv_.type = LV_INDEV_TYPE_POINTER;
+  input_device_ = lv_indev_drv_register(&indev_drv_);
+  if (!input_device_)
+    return ESP_FAIL;
+#endif
+  return ESP_OK;
+}
+
 void IRAM_ATTR UITask::Run() {
   ESP_LOGD(TAG, "Running.");
-  bool release_mutex = xSemaphoreTake(mutex_, portMAX_DELAY);
+  if (!xSemaphoreTake(mutex_, portMAX_DELAY))
+    return;
   lv_init();
   lvgl_driver_init();
   lv_png_init();
@@ -145,24 +162,24 @@ void IRAM_ATTR UITask::Run() {
 
   ESP_ERROR_CHECK(main_display_.Initialize());
   SetDarkMode();
-  if (release_mutex)
-    xSemaphoreGive(mutex_);
+  ESP_ERROR_CHECK(InitializeTouchPanel());
+  xSemaphoreGive(mutex_);
 
   ESP_ERROR_CHECK(CreateTickTimer());
   ESP_ERROR_CHECK(CreateUpdateTimeTimer());
 
   while (true) {
-    release_mutex = xSemaphoreTake(mutex_, portMAX_DELAY);
-    uint32_t wait_msecs = lv_task_handler() / 1000;
-    if (release_mutex)
+    if (xSemaphoreTake(mutex_, portMAX_DELAY)) {
+      uint32_t wait_msecs = lv_task_handler() / 1000;
       xSemaphoreGive(mutex_);
-    if (wait_msecs < kMinMainLoopWaitMSecs)
-      wait_msecs = kMinMainLoopWaitMSecs;
-    else if (wait_msecs > kMaxMainLoopWaitMSecs)
-      wait_msecs = kMaxMainLoopWaitMSecs;
+      if (wait_msecs < kMinMainLoopWaitMSecs)
+        wait_msecs = kMinMainLoopWaitMSecs;
+      else if (wait_msecs > kMaxMainLoopWaitMSecs)
+        wait_msecs = kMaxMainLoopWaitMSecs;
 
-    // Need to use vTaskDelay to avoid triggering the task WDT.
-    vTaskDelay(pdMS_TO_TICKS(wait_msecs));
+      // Need to use vTaskDelay to avoid triggering the task WDT.
+      vTaskDelay(pdMS_TO_TICKS(wait_msecs));
+    }
     taskYIELD();  // Not sure if this is necessary.
   }
 }
@@ -174,9 +191,9 @@ void IRAM_ATTR UITask::TaskFunc(void* arg) {
 
 // static
 void UITask::SetWiFiStatus(WiFiStatus status) {
-  const bool release_mutex = xSemaphoreTake(g_ui_task->mutex_, portMAX_DELAY);
+  if (!xSemaphoreTake(g_ui_task->mutex_, portMAX_DELAY))
+    return;
   g_ui_task->wifi_status_ = status;
   g_ui_task->main_display_.SetWiFiStatus(status);
-  if (release_mutex)
-    xSemaphoreGive(g_ui_task->mutex_);
+  xSemaphoreGive(g_ui_task->mutex_);
 }
