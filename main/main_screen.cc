@@ -67,7 +67,7 @@ esp_err_t MainScreen::InitializeStatusBar() {
   if (!lbl_time_)
     return ESP_FAIL;
   UpdateTime();
-  lv_obj_set_pos(lbl_time_, kScreenWidth - kStatusBarIconWidth - kTimeWidth, 0);
+  lv_obj_set_pos(lbl_time_, kScreenWidth - kStatusBarIconWidth - kTimeWidth, 2);
 
   esp_err_t err = LoadWiFiImages();
   if (err != ESP_OK)
