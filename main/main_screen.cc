@@ -17,6 +17,8 @@ constexpr lv_coord_t kStatusBarIconHeight = 20;
 constexpr lv_coord_t kSpotifyIconWidth = 66;
 constexpr lv_coord_t kSpotifyIconHeight = 20;
 constexpr int kStatusBarHeight = 20;
+constexpr lv_coord_t kRatingImageWidth = 40;
+constexpr lv_coord_t kRatingImageHeight = 42;
 }  // namespace
 
 MainScreen::MainScreen(MainDisplay& display) : Screen(display) {}
@@ -39,6 +41,11 @@ void MainScreen::UpdateWiFi() {
   lv_obj_set_hidden(img_wifi_offline_, wifi_status_ != WiFiStatus::Offline);
 }
 
+void MainScreen::UpdateRating() {
+  lv_obj_set_hidden(img_thumbs_up_, true);
+  lv_obj_set_hidden(img_thumbs_none_, false);
+}
+
 esp_err_t MainScreen::LoadWiFiImages() {
   lv_obj_t* screen = disp().screen();
   img_wifi_online_ = lv_img_create(screen, nullptr);
@@ -54,6 +61,28 @@ esp_err_t MainScreen::LoadWiFiImages() {
   lv_obj_set_pos(img_wifi_offline_, kScreenWidth - kStatusBarIconWidth, 0);
   lv_obj_set_size(img_wifi_offline_, kStatusBarIconWidth, kStatusBarIconHeight);
   lv_img_set_src(img_wifi_offline_, "S:/spiffs/wifi-offline.png");
+
+  return ESP_OK;
+}
+
+esp_err_t MainScreen::LoadRatingImages() {
+  lv_obj_t* screen = disp().screen();
+
+  img_thumbs_up_ = lv_img_create(screen, nullptr);
+  if (!img_thumbs_up_)
+    return ESP_FAIL;
+  lv_obj_set_pos(img_thumbs_up_, kScreenWidth - kRatingImageWidth - 20,
+                 (kScreenHeight - kRatingImageHeight) / 2);
+  lv_obj_set_size(img_thumbs_up_, kRatingImageWidth, kRatingImageHeight);
+  lv_img_set_src(img_thumbs_up_, "S:/spiffs/thumbs-up.png");
+
+  img_thumbs_none_ = lv_img_create(screen, nullptr);
+  if (!img_thumbs_none_)
+    return ESP_FAIL;
+  lv_obj_set_pos(img_thumbs_none_, kScreenWidth - kRatingImageWidth - 20,
+                 (kScreenHeight - kRatingImageHeight) / 2);
+  lv_obj_set_size(img_thumbs_none_, kRatingImageWidth, kRatingImageHeight);
+  lv_img_set_src(img_thumbs_none_, "S:/spiffs/thumbs-up-none.png");
 
   return ESP_OK;
 }
@@ -122,6 +151,9 @@ esp_err_t MainScreen::Initialize() {
     lv_obj_set_pos(img_album_, kImageLeft, top + 26);
     lv_obj_set_size(img_album_, kImageWidth, kImageHeight);
   }
+
+  LoadRatingImages();
+  UpdateRating();
 
   return InitializeStatusBar();
 }
