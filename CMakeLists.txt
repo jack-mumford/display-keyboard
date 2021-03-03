@@ -5,10 +5,8 @@ include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
 set(EXTRA_COMPONENT_DIRS
   components/i2clib
-  components/lv_port_esp32/components/lvgl
-  components/lv_port_esp32/components/lvgl_esp32_drivers
-  components/lv_port_esp32/components/lvgl_esp32_drivers/lvgl_tft
-  components/lv_port_esp32/components/lvgl_esp32_drivers/lvgl_touch
+  components/lvgl
+  components/lvgl_esp32_drivers
   components/tarablessd1306
 )
 

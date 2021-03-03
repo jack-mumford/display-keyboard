@@ -16,9 +16,10 @@ GIT_SUBMODULES=components/i2clib \
 							 components/inih \
 							 components/lv_lib_png \
 							 components/lv_lib_split_jpg \
+							 components/lvgl \
+							 components/lvgl_esp32_drivers \
 							 components/tarablessd1306 \
-							 components/tinyusb \
-							 components/lv_port_esp32
+							 components/tinyusb
 
 .PHONY: format
 format:
@@ -82,4 +83,3 @@ flash-feathers2-stock-bootloader:
 .PHONY: submodules
 submodules:
 	git submodule update --init ${GIT_SUBMODULES}
-	git -C components/lv_port_esp32 submodule update --init components/lvgl components/lvgl_esp32_drivers

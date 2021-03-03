@@ -15,13 +15,11 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/components/lv_lib_png/lv_png.c"
     "${CMAKE_SOURCE_DIR}/components/lv_lib_split_jpg/lv_sjpg.c"
     "${CMAKE_SOURCE_DIR}/components/lv_lib_split_jpg/tjpgd.c"
-    "${CMAKE_SOURCE_DIR}/components/lv_port_esp32/components/lvgl_esp32_drivers/lvgl_tft/ssd1306.c"
   INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/components"
     "${CMAKE_SOURCE_DIR}/components/i2clib/include"
     "${CMAKE_SOURCE_DIR}/components/inih"
-    "${CMAKE_SOURCE_DIR}/components/lv_port_esp32/components"
-    "${CMAKE_SOURCE_DIR}/components/lv_port_esp32/components/lvgl/src"
+    "${CMAKE_SOURCE_DIR}/components/lvgl/src"
     "${CMAKE_SOURCE_DIR}/components/tarablessd1306"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src"
     "${CMAKE_SOURCE_DIR}/main"
@@ -44,8 +42,6 @@ idf_component_register(
   REQUIRES
     i2clib
     lvgl_esp32_drivers
-    lvgl_tft
-    lvgl_touch
     spi_flash
     spiffs
     tinyusb

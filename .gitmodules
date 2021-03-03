@@ -1,9 +1,6 @@
 [submodule "components/tinyusb"]
 	path = components/tinyusb
 	url = https://github.com/hathach/tinyusb.git
-[submodule "components/lv_port_esp32"]
-	path = components/lv_port_esp32
-	url = https://github.com/lvgl/lv_port_esp32
 [submodule "components/inih"]
 	path = components/inih
 	url = https://github.com/benhoyt/inih
@@ -19,3 +16,9 @@
 [submodule "components/tarablessd1306"]
 	path = components/tarablessd1306
 	url = https://github.com/TaraHoleInIt/tarablessd1306.git
+[submodule "components/lvgl"]
+	path = components/lvgl
+	url = https://github.com/lvgl/lvgl.git
+[submodule "components/lvgl_esp32_drivers"]
+	path = components/lvgl_esp32_drivers
+	url = https://github.com/lvgl/lvgl_esp32_drivers.git
