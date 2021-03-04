@@ -28,6 +28,7 @@ class UITask {
   static void IRAM_ATTR TaskFunc(void* arg);
   static void IRAM_ATTR TickTimerCb(void* arg);
   static void IRAM_ATTR UpdateTimeCb(void* arg);
+  static void IRAM_ATTR TouchDriverFeedback(_lv_indev_drv_t*, lv_event_t);
 
   UITask();
 

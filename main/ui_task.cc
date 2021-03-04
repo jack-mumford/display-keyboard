@@ -85,6 +85,12 @@ void IRAM_ATTR UITask::UpdateTimeCb(void* arg) {
   static_cast<UITask*>(arg)->UpdateTime();
 }
 
+// static
+void IRAM_ATTR UITask::TouchDriverFeedback(_lv_indev_drv_t* driver,
+                                           lv_event_t event) {
+  ESP_LOGD(TAG, "Got touch feedback");
+}
+
 esp_err_t UITask::CreateUpdateTimeTimer() {
   const esp_timer_create_args_t timer_args = {
     .callback = UpdateTimeCb,
@@ -143,6 +149,7 @@ esp_err_t UITask::InitializeTouchPanel() {
 #if CONFIG_LV_TOUCH_CONTROLLER != TOUCH_CONTROLLER_NONE
   lv_indev_drv_init(&indev_drv_);
   indev_drv_.read_cb = touch_driver_read;
+  indev_drv_.feedback_cb = TouchDriverFeedback;
   indev_drv_.type = LV_INDEV_TYPE_POINTER;
   input_device_ = lv_indev_drv_register(&indev_drv_);
   if (!input_device_)
