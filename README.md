@@ -20,7 +20,7 @@ Feather with little (if any) PCB rework.
 
 ## Hardware Design
 
-Design is done in [KeyCad](https://kicad.org/). Files are located in
+Design is done in [KiCad](https://kicad.org/). Files are located in
 the [pcb](pcb) directory.
 
 ## Software Requirements
