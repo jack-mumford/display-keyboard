@@ -48,6 +48,10 @@ build/bootloader/bootloader.bin:
 flash:
 	${IDF} --port ${FLASH_PORT} --baud ${BAUD} flash
 
+.PHONY: app-flash
+app-flash:
+	${IDF} --port ${FLASH_PORT} --baud ${BAUD} app-flash
+
 .PHONY: monitor
 monitor:
 	${IDF} --port ${MONITOR_PORT} monitor
