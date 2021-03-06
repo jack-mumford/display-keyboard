@@ -27,7 +27,7 @@ format:
 
 .PHONY: clean
 clean:
-	rm -rf build sdkconfig.old
+	rm -rf build sdkconfig sdkconfig.old
 
 .PHONY: config
 config:

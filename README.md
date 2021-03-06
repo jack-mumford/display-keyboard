@@ -43,7 +43,7 @@ cd display-keyboard
 
 ## Building
 
-Configuration (GPIO pins, etc.) is stored in the sdkconfig file. This is
+Configuration (GPIO pins, etc.) is stored in the sdkconfig.defaults file. This is
 set using menuconfig as so:
 
 ```sh

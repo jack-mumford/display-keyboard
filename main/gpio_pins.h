@@ -20,7 +20,7 @@ constexpr gpio_num_t kI2C1_SDA_GPIO = GPIO_NUM_1;     // I2C port 1 SDA pin.
 constexpr gpio_num_t kI2C1_SCL_GPIO = GPIO_NUM_3;     // I2C port 1 SCL pin.
 
 /*
- * The SPI pins, used for display/touch, are specified in sdkconfig.
+ * The SPI pins, used for display/touch, are specified in sdkconfig.defaults.
  *
  * SPI-CS-DISP  = 7
  * SPI-CS-TOUCH = 10
