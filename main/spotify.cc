@@ -295,13 +295,13 @@ esp_err_t Spotify::GetCurrentlyPlaying() {
   constexpr char kCurrentlyPlayingURL[] =
       "https://api.spotify.com/v1/me/player/currently-playing";
 
-  bool give_mutex = xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE;
+  if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
+    return ESP_FAIL;
   const std::vector<HTTPClient::HeaderValue> header_values = {
       {"Authorization", "Bearer " + auth_data_.access_token},
       {"Connection", "close"},
   };
-  if (give_mutex)
-    xSemaphoreGive(mutex_);
+  xSemaphoreGive(mutex_);
 
   std::string response;
   HTTPClient https_client;
