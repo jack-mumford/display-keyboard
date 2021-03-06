@@ -33,6 +33,16 @@ CONFIG_FREERTOS_WATCHPOINT_END_OF_STACK=y
 CONFIG_FREERTOS_SUPPORT_STATIC_ALLOCATION=y
 # end of FreeRTOS
 
+# Remove (Heap memory debugging) section when shipping.
+
+#
+# Heap memory debugging
+#
+CONFIG_HEAP_POISONING_COMPREHENSIVE=y
+CONFIG_HEAP_TRACING_OFF=y
+CONFIG_HEAP_TASK_TRACKING=y
+# end of Heap memory debugging
+
 # Spotify auth headers are larger than default.
 
 #
