@@ -17,7 +17,7 @@ constexpr lv_coord_t kStatusBarIconHeight = 20;
 constexpr lv_coord_t kSpotifyIconWidth = 66;
 constexpr lv_coord_t kSpotifyIconHeight = 20;
 constexpr int kStatusBarHeight = 20;
-constexpr lv_coord_t kRatingImageWidth = 40;
+constexpr lv_coord_t kRatingImageWidth = 38;
 constexpr lv_coord_t kRatingImageHeight = 42;
 }  // namespace
 
