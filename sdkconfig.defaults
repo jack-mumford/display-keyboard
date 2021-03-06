@@ -65,6 +65,12 @@ CONFIG_LV_MEM_SIZE_KILOBYTES=600
 # end of Memory manager settings
 
 #
+# Image decoder and cache
+#
+CONFIG_LV_IMG_CACHE_DEF_SIZE=8
+# end of Image decoder and cache
+
+#
 # Debug Settings
 #
 CONFIG_LV_USE_DEBUG=y
