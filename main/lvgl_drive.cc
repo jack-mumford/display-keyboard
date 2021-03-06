@@ -39,15 +39,18 @@ lv_fs_res_t file_open_cb(struct _lv_fs_drv_t* drv,
                          const char* path,
                          lv_fs_mode_t mode) {
   std::unique_ptr<char> abs_path(new char[LV_FS_MAX_PATH_LENGTH]);
+  if (!abs_path)
+    return LV_FS_RES_OUT_OF_MEM;
 #if 1
   // Hack to restore the '/' prefix needed by SPIFFS.
   abs_path.get()[0] = '/';
-  strcpy(abs_path.get() + 1, path);
+  strncpy(abs_path.get() + 1, path, LV_FS_MAX_PATH_LENGTH - 1);
 #else
   // Looks like LVGL strips off the leading '/' prefix, which seems to
   // be needed by SPIFFS. This fails with errno=ENOENT(2).
-  strcpy(abs_path.get(), path);
+  strncpy(abs_path.get(), path, LV_FS_MAX_PATH_LENGTH);
 #endif
+  abs_path.get()[LV_FS_MAX_PATH_LENGTH - 1] = '\0';
 
   FILE* f = nullptr;
   if (mode == LV_FS_MODE_WR)
@@ -90,8 +93,10 @@ lv_fs_res_t file_read_cb(struct _lv_fs_drv_t* drv,
     return LV_FS_RES_OK;
   }
   const lv_fs_res_t err = ErrnoToLVGL(errno);
-  if (err != LV_FS_RES_OK)
-    ESP_LOGW(TAG, "Error %u reading %u bytes from file.", err, btr);
+  if (err)
+    ESP_LOGW(TAG, "Only read %u bytes of %u, err:%u.", *br, btr, err);
+  else
+    ESP_LOGD(TAG, "Only read %u bytes of %u", *br, btr);
 
   return err;
 }
