@@ -126,24 +126,18 @@ esp_err_t MainScreen::CreateTimeLabel() {
 esp_err_t MainScreen::InitializeStatusBar() {
   esp_err_t err;
 
-#if 1
   err = LoadGearImage();
   if (err != ESP_OK)
     return err;
-#endif
 
-#if 0
   err = LoadSpotifyImage();
   if (err != ESP_OK)
     return err;
-#endif
 
-#if 0
   err = LoadWiFiImages();
   if (err != ESP_OK)
     return err;
   UpdateWiFi();
-#endif
 
   err = CreateTimeLabel();
   if (err != ESP_OK)
