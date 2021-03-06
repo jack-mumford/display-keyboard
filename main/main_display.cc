@@ -8,38 +8,29 @@
 #include <lv_lib_split_jpg/lv_sjpg.h>
 #include <lvgl.h>
 #include <lvgl_helpers.h>
+#include <lvgl_touch/touch_driver.h>
 
 #include "lvgl_drive.h"
 #include "main_screen.h"
 
 namespace {
-
 const char TAG[] = "MainDisp";
-
-bool my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data) {
-  return false;
-}
-
 }  // namespace
 
 MainDisplay::MainDisplay()
     : screen_(new MainScreen(*this)),
-      initialized_(false),
       display_buf_1_(new lv_color_t[DISP_BUF_SIZE]),
-      display_buf_2_(new lv_color_t[DISP_BUF_SIZE]),
-      disp_driver_(nullptr),
-      lv_screen_(nullptr),
-      input_driver_(nullptr) {}
+      display_buf_2_(new lv_color_t[DISP_BUF_SIZE]) {}
 
 MainDisplay::~MainDisplay() = default;
 
-esp_err_t MainDisplay::Initialize() {
-  ESP_LOGD(TAG, "Initializing display");
-  if (initialized_) {
-    ESP_LOGW(TAG, "Already initialized");
-    return ESP_OK;
-  }
+// static
+void IRAM_ATTR MainDisplay::TouchDriverFeedback(_lv_indev_drv_t* driver,
+                                                lv_event_t event) {
+  ESP_LOGD(TAG, "Got touch feedback");
+}
 
+esp_err_t MainDisplay::InitializeDisplayDriver() {
 // Not controllers used by this project, but checking for future flexibility.
 #if defined CONFIG_LV_TFT_DISPLAY_CONTROLLER_IL3820 ||   \
     defined CONFIG_LV_TFT_DISPLAY_CONTROLLER_JD79653A || \
@@ -65,15 +56,36 @@ esp_err_t MainDisplay::Initialize() {
   disp_driver_ = lv_disp_drv_register(&disp_drv);
   if (!disp_driver_)
     return ESP_FAIL;
+  return ESP_OK;
+}
 
-  lv_indev_drv_t indev_drv;
-  lv_indev_drv_init(&indev_drv);
-
-  indev_drv.type = LV_INDEV_TYPE_POINTER;
-  indev_drv.read_cb = my_touchpad_read;
-  input_driver_ = lv_indev_drv_register(&indev_drv);
-  if (!input_driver_)
+esp_err_t MainDisplay::InitializeTouchPanelDriver() {
+#if CONFIG_LV_TOUCH_CONTROLLER != TOUCH_CONTROLLER_NONE
+  lv_indev_drv_init(&indev_drv_);
+  indev_drv_.read_cb = touch_driver_read;
+  indev_drv_.feedback_cb = TouchDriverFeedback;
+  indev_drv_.type = LV_INDEV_TYPE_POINTER;
+  input_device_ = lv_indev_drv_register(&indev_drv_);
+  if (!input_device_)
     return ESP_FAIL;
+#endif
+  return ESP_OK;
+}
+
+esp_err_t MainDisplay::Initialize() {
+  ESP_LOGD(TAG, "Initializing display");
+  if (initialized_) {
+    ESP_LOGW(TAG, "Already initialized");
+    return ESP_OK;
+  }
+
+  esp_err_t err = InitializeDisplayDriver();
+  if (err != ESP_OK)
+    return err;
+
+  err = InitializeTouchPanelDriver();
+  if (err != ESP_OK)
+    return err;
 
   lv_screen_ = lv_disp_get_scr_act(disp_driver_);
   if (!lv_screen_)
@@ -82,7 +94,7 @@ esp_err_t MainDisplay::Initialize() {
   if (lvgl::Drive::Initialize() != ESP_OK)
     return ESP_FAIL;
 
-  esp_err_t err = screen_->Initialize();
+  err = screen_->Initialize();
   if (err != ESP_OK)
     return err;
 

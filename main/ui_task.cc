@@ -8,7 +8,6 @@
 #include <lv_lib_split_jpg/lv_sjpg.h>
 #include <lvgl.h>
 #include <lvgl_helpers.h>
-#include <lvgl_touch/touch_driver.h>
 
 #include "gpio_pins.h"
 #include "main_display.h"
@@ -74,7 +73,7 @@ esp_err_t UITask::CreateTickTimer() {
 
 void UITask::UpdateTime() {
   constexpr TickType_t kUpdateTimeTimeout = 2000 / portTICK_PERIOD_MS;
-  if (xSemaphoreTake(mutex_, kUpdateTimeTimeout)) {
+  if (xSemaphoreTake(mutex_, kUpdateTimeTimeout) == pdTRUE) {
     main_display_.UpdateTime();
     xSemaphoreGive(mutex_);
   }
@@ -83,12 +82,6 @@ void UITask::UpdateTime() {
 // static
 void IRAM_ATTR UITask::UpdateTimeCb(void* arg) {
   static_cast<UITask*>(arg)->UpdateTime();
-}
-
-// static
-void IRAM_ATTR UITask::TouchDriverFeedback(_lv_indev_drv_t* driver,
-                                           lv_event_t event) {
-  ESP_LOGD(TAG, "Got touch feedback");
 }
 
 esp_err_t UITask::CreateUpdateTimeTimer() {
@@ -132,7 +125,7 @@ esp_err_t UITask::Initialize() {
 void UITask::SetDarkMode() {
   // TODO: Set dark mode and background color at compile-time.
   // This should be do-able, but the theme in sdkconfig seems to
-  // be ignored. Maybe lv_conf.h will work.
+  // be ignored. Maybe using lv_conf.h will work.
   lv_theme_material_init(
       lv_theme_get_color_primary(), lv_theme_get_color_secondary(),
       LV_THEME_MATERIAL_FLAG_DARK, lv_theme_get_font_small(),
@@ -145,22 +138,9 @@ void UITask::SetDarkMode() {
   lv_obj_add_style(main_display_.screen(), LV_OBJ_PART_MAIN, &style);
 }
 
-esp_err_t UITask::InitializeTouchPanel() {
-#if CONFIG_LV_TOUCH_CONTROLLER != TOUCH_CONTROLLER_NONE
-  lv_indev_drv_init(&indev_drv_);
-  indev_drv_.read_cb = touch_driver_read;
-  indev_drv_.feedback_cb = TouchDriverFeedback;
-  indev_drv_.type = LV_INDEV_TYPE_POINTER;
-  input_device_ = lv_indev_drv_register(&indev_drv_);
-  if (!input_device_)
-    return ESP_FAIL;
-#endif
-  return ESP_OK;
-}
-
 void IRAM_ATTR UITask::Run() {
   ESP_LOGD(TAG, "Running.");
-  if (!xSemaphoreTake(mutex_, portMAX_DELAY))
+  if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
     return;
   lv_init();
   lvgl_driver_init();
@@ -169,14 +149,13 @@ void IRAM_ATTR UITask::Run() {
 
   ESP_ERROR_CHECK(main_display_.Initialize());
   SetDarkMode();
-  ESP_ERROR_CHECK(InitializeTouchPanel());
-  xSemaphoreGive(mutex_);
-
   ESP_ERROR_CHECK(CreateTickTimer());
   ESP_ERROR_CHECK(CreateUpdateTimeTimer());
 
+  xSemaphoreGive(mutex_);
+
   while (true) {
-    if (xSemaphoreTake(mutex_, portMAX_DELAY)) {
+    if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
       uint32_t wait_msecs = lv_task_handler() / 1000;
       xSemaphoreGive(mutex_);
       if (wait_msecs < kMinMainLoopWaitMSecs)
@@ -198,7 +177,7 @@ void IRAM_ATTR UITask::TaskFunc(void* arg) {
 
 // static
 void UITask::SetWiFiStatus(WiFiStatus status) {
-  if (!xSemaphoreTake(g_ui_task->mutex_, portMAX_DELAY))
+  if (xSemaphoreTake(g_ui_task->mutex_, portMAX_DELAY) != pdTRUE)
     return;
   g_ui_task->wifi_status_ = status;
   g_ui_task->main_display_.SetWiFiStatus(status);

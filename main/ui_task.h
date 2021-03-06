@@ -28,7 +28,6 @@ class UITask {
   static void IRAM_ATTR TaskFunc(void* arg);
   static void IRAM_ATTR TickTimerCb(void* arg);
   static void IRAM_ATTR UpdateTimeCb(void* arg);
-  static void IRAM_ATTR TouchDriverFeedback(_lv_indev_drv_t*, lv_event_t);
 
   UITask();
 
@@ -38,7 +37,6 @@ class UITask {
   esp_err_t CreateTickTimer();
   void Tick();
   esp_err_t Initialize();
-  esp_err_t InitializeTouchPanel();
   void IRAM_ATTR Run();
 
   SemaphoreHandle_t mutex_;
@@ -48,6 +46,4 @@ class UITask {
   esp_timer_handle_t time_update_timer_ = nullptr;
   WiFiStatus wifi_status_ = WiFiStatus::Offline;
   int64_t last_tick_time_ = -1;
-  lv_indev_drv_t indev_drv_;
-  lv_indev_t* input_device_ = nullptr;
 };
