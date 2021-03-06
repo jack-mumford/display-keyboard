@@ -21,6 +21,11 @@ class MainScreen : public Screen {
   esp_err_t InitializeStatusBar();
   void UpdateWiFi();
   esp_err_t LoadWiFiImages();
+  esp_err_t LoadGearImage();
+  esp_err_t LoadSpotifyImage();
+  esp_err_t CreateTimeLabel();
+  esp_err_t CreateSongDataLabels();
+  esp_err_t CreateAlbumArtwork();
   void UpdateRating();
   esp_err_t LoadRatingImages();
 

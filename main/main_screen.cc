@@ -24,6 +24,8 @@ constexpr lv_coord_t kRatingImageHeight = 42;
 MainScreen::MainScreen(MainDisplay& display) : Screen(display) {}
 
 void MainScreen::UpdateTime() {
+  if (!lbl_time_)
+    return;
   struct tm now_local;
   {
     time_t now_epoch_coordinated_universal = 0;
@@ -37,13 +39,17 @@ void MainScreen::UpdateTime() {
 }
 
 void MainScreen::UpdateWiFi() {
-  lv_obj_set_hidden(img_wifi_online_, wifi_status_ != WiFiStatus::Online);
-  lv_obj_set_hidden(img_wifi_offline_, wifi_status_ != WiFiStatus::Offline);
+  if (img_wifi_online_)
+    lv_obj_set_hidden(img_wifi_online_, wifi_status_ != WiFiStatus::Online);
+  if (img_wifi_offline_)
+    lv_obj_set_hidden(img_wifi_offline_, wifi_status_ != WiFiStatus::Offline);
 }
 
 void MainScreen::UpdateRating() {
-  lv_obj_set_hidden(img_thumbs_up_, true);
-  lv_obj_set_hidden(img_thumbs_none_, false);
+  if (img_thumbs_up_)
+    lv_obj_set_hidden(img_thumbs_up_, true);
+  if (img_thumbs_none_)
+    lv_obj_set_hidden(img_thumbs_none_, false);
 }
 
 esp_err_t MainScreen::LoadWiFiImages() {
@@ -87,75 +93,132 @@ esp_err_t MainScreen::LoadRatingImages() {
   return ESP_OK;
 }
 
-esp_err_t MainScreen::InitializeStatusBar() {
-  constexpr lv_coord_t kTimeWidth = 105;
-
-  lv_obj_t* screen = disp().screen();
-
-  lbl_time_ = lv_label_create(screen, nullptr);
-  if (!lbl_time_)
-    return ESP_FAIL;
-  UpdateTime();
-  lv_obj_set_pos(lbl_time_, kScreenWidth - kStatusBarIconWidth - kTimeWidth, 2);
-
-  esp_err_t err = LoadWiFiImages();
-  if (err != ESP_OK)
-    return err;
-  UpdateWiFi();
-
-  img_gear_ = lv_img_create(screen, nullptr);
+esp_err_t MainScreen::LoadGearImage() {
+  img_gear_ = lv_img_create(disp().screen(), nullptr);
   if (!img_gear_)
     return ESP_FAIL;
   lv_img_set_src(img_gear_, "S:/spiffs/gear_icon.png");
   lv_obj_set_pos(img_gear_, 2, 0);
   lv_obj_set_size(img_gear_, kStatusBarIconWidth, kStatusBarIconHeight);
+  return ESP_OK;
+}
 
-  img_spotify_ = lv_img_create(screen, nullptr);
+esp_err_t MainScreen::LoadSpotifyImage() {
+  img_spotify_ = lv_img_create(disp().screen(), nullptr);
   if (!img_spotify_)
     return ESP_FAIL;
   lv_img_set_src(img_spotify_, "S:/spiffs/spotify-norm.png");
   lv_obj_set_pos(img_spotify_, (kScreenWidth - kSpotifyIconWidth) / 2 - 10, 0);
   lv_obj_set_size(img_spotify_, kSpotifyIconWidth, kSpotifyIconHeight);
+  return ESP_OK;
+}
+
+esp_err_t MainScreen::CreateTimeLabel() {
+  constexpr lv_coord_t kTimeWidth = 105;
+
+  lbl_time_ = lv_label_create(disp().screen(), nullptr);
+  if (!lbl_time_)
+    return ESP_FAIL;
+  lv_obj_set_pos(lbl_time_, kScreenWidth - kStatusBarIconWidth - kTimeWidth, 2);
+  return ESP_OK;
+}
+
+esp_err_t MainScreen::InitializeStatusBar() {
+  esp_err_t err;
+
+#if 1
+  err = LoadGearImage();
+  if (err != ESP_OK)
+    return err;
+#endif
+
+#if 0
+  err = LoadSpotifyImage();
+  if (err != ESP_OK)
+    return err;
+#endif
+
+#if 0
+  err = LoadWiFiImages();
+  if (err != ESP_OK)
+    return err;
+  UpdateWiFi();
+#endif
+
+  err = CreateTimeLabel();
+  if (err != ESP_OK)
+    return err;
+  UpdateTime();
 
   return ESP_OK;
 }
 
-esp_err_t MainScreen::Initialize() {
+esp_err_t MainScreen::CreateSongDataLabels() {
   constexpr int kLineHeight = 18;
   constexpr int kMargin = 10;
 
-  int top = kStatusBarHeight;
-
+  lv_coord_t top = kStatusBarHeight;
   lv_obj_t* screen = disp().screen();
 
   lbl_test_ = lv_label_create(screen, nullptr);
+  if (!lbl_test_)
+    return ESP_FAIL;
   lv_label_set_text(lbl_test_, "Artist: <Name of artist>");
   lv_obj_set_pos(lbl_test_, kMargin, top += kLineHeight);
 
   lv_obj_t* album = lv_label_create(screen, nullptr);
+  if (!album)
+    return ESP_FAIL;
   lv_label_set_text(album, "Album: <Name of album>");
   lv_obj_set_pos(album, kMargin, top += kLineHeight);
 
   lv_obj_t* song = lv_label_create(screen, nullptr);
+  if (!song)
+    return ESP_FAIL;
   lv_label_set_text(song, "Song: <Name of song>");
   lv_obj_set_pos(song, kMargin, top += kLineHeight);
+  return ESP_OK;
+}
 
-  img_album_ = lv_img_create(screen, nullptr);
-  if (img_album_) {
-    constexpr char fname[] = "S:/spiffs/album_2_cover.jpg";
-    ESP_LOGI(TAG, "Loading image \"%s\".", fname);
-    constexpr int kImageWidth = kScreenWidth / 2;
-    constexpr int kImageHeight = kScreenHeight / 2;
-    constexpr int kImageLeft = (kScreenWidth - kImageWidth) / 2;
-    lv_img_set_src(img_album_, fname);
-    lv_obj_set_pos(img_album_, kImageLeft, top + 26);
-    lv_obj_set_size(img_album_, kImageWidth, kImageHeight);
-  }
+esp_err_t MainScreen::CreateAlbumArtwork() {
+  img_album_ = lv_img_create(disp().screen(), nullptr);
+  if (!img_album_)
+    return ESP_FAIL;
 
-  LoadRatingImages();
+  constexpr lv_coord_t kImageWidth = kScreenWidth / 2;
+  constexpr lv_coord_t kImageHeight = kScreenHeight / 2;
+  constexpr lv_coord_t kImageLeft = (kScreenWidth - kImageWidth) / 2;
+  constexpr lv_coord_t kImageTop = kScreenHeight - kImageHeight - 20;
+
+  constexpr char fname[] = "S:/spiffs/album_2_cover.jpg";
+  ESP_LOGI(TAG, "Loading image \"%s\".", fname);
+  lv_img_set_src(img_album_, fname);
+  lv_obj_set_pos(img_album_, kImageLeft, kImageTop);
+  lv_obj_set_size(img_album_, kImageWidth, kImageHeight);
+  return ESP_OK;
+}
+
+esp_err_t MainScreen::Initialize() {
+  esp_err_t err;
+
+  err = InitializeStatusBar();
+  if (err != ESP_OK)
+    return err;
+
+  err = CreateSongDataLabels();
+  if (err != ESP_OK)
+    return err;
+
+  err = CreateAlbumArtwork();
+  if (err != ESP_OK)
+    return err;
+
+  err = LoadRatingImages();
+  if (err != ESP_OK)
+    return err;
   UpdateRating();
 
-  return InitializeStatusBar();
+  return ESP_OK;
 }
 
 MainScreen::~MainScreen() = default;
