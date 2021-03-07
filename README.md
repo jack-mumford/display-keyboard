@@ -43,16 +43,21 @@ cd display-keyboard
 
 ## Building
 
-Configuration (GPIO pins, etc.) is stored in the sdkconfig.defaults file. This is
-set using menuconfig as so:
+Do this after opening a new terminal window:
 
 ```sh
-./make config
+. $HOME/esp/esp-idf/export.sh
 ```
 
 Build and flash to the attached ESP32-S2 device as so:
 
 ```sh
-. $HOME/esp/esp-idf/export.sh # only do this once
-./make build && ./make flash
+./make flash
+```
+
+Configuration (GPIO pins, etc.) is stored in the sdkconfig.defaults file. This can
+be changed using menuconfig as so:
+
+```sh
+./make config
 ```
