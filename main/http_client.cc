@@ -96,9 +96,9 @@ esp_err_t HTTPClient::DoGET(const std::string& url,
 
 exit:
   data_callback_ = nullptr;
-  esp_http_client_cleanup(client);
   if (err == ESP_OK)
     *status_code = esp_http_client_get_status_code(client);
+  esp_http_client_cleanup(client);
   return err;
 }
 
