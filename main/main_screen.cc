@@ -19,6 +19,12 @@ constexpr lv_coord_t kSpotifyIconHeight = 20;
 constexpr int kStatusBarHeight = 20;
 constexpr lv_coord_t kRatingImageWidth = 38;
 constexpr lv_coord_t kRatingImageHeight = 42;
+constexpr lv_coord_t kAlbumArtworkWidth = 130;
+constexpr lv_coord_t kAlbumArtworkHeight = 130;
+constexpr lv_coord_t kAlbumArtworkLeft =
+    (kScreenWidth - kAlbumArtworkWidth) / 2;
+constexpr lv_coord_t kAlbumArtworkTop =
+    kScreenHeight - kAlbumArtworkHeight - 20;
 }  // namespace
 
 MainScreen::MainScreen(MainDisplay& display) : Screen(display) {}
@@ -74,19 +80,21 @@ esp_err_t MainScreen::LoadWiFiImages() {
 esp_err_t MainScreen::LoadRatingImages() {
   lv_obj_t* screen = disp().lv_screen();
 
+  constexpr lv_coord_t kImageTop =
+      kAlbumArtworkTop + (kAlbumArtworkHeight - kRatingImageHeight) / 2;
+  constexpr lv_coord_t kImageLeft = kScreenWidth - kRatingImageWidth - 30;
+
   img_thumbs_up_ = lv_img_create(screen, nullptr);
   if (!img_thumbs_up_)
     return ESP_FAIL;
-  lv_obj_set_pos(img_thumbs_up_, kScreenWidth - kRatingImageWidth - 20,
-                 (kScreenHeight - kRatingImageHeight) / 2);
+  lv_obj_set_pos(img_thumbs_up_, kImageLeft, kImageTop);
   lv_obj_set_size(img_thumbs_up_, kRatingImageWidth, kRatingImageHeight);
   lv_img_set_src(img_thumbs_up_, "S:/spiffs/thumbs-up.png");
 
   img_thumbs_none_ = lv_img_create(screen, nullptr);
   if (!img_thumbs_none_)
     return ESP_FAIL;
-  lv_obj_set_pos(img_thumbs_none_, kScreenWidth - kRatingImageWidth - 20,
-                 (kScreenHeight - kRatingImageHeight) / 2);
+  lv_obj_set_pos(img_thumbs_none_, kImageLeft, kImageTop);
   lv_obj_set_size(img_thumbs_none_, kRatingImageWidth, kRatingImageHeight);
   lv_img_set_src(img_thumbs_none_, "S:/spiffs/thumbs-up-none.png");
 
@@ -151,7 +159,7 @@ esp_err_t MainScreen::CreateSongDataLabels() {
   constexpr int kLineHeight = 18;
   constexpr int kMargin = 10;
 
-  lv_coord_t top = kStatusBarHeight;
+  lv_coord_t top = kStatusBarHeight - 12;
   lv_obj_t* screen = disp().lv_screen();
 
   lbl_test_ = lv_label_create(screen, nullptr);
@@ -178,7 +186,7 @@ void MainScreen::SetAlbumArtwork(std::string image_src) {
   album_cover_img_src_ = std::move(image_src);
   if (!img_album_)
     return;
-  //lv_img_set_src(img_album_, album_cover_img_src_.data());
+  lv_img_set_src(img_album_, album_cover_img_src_.data());
 }
 
 esp_err_t MainScreen::CreateAlbumArtwork() {
@@ -186,16 +194,12 @@ esp_err_t MainScreen::CreateAlbumArtwork() {
   if (!img_album_)
     return ESP_FAIL;
 
-  constexpr lv_coord_t kImageWidth = kScreenWidth / 2;
-  constexpr lv_coord_t kImageHeight = kScreenHeight / 2;
-  constexpr lv_coord_t kImageLeft = (kScreenWidth - kImageWidth) / 2;
-  constexpr lv_coord_t kImageTop = kScreenHeight - kImageHeight - 20;
-
   constexpr char fname[] = "S:/spiffs/album_2_cover.jpg";
   ESP_LOGI(TAG, "Loading image \"%s\".", fname);
   lv_img_set_src(img_album_, fname);
-  lv_obj_set_pos(img_album_, kImageLeft, kImageTop);
-  lv_obj_set_size(img_album_, kImageWidth, kImageHeight);
+  lv_obj_set_pos(img_album_, kAlbumArtworkLeft, kAlbumArtworkTop);
+  lv_obj_set_size(img_album_, kAlbumArtworkWidth, kAlbumArtworkHeight);
+  // lv_img_set_zoom(img_album_, /*50%=*/128);
   return ESP_OK;
 }
 
