@@ -33,8 +33,8 @@ esp_err_t KeyboardSimulatorTask::Initialize() {
   // https://www.freertos.org/FAQMem.html#StackSize
   constexpr uint32_t kStackDepthWords = 2048;
 
-  return xTaskCreate(TaskFunc, TAG, kStackDepthWords, this,
-                     tskIDLE_PRIORITY + 1, &task_) == pdPASS
+  return xTaskCreate(TaskFunc, TAG, kStackDepthWords, this, tskIDLE_PRIORITY,
+                     &task_) == pdPASS
              ? ESP_OK
              : ESP_FAIL;
 }

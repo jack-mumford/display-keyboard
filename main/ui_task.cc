@@ -9,6 +9,7 @@
 #include <lvgl.h>
 #include <lvgl_helpers.h>
 
+#include "album_art_downloader_task.h"
 #include "gpio_pins.h"
 #include "main_display.h"
 
@@ -182,4 +183,27 @@ void UITask::SetWiFiStatus(WiFiStatus status) {
   g_ui_task->wifi_status_ = status;
   g_ui_task->main_display_.SetWiFiStatus(status);
   xSemaphoreGive(g_ui_task->mutex_);
+
+  // Start a task to download the cover artwork.
+  AlbumArtDownloaderTask::Start(g_ui_task->GetCoverArtURL(), g_ui_task);
+}
+
+std::string UITask::GetCoverArtURL() const {
+  char* tmp(nullptr);
+  if (asprintf(&tmp, "http://10.0.9.104/album_artwork/album_%d_cover.jpg",
+               test_img_idx_) < 0) {
+    return std::string();
+  }
+
+  std::string url(tmp);
+  free(tmp);
+  return url;
+}
+
+void UITask::SetAlbumCoverDownloadError() {
+  ESP_LOGE(TAG, "Unable to download cover art");
+}
+
+void UITask::SetAlbumCoverImage(std::string image_data) {
+  ESP_LOGI(TAG, "Got cover art");
 }

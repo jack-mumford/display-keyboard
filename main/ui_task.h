@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
@@ -24,6 +26,9 @@ class UITask {
    */
   static void SetWiFiStatus(WiFiStatus status);
 
+  void SetAlbumCoverDownloadError();
+  void SetAlbumCoverImage(std::string image_data);
+
  private:
   static void IRAM_ATTR TaskFunc(void* arg);
   static void IRAM_ATTR TickTimerCb(void* arg);
@@ -31,6 +36,7 @@ class UITask {
 
   UITask();
 
+  std::string GetCoverArtURL() const;
   void SetDarkMode();
   void UpdateTime();
   esp_err_t CreateUpdateTimeTimer();
@@ -46,4 +52,5 @@ class UITask {
   esp_timer_handle_t time_update_timer_ = nullptr;
   WiFiStatus wifi_status_ = WiFiStatus::Offline;
   int64_t last_tick_time_ = -1;
+  uint8_t test_img_idx_ = 1;  // Just for testing.
 };

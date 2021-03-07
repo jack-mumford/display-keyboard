@@ -56,8 +56,8 @@ esp_err_t KeyboardTask::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  return xTaskCreate(TaskFunc, TAG, kStackDepthWords, this,
-                     tskIDLE_PRIORITY + 1, &task_) == pdPASS
+  return xTaskCreate(TaskFunc, TAG, kStackDepthWords, this, tskIDLE_PRIORITY,
+                     &task_) == pdPASS
              ? ESP_OK
              : ESP_FAIL;
 }
