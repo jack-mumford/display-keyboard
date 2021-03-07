@@ -50,7 +50,7 @@ AlbumArtDownloaderTask* AlbumArtDownloaderTask::Start(
 
 esp_err_t AlbumArtDownloaderTask::Initialize() {
   // https://www.freertos.org/FAQMem.html#StackSize
-  constexpr uint32_t kStackDepthWords = 2048;
+  constexpr uint32_t kStackDepthWords = 4096;
 
   if (!event_group_)
     return ESP_FAIL;
