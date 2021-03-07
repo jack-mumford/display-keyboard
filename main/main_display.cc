@@ -102,13 +102,3 @@ esp_err_t MainDisplay::Initialize() {
   ESP_LOGD(TAG, "Display successfully initialized");
   return ESP_OK;
 }
-
-void MainDisplay::SetWiFiStatus(WiFiStatus status) {
-  screen_->SetWiFiStatus(status);
-}
-
-void MainDisplay::UpdateTime() {
-  if (!screen_)
-    return;
-  screen_->UpdateTime();
-}

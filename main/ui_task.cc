@@ -12,6 +12,7 @@
 #include "album_art_downloader_task.h"
 #include "gpio_pins.h"
 #include "main_display.h"
+#include "main_screen.h"
 
 namespace {
 
@@ -75,7 +76,8 @@ esp_err_t UITask::CreateTickTimer() {
 void UITask::UpdateTime() {
   constexpr TickType_t kUpdateTimeTimeout = 2000 / portTICK_PERIOD_MS;
   if (xSemaphoreTake(mutex_, kUpdateTimeTimeout) == pdTRUE) {
-    main_display_.UpdateTime();
+    if (main_display_.screen())
+      main_display_.screen()->UpdateTime();
     xSemaphoreGive(mutex_);
   }
 }
@@ -136,7 +138,7 @@ void UITask::SetDarkMode() {
   static lv_style_t style;
   lv_style_init(&style);
   lv_style_set_bg_color(&style, LV_STATE_DEFAULT, LV_COLOR_BLACK);
-  lv_obj_add_style(main_display_.screen(), LV_OBJ_PART_MAIN, &style);
+  lv_obj_add_style(main_display_.lv_screen(), LV_OBJ_PART_MAIN, &style);
 }
 
 void IRAM_ATTR UITask::Run() {
@@ -181,7 +183,8 @@ void UITask::SetWiFiStatus(WiFiStatus status) {
   if (xSemaphoreTake(g_ui_task->mutex_, portMAX_DELAY) != pdTRUE)
     return;
   g_ui_task->wifi_status_ = status;
-  g_ui_task->main_display_.SetWiFiStatus(status);
+  if (g_ui_task->main_display_.screen())
+    g_ui_task->main_display_.screen()->SetWiFiStatus(status);
   xSemaphoreGive(g_ui_task->mutex_);
 
   // Start a task to download the cover artwork.

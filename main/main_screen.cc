@@ -53,7 +53,7 @@ void MainScreen::UpdateRating() {
 }
 
 esp_err_t MainScreen::LoadWiFiImages() {
-  lv_obj_t* screen = disp().screen();
+  lv_obj_t* screen = disp().lv_screen();
   img_wifi_online_ = lv_img_create(screen, nullptr);
   if (!img_wifi_online_)
     return ESP_FAIL;
@@ -72,7 +72,7 @@ esp_err_t MainScreen::LoadWiFiImages() {
 }
 
 esp_err_t MainScreen::LoadRatingImages() {
-  lv_obj_t* screen = disp().screen();
+  lv_obj_t* screen = disp().lv_screen();
 
   img_thumbs_up_ = lv_img_create(screen, nullptr);
   if (!img_thumbs_up_)
@@ -94,7 +94,7 @@ esp_err_t MainScreen::LoadRatingImages() {
 }
 
 esp_err_t MainScreen::LoadGearImage() {
-  img_gear_ = lv_img_create(disp().screen(), nullptr);
+  img_gear_ = lv_img_create(disp().lv_screen(), nullptr);
   if (!img_gear_)
     return ESP_FAIL;
   lv_img_set_src(img_gear_, "S:/spiffs/gear_icon.png");
@@ -104,7 +104,7 @@ esp_err_t MainScreen::LoadGearImage() {
 }
 
 esp_err_t MainScreen::LoadSpotifyImage() {
-  img_spotify_ = lv_img_create(disp().screen(), nullptr);
+  img_spotify_ = lv_img_create(disp().lv_screen(), nullptr);
   if (!img_spotify_)
     return ESP_FAIL;
   lv_img_set_src(img_spotify_, "S:/spiffs/spotify-norm.png");
@@ -116,7 +116,7 @@ esp_err_t MainScreen::LoadSpotifyImage() {
 esp_err_t MainScreen::CreateTimeLabel() {
   constexpr lv_coord_t kTimeWidth = 105;
 
-  lbl_time_ = lv_label_create(disp().screen(), nullptr);
+  lbl_time_ = lv_label_create(disp().lv_screen(), nullptr);
   if (!lbl_time_)
     return ESP_FAIL;
   lv_obj_set_pos(lbl_time_, kScreenWidth - kStatusBarIconWidth - kTimeWidth, 2);
@@ -152,7 +152,7 @@ esp_err_t MainScreen::CreateSongDataLabels() {
   constexpr int kMargin = 10;
 
   lv_coord_t top = kStatusBarHeight;
-  lv_obj_t* screen = disp().screen();
+  lv_obj_t* screen = disp().lv_screen();
 
   lbl_test_ = lv_label_create(screen, nullptr);
   if (!lbl_test_)
@@ -174,8 +174,15 @@ esp_err_t MainScreen::CreateSongDataLabels() {
   return ESP_OK;
 }
 
+void MainScreen::SetAlbumArtwork(std::string image_src) {
+  album_cover_img_src_ = std::move(image_src);
+  if (!img_album_)
+    return;
+  //lv_img_set_src(img_album_, album_cover_img_src_.data());
+}
+
 esp_err_t MainScreen::CreateAlbumArtwork() {
-  img_album_ = lv_img_create(disp().screen(), nullptr);
+  img_album_ = lv_img_create(disp().lv_screen(), nullptr);
   if (!img_album_)
     return ESP_FAIL;
 

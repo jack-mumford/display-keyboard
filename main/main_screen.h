@@ -17,6 +17,8 @@ class MainScreen : public Screen {
   void SetWiFiStatus(WiFiStatus status);
   void UpdateTime();
 
+  void SetAlbumArtwork(std::string image_src);
+
  private:
   esp_err_t InitializeStatusBar();
   void UpdateWiFi();
@@ -29,6 +31,7 @@ class MainScreen : public Screen {
   void UpdateRating();
   esp_err_t LoadRatingImages();
 
+  std::string album_cover_img_src_;
   lv_obj_t* lbl_test_ = nullptr;
   lv_obj_t* lbl_time_ = nullptr;
   lv_obj_t* img_album_ = nullptr;
