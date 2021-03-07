@@ -191,7 +191,7 @@ void IRAM_ATTR UITask::Run() {
       // Need to use vTaskDelay to avoid triggering the task WDT.
       vTaskDelay(pdMS_TO_TICKS(wait_msecs));
     }
-    if ((loop_count % 200) == 0)
+    if ((loop_count % 500) == 0)
       LogMemory();
     loop_count++;
     taskYIELD();  // Not sure if this is necessary.
@@ -220,7 +220,7 @@ void UITask::SetWiFiStatus(WiFiStatus status) {
 
 std::string UITask::GetCoverArtURL() const {
   char* tmp(nullptr);
-  if (asprintf(&tmp, "http://code.home/album_covers/album_%d_cover.jpg",
+  if (asprintf(&tmp, "http://10.0.9.104/album_covers/album_%u_cover.jpg",
                test_img_idx_) < 0) {
     return std::string();
   }
@@ -238,7 +238,7 @@ void UITask::FetchResult(uint32_t request_id,
              http_status_code);
     return;
   }
-  ESP_LOGI(TAG, "Got cover art");
+  ESP_LOGI(TAG, "Got cover art: %zu bytes", resource_data.size());
   configASSERT(main_display_.screen());
   if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
     return;
