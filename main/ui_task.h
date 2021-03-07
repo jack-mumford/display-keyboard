@@ -9,11 +9,9 @@
 #include <esp_err.h>
 #include <esp_timer.h>
 
-#include "album_art_downloader_task.h"
 #include "event_ids.h"
 #include "main_display.h"
-
-class AlbumArtDownloaderTask;
+#include "resource_fetcher.h"
 
 /**
  * The task responsible for doing **all** UI rendering to screens.
@@ -59,6 +57,6 @@ class UITask : public ResourceFetchClient {
   WiFiStatus wifi_status_ = WiFiStatus::Offline;
   int64_t last_tick_time_ = -1;
   uint8_t test_img_idx_ = 1;  // Just for testing.
-  AlbumArtDownloaderTask* fetcher_;
+  ResourceFetcher* fetcher_;
   uint32_t next_fetch_id_ = 1;
 };

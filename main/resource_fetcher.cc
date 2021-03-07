@@ -1,4 +1,4 @@
-#include "album_art_downloader_task.h"
+#include "resource_fetcher.h"
 
 #include <memory>
 
@@ -18,8 +18,7 @@ constexpr EventBits_t FETCH_EVENT = BIT0;
 constexpr EventBits_t EVENT_ALL = BIT0;
 }  // namespace
 
-AlbumArtDownloaderTask::AlbumArtDownloaderTask(
-    ResourceFetchClient* fetch_client)
+ResourceFetcher::ResourceFetcher(ResourceFetchClient* fetch_client)
     : mutex_(xSemaphoreCreateMutex()),
       event_group_(xEventGroupCreate()),
       fetch_client_(fetch_client) {
@@ -27,15 +26,14 @@ AlbumArtDownloaderTask::AlbumArtDownloaderTask(
 }
 
 // static
-AlbumArtDownloaderTask* AlbumArtDownloaderTask::Start(
-    ResourceFetchClient* fetch_client) {
-  static AlbumArtDownloaderTask* task;
+ResourceFetcher* ResourceFetcher::Start(ResourceFetchClient* fetch_client) {
+  static ResourceFetcher* task;
 
   if (task)
     return task;
 
   ESP_LOGD(TAG, "Starting Fetcher task");
-  task = new AlbumArtDownloaderTask(fetch_client);
+  task = new ResourceFetcher(fetch_client);
   if (!task)
     return nullptr;
   esp_err_t err = task->Initialize();
@@ -48,7 +46,7 @@ AlbumArtDownloaderTask* AlbumArtDownloaderTask::Start(
   return task;
 }
 
-esp_err_t AlbumArtDownloaderTask::Initialize() {
+esp_err_t ResourceFetcher::Initialize() {
   // https://www.freertos.org/FAQMem.html#StackSize
   constexpr uint32_t kStackDepthWords = 4096;
 
@@ -61,7 +59,7 @@ esp_err_t AlbumArtDownloaderTask::Initialize() {
              : ESP_FAIL;
 }
 
-void AlbumArtDownloaderTask::QueueFetch(uint32_t request_id, std::string url) {
+void ResourceFetcher::QueueFetch(uint32_t request_id, std::string url) {
   if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
     return;
   requests_.emplace(request_id, url);
@@ -69,7 +67,7 @@ void AlbumArtDownloaderTask::QueueFetch(uint32_t request_id, std::string url) {
   xEventGroupSetBits(event_group_, FETCH_EVENT);
 }
 
-void AlbumArtDownloaderTask::DownloadResource(RequestData resource) {
+void ResourceFetcher::DownloadResource(RequestData resource) {
   std::string response;
   HTTPClient https_client;
   int status_code(0);
@@ -94,7 +92,7 @@ void AlbumArtDownloaderTask::DownloadResource(RequestData resource) {
                              std::move(response));
 }
 
-void IRAM_ATTR AlbumArtDownloaderTask::Run() {
+void IRAM_ATTR ResourceFetcher::Run() {
   while (true) {
     EventBits_t bits =
         xEventGroupWaitBits(event_group_, EVENT_ALL, /*xClearOnExit=*/pdFALSE,
@@ -118,6 +116,6 @@ void IRAM_ATTR AlbumArtDownloaderTask::Run() {
 }
 
 // static
-void IRAM_ATTR AlbumArtDownloaderTask::TaskFunc(void* arg) {
-  static_cast<AlbumArtDownloaderTask*>(arg)->Run();
+void IRAM_ATTR ResourceFetcher::TaskFunc(void* arg) {
+  static_cast<ResourceFetcher*>(arg)->Run();
 }

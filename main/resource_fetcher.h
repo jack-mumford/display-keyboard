@@ -41,9 +41,9 @@ class ResourceFetchClient {
 /**
  * @brief Download a single album cover image and then self delete.
  */
-class AlbumArtDownloaderTask {
+class ResourceFetcher {
  public:
-  static AlbumArtDownloaderTask* Start(ResourceFetchClient* fetch_client);
+  static ResourceFetcher* Start(ResourceFetchClient* fetch_client);
 
   /**
    * @brief Queue a resource to fetch.
@@ -66,8 +66,8 @@ class AlbumArtDownloaderTask {
 
   void IRAM_ATTR Run();
   void DownloadResource(RequestData resource);
-  AlbumArtDownloaderTask(ResourceFetchClient* fetch_client);
-  ~AlbumArtDownloaderTask() = default;
+  ResourceFetcher(ResourceFetchClient* fetch_client);
+  ~ResourceFetcher() = default;
 
   esp_err_t Initialize();
 

@@ -9,10 +9,10 @@
 #include <lvgl.h>
 #include <lvgl_helpers.h>
 
-#include "album_art_downloader_task.h"
 #include "gpio_pins.h"
 #include "main_display.h"
 #include "main_screen.h"
+#include "resource_fetcher.h"
 
 namespace {
 
@@ -131,7 +131,7 @@ esp_err_t UITask::Initialize() {
   if (!mutex_)
     return ESP_FAIL;
 
-  fetcher_ = AlbumArtDownloaderTask::Start(this);
+  fetcher_ = ResourceFetcher::Start(this);
   if (!fetcher_)
     return ESP_FAIL;
 
