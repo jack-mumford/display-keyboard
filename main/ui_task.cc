@@ -119,7 +119,7 @@ esp_err_t UITask::Initialize() {
   // be pinned to a single core, but doing so on a dual-core MCU
   // will reserve the other core for WiFi and other activities.
   return pdPASS == xTaskCreatePinnedToCore(TaskFunc, "UI", kStackDepthWords,
-                                           this, tskIDLE_PRIORITY, &task_,
+                                           this, tskIDLE_PRIORITY + 1, &task_,
                                            tskNO_AFFINITY)
              ? ESP_OK
              : ESP_FAIL;
