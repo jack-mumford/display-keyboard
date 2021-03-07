@@ -1,6 +1,6 @@
 #include "http_client.h"
 
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+#define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
 #include <esp_crt_bundle.h>
 #include <esp_http_client.h>
 #include <esp_log.h>
@@ -53,7 +53,7 @@ esp_err_t HTTPClient::EventHandler(esp_http_client_event_t* evt) {
     case HTTP_EVENT_ON_CONNECTED:
       break;
     case HTTP_EVENT_ON_DATA:
-      ESP_LOGI(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
+      ESP_LOGV(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
       if (client->data_callback_)
         client->data_callback_(evt->data, evt->data_len);
       break;
