@@ -10,54 +10,73 @@
 #include <esp_log.h>
 
 #include "http_client.h"
-#include "ui_task.h"
 
 namespace {
-constexpr char TAG[] = "CoverTask";
+constexpr char TAG[] = "Fetcher";
+
+constexpr EventBits_t FETCH_EVENT = BIT0;
+constexpr EventBits_t EVENT_ALL = BIT0;
+}  // namespace
+
+AlbumArtDownloaderTask::AlbumArtDownloaderTask(
+    ResourceFetchClient* fetch_client)
+    : mutex_(xSemaphoreCreateMutex()),
+      event_group_(xEventGroupCreate()),
+      fetch_client_(fetch_client) {
+  configASSERT(fetch_client);
 }
 
-AlbumArtDownloaderTask::AlbumArtDownloaderTask(std::string url, UITask* ui_task)
-    : url_(std::move(url)), ui_task_(ui_task) {}
-
 // static
-esp_err_t AlbumArtDownloaderTask::Start(std::string url, UITask* ui_task) {
-  ESP_LOGD(TAG, "Starting AlbumArtDownloaderTask");
+AlbumArtDownloaderTask* AlbumArtDownloaderTask::Start(
+    ResourceFetchClient* fetch_client) {
+  static AlbumArtDownloaderTask* task;
 
-  AlbumArtDownloaderTask* task =
-      new AlbumArtDownloaderTask(std::move(url), ui_task);
+  if (task)
+    return task;
+
+  ESP_LOGD(TAG, "Starting Fetcher task");
+  task = new AlbumArtDownloaderTask(fetch_client);
   if (!task)
-    return ESP_ERR_NO_MEM;
+    return nullptr;
   esp_err_t err = task->Initialize();
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "Cannot initialize: %s", esp_err_to_name(err));
     delete task;
-    return err;
+    task = nullptr;
+    return nullptr;
   }
-  return ESP_OK;
+  return task;
 }
 
 esp_err_t AlbumArtDownloaderTask::Initialize() {
   // https://www.freertos.org/FAQMem.html#StackSize
   constexpr uint32_t kStackDepthWords = 2048;
 
-  return xTaskCreate(TaskFunc, TAG, kStackDepthWords, this, tskIDLE_PRIORITY,
-                     &task_) == pdPASS
+  if (!event_group_)
+    return ESP_FAIL;
+
+  return xTaskCreate(TaskFunc, TAG, kStackDepthWords, this,
+                     tskIDLE_PRIORITY + 1, &task_) == pdPASS
              ? ESP_OK
              : ESP_FAIL;
 }
 
-// static
-void IRAM_ATTR AlbumArtDownloaderTask::TaskFunc(void* arg) {
-  std::unique_ptr<AlbumArtDownloaderTask> task(
-      static_cast<AlbumArtDownloaderTask*>(arg));
+void AlbumArtDownloaderTask::QueueFetch(uint32_t request_id, std::string url) {
+  if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
+    return;
+  requests_.emplace(request_id, url);
+  xSemaphoreGive(mutex_);
+  xEventGroupSetBits(event_group_, FETCH_EVENT);
+}
 
+void AlbumArtDownloaderTask::DownloadResource(RequestData resource) {
   std::string response;
   HTTPClient https_client;
   int status_code(0);
   const std::vector<HTTPClient::HeaderValue> header_values;
-  ESP_LOGD(TAG, "GETting %s", task->url_.c_str());
+  ESP_LOGD(TAG, "GETting %s", resource.url.c_str());
   esp_err_t err = https_client.DoGET(
-      task->url_, header_values,
+      resource.url, header_values,
       [&response](const void* data, int data_len) {
         response.append(static_cast<const char*>(data), data_len);
         return ESP_OK;
@@ -65,23 +84,40 @@ void IRAM_ATTR AlbumArtDownloaderTask::TaskFunc(void* arg) {
       &status_code);
 
   if (err != ESP_OK) {
-    ESP_LOGE(TAG, "Error GETting %s: %s", task->url_.c_str(),
+    ESP_LOGE(TAG, "Error GETting %s: %s", resource.url.c_str(),
              esp_err_to_name(err));
-    task->ui_task_->SetAlbumCoverDownloadError();
+    fetch_client_->FetchError(resource.request_id, err);
     return;
   }
 
-  if (status_code != HttpStatus_Ok) {
-    ESP_LOGE(TAG, "Request error: %d", status_code);
-    task->ui_task_->SetAlbumCoverDownloadError();
-    return;
-  }
+  fetch_client_->FetchResult(resource.request_id, status_code,
+                             std::move(response));
+}
 
-  if (response.empty()) {
-    ESP_LOGE(TAG, "Got empty response.");
-    task->ui_task_->SetAlbumCoverDownloadError();
-    return;
-  }
+void IRAM_ATTR AlbumArtDownloaderTask::Run() {
+  while (true) {
+    EventBits_t bits =
+        xEventGroupWaitBits(event_group_, EVENT_ALL, /*xClearOnExit=*/pdFALSE,
+                            /*xWaitForAllBits=*/pdFALSE, portMAX_DELAY);
+    if (bits & FETCH_EVENT) {
+      if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
+        return;
+      configASSERT(!requests_.empty());
+      RequestData resource = requests_.front();
+      requests_.pop();
+      xSemaphoreGive(mutex_);
+      DownloadResource(std::move(resource));
 
-  task->ui_task_->SetAlbumCoverImage(std::move(response));
+      if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
+        return;
+      if (requests_.empty())
+        xEventGroupClearBits(event_group_, FETCH_EVENT);
+      xSemaphoreGive(mutex_);
+    }
+  }
+}
+
+// static
+void IRAM_ATTR AlbumArtDownloaderTask::TaskFunc(void* arg) {
+  static_cast<AlbumArtDownloaderTask*>(arg)->Run();
 }

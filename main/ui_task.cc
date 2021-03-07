@@ -28,6 +28,22 @@ static_assert(kMaxMainLoopWaitMSecs > kMinMainLoopWaitMSecs);
 
 UITask* g_ui_task = nullptr;
 
+void LogMemory() {
+  ESP_LOGW(TAG, "Memory:");
+  ESP_LOGD(TAG, "MALLOC_CAP_8BIT:     %u (min: %u)",
+           heap_caps_get_free_size(MALLOC_CAP_8BIT),
+           heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT));
+  ESP_LOGD(TAG, "MALLOC_CAP_DMA:      %u (min: %u)",
+           heap_caps_get_free_size(MALLOC_CAP_DMA),
+           heap_caps_get_minimum_free_size(MALLOC_CAP_DMA));
+  ESP_LOGD(TAG, "MALLOC_CAP_SPIRAM:   %u (min: %u)",
+           heap_caps_get_free_size(MALLOC_CAP_SPIRAM),
+           heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM));
+  ESP_LOGD(TAG, "MALLOC_CAP_INTERNAL: %u (min: %u)",
+           heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
+           heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL));
+}
+
 }  // namespace
 
 UITask::UITask() : mutex_(xSemaphoreCreateMutex()) {}
@@ -115,6 +131,10 @@ esp_err_t UITask::Initialize() {
   if (!mutex_)
     return ESP_FAIL;
 
+  fetcher_ = AlbumArtDownloaderTask::Start(this);
+  if (!fetcher_)
+    return ESP_FAIL;
+
   // Create a new task for LVGL drawing. Don't believe this needs to
   // be pinned to a single core, but doing so on a dual-core MCU
   // will reserve the other core for WiFi and other activities.
@@ -157,6 +177,8 @@ void IRAM_ATTR UITask::Run() {
 
   xSemaphoreGive(mutex_);
 
+  uint32_t loop_count = 0;
+
   while (true) {
     if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
       uint32_t wait_msecs = lv_task_handler() / 1000;
@@ -169,6 +191,9 @@ void IRAM_ATTR UITask::Run() {
       // Need to use vTaskDelay to avoid triggering the task WDT.
       vTaskDelay(pdMS_TO_TICKS(wait_msecs));
     }
+    if ((loop_count % 200) == 0)
+      LogMemory();
+    loop_count++;
     taskYIELD();  // Not sure if this is necessary.
   }
 }
@@ -180,6 +205,7 @@ void IRAM_ATTR UITask::TaskFunc(void* arg) {
 
 // static
 void UITask::SetWiFiStatus(WiFiStatus status) {
+  configASSERT(g_ui_task);
   if (xSemaphoreTake(g_ui_task->mutex_, portMAX_DELAY) != pdTRUE)
     return;
   g_ui_task->wifi_status_ = status;
@@ -188,12 +214,13 @@ void UITask::SetWiFiStatus(WiFiStatus status) {
   xSemaphoreGive(g_ui_task->mutex_);
 
   // Start a task to download the cover artwork.
-  AlbumArtDownloaderTask::Start(g_ui_task->GetCoverArtURL(), g_ui_task);
+  g_ui_task->fetcher_->QueueFetch(g_ui_task->next_fetch_id_++,
+                                  g_ui_task->GetCoverArtURL());
 }
 
 std::string UITask::GetCoverArtURL() const {
   char* tmp(nullptr);
-  if (asprintf(&tmp, "http://10.0.9.104/album_artwork/album_%d_cover.jpg",
+  if (asprintf(&tmp, "http://code.home/album_covers/album_%d_cover.jpg",
                test_img_idx_) < 0) {
     return std::string();
   }
@@ -203,10 +230,22 @@ std::string UITask::GetCoverArtURL() const {
   return url;
 }
 
-void UITask::SetAlbumCoverDownloadError() {
-  ESP_LOGE(TAG, "Unable to download cover art");
+void UITask::FetchResult(uint32_t request_id,
+                         int http_status_code,
+                         std::string resource_data) {
+  if (http_status_code != HttpStatus_Ok) {
+    ESP_LOGW(TAG, "Unable to fetch resource: status_code: %d",
+             http_status_code);
+    return;
+  }
+  ESP_LOGI(TAG, "Got cover art");
+  configASSERT(main_display_.screen());
+  if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
+    return;
+  main_display_.screen()->SetAlbumArtwork(std::move(resource_data));
+  xSemaphoreGive(mutex_);
 }
 
-void UITask::SetAlbumCoverImage(std::string image_data) {
-  ESP_LOGI(TAG, "Got cover art");
+void UITask::FetchError(uint32_t request_id, esp_err_t err) {
+  ESP_LOGE(TAG, "Error fetching resource: %s", esp_err_to_name(err));
 }

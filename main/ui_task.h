@@ -9,13 +9,16 @@
 #include <esp_err.h>
 #include <esp_timer.h>
 
+#include "album_art_downloader_task.h"
 #include "event_ids.h"
 #include "main_display.h"
+
+class AlbumArtDownloaderTask;
 
 /**
  * The task responsible for doing **all** UI rendering to screens.
  */
-class UITask {
+class UITask : public ResourceFetchClient {
  public:
   static esp_err_t Start();
 
@@ -26,8 +29,11 @@ class UITask {
    */
   static void SetWiFiStatus(WiFiStatus status);
 
-  void SetAlbumCoverDownloadError();
-  void SetAlbumCoverImage(std::string image_data);
+  // ResourceFetchClient:
+  void FetchResult(uint32_t request_id,
+                   int http_status_code,
+                   std::string resource_data) override;
+  void FetchError(uint32_t request_id, esp_err_t err) override;
 
  private:
   static void IRAM_ATTR TaskFunc(void* arg);
@@ -53,4 +59,6 @@ class UITask {
   WiFiStatus wifi_status_ = WiFiStatus::Offline;
   int64_t last_tick_time_ = -1;
   uint8_t test_img_idx_ = 1;  // Just for testing.
+  AlbumArtDownloaderTask* fetcher_;
+  uint32_t next_fetch_id_ = 1;
 };
