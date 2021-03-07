@@ -183,10 +183,13 @@ esp_err_t MainScreen::CreateSongDataLabels() {
 }
 
 void MainScreen::SetAlbumArtwork(std::string image_src) {
+  // We could handle empty in the future, but don't at present.
+  configASSERT(!image_src.empty());
   album_cover_img_src_ = std::move(image_src);
   if (!img_album_)
     return;
-  lv_img_set_src(img_album_, album_cover_img_src_.data());
+  // This doesn't work (at least for JPEG images).
+  // lv_img_set_src(img_album_, album_cover_img_src_.c_str());
 }
 
 esp_err_t MainScreen::CreateAlbumArtwork() {
