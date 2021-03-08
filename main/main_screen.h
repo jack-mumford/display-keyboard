@@ -8,6 +8,8 @@
 #include "event_ids.h"
 #include "screen.h"
 
+#define DISPLAY_MEMORY
+
 class MainScreen : public Screen {
  public:
   MainScreen(MainDisplay& display);
@@ -34,6 +36,9 @@ class MainScreen : public Screen {
   std::string album_cover_img_src_;
   lv_obj_t* lbl_test_ = nullptr;
   lv_obj_t* lbl_time_ = nullptr;
+#ifdef DISPLAY_MEMORY
+  lv_obj_t* lbl_memory_ = nullptr;
+#endif
   lv_obj_t* img_album_ = nullptr;
   lv_obj_t* img_wifi_online_ = nullptr;
   lv_obj_t* img_wifi_offline_ = nullptr;

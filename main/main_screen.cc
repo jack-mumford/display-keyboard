@@ -30,6 +30,16 @@ constexpr lv_coord_t kAlbumArtworkTop =
 MainScreen::MainScreen(MainDisplay& display) : Screen(display) {}
 
 void MainScreen::UpdateTime() {
+  char tmbuf[32];
+
+#ifdef DISPLAY_MEMORY
+  if (lbl_memory_) {
+    snprintf(tmbuf, sizeof(tmbuf), "Mem: %zu, min:%zu",
+             heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
+             heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL));
+    lv_label_set_text(lbl_memory_, tmbuf);
+  }
+#endif
   if (!lbl_time_)
     return;
   struct tm now_local;
@@ -38,7 +48,6 @@ void MainScreen::UpdateTime() {
     time(&now_epoch_coordinated_universal);
     localtime_r(&now_epoch_coordinated_universal, &now_local);
   }
-  char tmbuf[32];
   strftime(tmbuf, sizeof(tmbuf), "%r", &now_local);
   lv_label_set_text(lbl_time_, tmbuf);
   last_time_ = tmbuf;
@@ -128,6 +137,14 @@ esp_err_t MainScreen::CreateTimeLabel() {
   if (!lbl_time_)
     return ESP_FAIL;
   lv_obj_set_pos(lbl_time_, kScreenWidth - kStatusBarIconWidth - kTimeWidth, 2);
+
+#ifdef DISPLAY_MEMORY
+  lbl_memory_ = lv_label_create(disp().lv_screen(), nullptr);
+  if (!lbl_memory_)
+    return ESP_FAIL;
+  lv_obj_set_pos(lbl_memory_, 0, kScreenHeight - 17);
+#endif
+
   return ESP_OK;
 }
 
