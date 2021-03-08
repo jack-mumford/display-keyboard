@@ -3,7 +3,7 @@ EELAYER 30 0
 EELAYER END
 $Descr A 11000 8500
 encoding utf-8
-Sheet 1 1
+Sheet 1 2
 Title "Display Keyboard"
 Date "2020-12-27"
 Rev "2"
@@ -25,151 +25,6 @@ Text GLabel 8200 1850 0    50   Input ~ 0
 1V8_KBDINT
 Text GLabel 5650 5650 2    50   Input ~ 0
 3V3_KBDINT
-$Comp
-L Switch:SW_Push Q1
-U 1 1 5FCC9F75
-P 4900 2000
-F 0 "Q1" H 4900 2193 50  0001 C CNN
-F 1 "Q" H 4900 2193 50  0000 C CNN
-F 2 "Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB" H 4900 2200 50  0001 C CNN
-F 3 "~" H 4900 2200 50  0001 C CNN
-	1    4900 2000
-	1    0    0    -1  
-$EndComp
-$Comp
-L Switch:SW_Push W1
-U 1 1 5FCCA414
-P 5500 2000
-F 0 "W1" H 5500 2193 50  0001 C CNN
-F 1 "W" H 5500 2193 50  0000 C CNN
-F 2 "Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB" H 5500 2200 50  0001 C CNN
-F 3 "~" H 5500 2200 50  0001 C CNN
-	1    5500 2000
-	1    0    0    -1  
-$EndComp
-$Comp
-L Switch:SW_Push E1
-U 1 1 5FCCAA98
-P 6100 2000
-F 0 "E1" H 6100 2193 50  0001 C CNN
-F 1 "E" H 6100 2193 50  0000 C CNN
-F 2 "Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB" H 6100 2200 50  0001 C CNN
-F 3 "~" H 6100 2200 50  0001 C CNN
-	1    6100 2000
-	1    0    0    -1  
-$EndComp
-$Comp
-L Switch:SW_Push A1
-U 1 1 5FCCB8B3
-P 4900 2600
-F 0 "A1" H 4900 2793 50  0001 C CNN
-F 1 "A" H 4900 2793 50  0000 C CNN
-F 2 "Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB" H 4900 2800 50  0001 C CNN
-F 3 "~" H 4900 2800 50  0001 C CNN
-	1    4900 2600
-	1    0    0    -1  
-$EndComp
-$Comp
-L Switch:SW_Push S1
-U 1 1 5FCCBF44
-P 5500 2600
-F 0 "S1" H 5500 2793 50  0001 C CNN
-F 1 "S" H 5500 2793 50  0000 C CNN
-F 2 "Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB" H 5500 2800 50  0001 C CNN
-F 3 "~" H 5500 2800 50  0001 C CNN
-	1    5500 2600
-	1    0    0    -1  
-$EndComp
-$Comp
-L Switch:SW_Push D1
-U 1 1 5FCCC6C4
-P 6100 2600
-F 0 "D1" H 6100 2793 50  0001 C CNN
-F 1 "D" H 6100 2793 50  0000 C CNN
-F 2 "Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB" H 6100 2800 50  0001 C CNN
-F 3 "~" H 6100 2800 50  0001 C CNN
-	1    6100 2600
-	1    0    0    -1  
-$EndComp
-$Comp
-L Switch:SW_Push Shift1
-U 1 1 5FCCCBD3
-P 4300 2000
-F 0 "Shift1" H 4300 2193 50  0001 C CNN
-F 1 "Shift" H 4300 2193 50  0000 C CNN
-F 2 "Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB" H 4300 2200 50  0001 C CNN
-F 3 "~" H 4300 2200 50  0001 C CNN
-	1    4300 2000
-	1    0    0    -1  
-$EndComp
-$Comp
-L Switch:SW_Push Ctrl1
-U 1 1 5FCCD3E9
-P 4300 2600
-F 0 "Ctrl1" H 4300 2793 50  0001 C CNN
-F 1 "Ctrl" H 4300 2793 50  0000 C CNN
-F 2 "Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB" H 4300 2800 50  0001 C CNN
-F 3 "~" H 4300 2800 50  0001 C CNN
-	1    4300 2600
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	4500 2000 4550 2000
-Wire Wire Line
-	4550 2000 4550 2600
-Wire Wire Line
-	5100 2000 5150 2000
-Wire Wire Line
-	5150 2000 5150 2600
-Wire Wire Line
-	5700 2000 5750 2000
-Wire Wire Line
-	5750 2000 5750 2600
-Wire Wire Line
-	6300 2000 6350 2000
-Wire Wire Line
-	6350 2000 6350 2600
-Wire Wire Line
-	5900 2100 5900 2000
-Wire Wire Line
-	5300 2000 5300 2100
-Connection ~ 5300 2100
-Wire Wire Line
-	5300 2100 5900 2100
-Wire Wire Line
-	4700 2000 4700 2100
-Connection ~ 4700 2100
-Wire Wire Line
-	4700 2100 5300 2100
-Wire Wire Line
-	4050 2600 4050 2700
-Wire Wire Line
-	4050 2700 4700 2700
-Wire Wire Line
-	5900 2700 5900 2600
-Wire Wire Line
-	4050 2600 4100 2600
-Wire Wire Line
-	5300 2600 5300 2700
-Connection ~ 5300 2700
-Wire Wire Line
-	5300 2700 5900 2700
-Wire Wire Line
-	4700 2600 4700 2700
-Connection ~ 4700 2700
-Wire Wire Line
-	4700 2700 5300 2700
-Wire Wire Line
-	4500 2600 4550 2600
-Connection ~ 4550 2600
-Wire Wire Line
-	5100 2600 5150 2600
-Wire Wire Line
-	5700 2600 5750 2600
-Wire Wire Line
-	6300 2600 6350 2600
-Wire Wire Line
-	4550 2600 4550 2850
 Text GLabel 8200 1950 0    50   Input ~ 0
 1V8_RST
 Text GLabel 4800 4350 0    50   Input ~ 0
@@ -194,39 +49,6 @@ Text GLabel 9250 2400 2    50   Input ~ 0
 COL2
 Text GLabel 9250 2500 2    50   Input ~ 0
 COL3
-Text GLabel 6350 2850 3    50   Input ~ 0
-COL0
-Text GLabel 4550 2850 3    50   Input ~ 0
-COL3
-Text GLabel 5150 2850 3    50   Input ~ 0
-COL2
-Text GLabel 5750 2850 3    50   Input ~ 0
-COL1
-Wire Wire Line
-	5150 2850 5150 2600
-Connection ~ 5150 2600
-Wire Wire Line
-	5750 2600 5750 2850
-Connection ~ 5750 2600
-Wire Wire Line
-	6350 2600 6350 2850
-Connection ~ 6350 2600
-Text GLabel 3950 2100 0    50   Input ~ 0
-ROW0
-Text GLabel 3950 2700 0    50   Input ~ 0
-ROW1
-Wire Wire Line
-	3950 2100 4050 2100
-Wire Wire Line
-	3950 2700 4050 2700
-Connection ~ 4050 2700
-Wire Wire Line
-	4100 2000 4050 2000
-Wire Wire Line
-	4050 2000 4050 2100
-Connection ~ 4050 2100
-Wire Wire Line
-	4050 2100 4700 2100
 $Comp
 L Connector:Conn_01x14_Female J1
 U 1 1 5FCD18E2
@@ -735,4 +557,16 @@ Wire Wire Line
 	9200 1300 9450 1300
 Wire Wire Line
 	9450 1300 9450 1350
+$Sheet
+S 3700 1250 3000 1850
+U 60458A5B
+F0 "New Keyboard Matrix" 50
+F1 "NewKeyboardMatrix.sch" 50
+F2 "ROW0" I L 3700 2000 50 
+F3 "ROW1" I L 3700 2350 50 
+F4 "COL0" I L 3700 2550 50 
+F5 "COL1" I L 3700 2700 50 
+F6 "COL2" I L 3700 2850 50 
+F7 "COL3" I L 3700 3000 50 
+$EndSheet
 $EndSCHEMATC
