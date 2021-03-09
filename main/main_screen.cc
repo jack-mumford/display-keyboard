@@ -7,6 +7,12 @@
 #include <lv_widgets/lv_label.h>
 
 #include "main_display.h"
+#include "images/gear.h"
+#include "images/rating_none.h"
+#include "images/rating_positive.h"
+#include "images/spotify.h"
+#include "images/wifi_offline.h"
+#include "images/wifi_online.h"
 
 namespace {
 constexpr char TAG[] = "MainScreen";
@@ -74,14 +80,14 @@ esp_err_t MainScreen::LoadWiFiImages() {
     return ESP_FAIL;
   lv_obj_set_pos(img_wifi_online_, kScreenWidth - kStatusBarIconWidth, 0);
   lv_obj_set_size(img_wifi_online_, kStatusBarIconWidth, kStatusBarIconHeight);
-  lv_img_set_src(img_wifi_online_, "S:/spiffs/wifi-online.png");
+  lv_img_set_src(img_wifi_online_, &wifi_online);
 
   img_wifi_offline_ = lv_img_create(screen, nullptr);
   if (!img_wifi_offline_)
     return ESP_FAIL;
   lv_obj_set_pos(img_wifi_offline_, kScreenWidth - kStatusBarIconWidth, 0);
   lv_obj_set_size(img_wifi_offline_, kStatusBarIconWidth, kStatusBarIconHeight);
-  lv_img_set_src(img_wifi_offline_, "S:/spiffs/wifi-offline.png");
+  lv_img_set_src(img_wifi_offline_, &wifi_offline);
 
   return ESP_OK;
 }
@@ -98,14 +104,14 @@ esp_err_t MainScreen::LoadRatingImages() {
     return ESP_FAIL;
   lv_obj_set_pos(img_thumbs_up_, kImageLeft, kImageTop);
   lv_obj_set_size(img_thumbs_up_, kRatingImageWidth, kRatingImageHeight);
-  lv_img_set_src(img_thumbs_up_, "S:/spiffs/thumbs-up.png");
+  lv_img_set_src(img_thumbs_up_, &rating_positive);
 
   img_thumbs_none_ = lv_img_create(screen, nullptr);
   if (!img_thumbs_none_)
     return ESP_FAIL;
   lv_obj_set_pos(img_thumbs_none_, kImageLeft, kImageTop);
   lv_obj_set_size(img_thumbs_none_, kRatingImageWidth, kRatingImageHeight);
-  lv_img_set_src(img_thumbs_none_, "S:/spiffs/thumbs-up-none.png");
+  lv_img_set_src(img_thumbs_none_, &rating_none);
 
   return ESP_OK;
 }
@@ -114,7 +120,7 @@ esp_err_t MainScreen::LoadGearImage() {
   img_gear_ = lv_img_create(disp().lv_screen(), nullptr);
   if (!img_gear_)
     return ESP_FAIL;
-  lv_img_set_src(img_gear_, "S:/spiffs/gear_icon.png");
+  lv_img_set_src(img_gear_, &gear);
   lv_obj_set_pos(img_gear_, 2, 0);
   lv_obj_set_size(img_gear_, kStatusBarIconWidth, kStatusBarIconHeight);
   return ESP_OK;
@@ -124,7 +130,7 @@ esp_err_t MainScreen::LoadSpotifyImage() {
   img_spotify_ = lv_img_create(disp().lv_screen(), nullptr);
   if (!img_spotify_)
     return ESP_FAIL;
-  lv_img_set_src(img_spotify_, "S:/spiffs/spotify-norm.png");
+  lv_img_set_src(img_spotify_, &spotify);
   lv_obj_set_pos(img_spotify_, (kScreenWidth - kSpotifyIconWidth) / 2 - 10, 0);
   lv_obj_set_size(img_spotify_, kSpotifyIconWidth, kSpotifyIconHeight);
   return ESP_OK;
