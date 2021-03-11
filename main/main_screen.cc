@@ -6,13 +6,13 @@
 #include <lv_widgets/lv_img.h>
 #include <lv_widgets/lv_label.h>
 
-#include "main_display.h"
 #include "images/gear.h"
 #include "images/rating_none.h"
 #include "images/rating_positive.h"
 #include "images/spotify.h"
 #include "images/wifi_offline.h"
 #include "images/wifi_online.h"
+#include "main_display.h"
 
 namespace {
 constexpr char TAG[] = "MainScreen";
@@ -29,21 +29,65 @@ constexpr lv_coord_t kAlbumArtworkWidth = 130;
 constexpr lv_coord_t kAlbumArtworkHeight = 130;
 constexpr lv_coord_t kAlbumArtworkLeft =
     (kScreenWidth - kAlbumArtworkWidth) / 2;
-constexpr lv_coord_t kAlbumArtworkTop =
-    kScreenHeight - kAlbumArtworkHeight - 20;
+constexpr lv_coord_t kAlbumArtworkTop = 20;
+// kScreenHeight - kAlbumArtworkHeight - 20;
+
+#ifdef DISPLAY_MEMORY
+std::string DisplayMem(size_t bytes) {
+  char buff[20];
+
+  if (bytes > 1000000) {
+    snprintf(buff, sizeof(buff), "%0.1f MB",
+             static_cast<float>(bytes) / 1024.0f / 1024.0f);
+  } else if (bytes > 10000) {
+    snprintf(buff, sizeof(buff), "%zu KB", bytes / 1024);
+  } else {
+    snprintf(buff, sizeof(buff), "%zu B", bytes);
+  }
+
+  buff[sizeof(buff) - 1] = '\0';
+  return std::string(buff);
+}
+#endif
 }  // namespace
 
 MainScreen::MainScreen(MainDisplay& display) : Screen(display) {}
 
 void MainScreen::UpdateTime() {
-  char tmbuf[32];
+  char tmbuf[40];
 
 #ifdef DISPLAY_MEMORY
-  if (lbl_memory_) {
-    snprintf(tmbuf, sizeof(tmbuf), "Mem: %zu, min:%zu",
-             heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
-             heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL));
-    lv_label_set_text(lbl_memory_, tmbuf);
+  if (lbl_memory_caps_) {
+    snprintf(
+        tmbuf, sizeof(tmbuf), "8bit: %s, min:%s (%s)",
+        DisplayMem(heap_caps_get_free_size(MALLOC_CAP_8BIT)).c_str(),
+        DisplayMem(heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT)).c_str(),
+        DisplayMem(heap_caps_get_total_size(MALLOC_CAP_8BIT)).c_str());
+    lv_label_set_text(lbl_memory_caps_, tmbuf);
+  }
+  if (lbl_memory_dma_) {
+    snprintf(
+        tmbuf, sizeof(tmbuf), "DMA: %s, min:%s (%s)",
+        DisplayMem(heap_caps_get_free_size(MALLOC_CAP_DMA)).c_str(),
+        DisplayMem(heap_caps_get_minimum_free_size(MALLOC_CAP_DMA)).c_str(),
+        DisplayMem(heap_caps_get_total_size(MALLOC_CAP_DMA)).c_str());
+    lv_label_set_text(lbl_memory_dma_, tmbuf);
+  }
+  if (lbl_memory_spiram_) {
+    snprintf(
+        tmbuf, sizeof(tmbuf), "SPIRAM: %s, min:%s (%s)",
+        DisplayMem(heap_caps_get_free_size(MALLOC_CAP_SPIRAM)).c_str(),
+        DisplayMem(heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM)).c_str(),
+        DisplayMem(heap_caps_get_total_size(MALLOC_CAP_SPIRAM)).c_str());
+    lv_label_set_text(lbl_memory_spiram_, tmbuf);
+  }
+  if (lbl_memory_internal_) {
+    snprintf(tmbuf, sizeof(tmbuf), "INT: %s, min:%s (%s)",
+             DisplayMem(heap_caps_get_free_size(MALLOC_CAP_INTERNAL)).c_str(),
+             DisplayMem(heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL))
+                 .c_str(),
+             DisplayMem(heap_caps_get_total_size(MALLOC_CAP_INTERNAL)).c_str());
+    lv_label_set_text(lbl_memory_internal_, tmbuf);
   }
 #endif
   if (!lbl_time_)
@@ -145,10 +189,28 @@ esp_err_t MainScreen::CreateTimeLabel() {
   lv_obj_set_pos(lbl_time_, kScreenWidth - kStatusBarIconWidth - kTimeWidth, 2);
 
 #ifdef DISPLAY_MEMORY
-  lbl_memory_ = lv_label_create(disp().lv_screen(), nullptr);
-  if (!lbl_memory_)
+  constexpr lv_coord_t kLineHeight = 15;
+  constexpr lv_coord_t kBottomMargin = 2;
+  lbl_memory_caps_ = lv_label_create(disp().lv_screen(), nullptr);
+  if (!lbl_memory_caps_)
     return ESP_FAIL;
-  lv_obj_set_pos(lbl_memory_, 0, kScreenHeight - 17);
+  lv_obj_set_pos(lbl_memory_caps_, 0,
+                 kScreenHeight - 4 * kLineHeight - kBottomMargin);
+  lbl_memory_dma_ = lv_label_create(disp().lv_screen(), nullptr);
+  if (!lbl_memory_dma_)
+    return ESP_FAIL;
+  lv_obj_set_pos(lbl_memory_dma_, 0,
+                 kScreenHeight - 3 * kLineHeight - kBottomMargin);
+  lbl_memory_spiram_ = lv_label_create(disp().lv_screen(), nullptr);
+  if (!lbl_memory_spiram_)
+    return ESP_FAIL;
+  lv_obj_set_pos(lbl_memory_spiram_, 0,
+                 kScreenHeight - 2 * kLineHeight - kBottomMargin);
+  lbl_memory_internal_ = lv_label_create(disp().lv_screen(), nullptr);
+  if (!lbl_memory_internal_)
+    return ESP_FAIL;
+  lv_obj_set_pos(lbl_memory_internal_, 0,
+                 kScreenHeight - 1 * kLineHeight - kBottomMargin);
 #endif
 
   return ESP_OK;

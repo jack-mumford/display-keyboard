@@ -37,7 +37,10 @@ class MainScreen : public Screen {
   lv_obj_t* lbl_test_ = nullptr;
   lv_obj_t* lbl_time_ = nullptr;
 #ifdef DISPLAY_MEMORY
-  lv_obj_t* lbl_memory_ = nullptr;
+  lv_obj_t* lbl_memory_caps_ = nullptr;
+  lv_obj_t* lbl_memory_dma_ = nullptr;
+  lv_obj_t* lbl_memory_spiram_ = nullptr;
+  lv_obj_t* lbl_memory_internal_ = nullptr;
 #endif
   lv_obj_t* img_album_ = nullptr;
   lv_obj_t* img_wifi_online_ = nullptr;
