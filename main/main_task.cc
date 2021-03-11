@@ -142,6 +142,10 @@ esp_err_t MainTask::Initialize() {
   if (err != ESP_OK)
     return err;
 
+  err = UITask::Start();
+  if (err != ESP_OK)
+    return err;
+
   err = InitializeI2C();
   if (err != ESP_OK)
     return err;
@@ -187,10 +191,6 @@ esp_err_t MainTask::Initialize() {
     return err;
 
   err = wifi_.InitiateConnection(config_.wifi.ssid, config_.wifi.key);
-  if (err != ESP_OK)
-    return err;
-
-  err = UITask::Start();
   if (err != ESP_OK)
     return err;
 
