@@ -16,7 +16,7 @@
 
 namespace {
 
-constexpr uint32_t kStackDepthWords = 16 * 1024;
+constexpr uint32_t kStackDepthWords = 4 * 1024;
 constexpr uint64_t kMaxMainLoopWaitMSecs = 100;
 constexpr uint32_t kMinMainLoopWaitMSecs = 10;
 constexpr uint64_t kTickTimerPeriodUsec = 1000;
