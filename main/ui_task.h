@@ -54,7 +54,7 @@ class UITask : public ResourceFetchClient {
   TaskHandle_t task_ = nullptr;
   esp_timer_handle_t tick_timer_ = nullptr;
   esp_timer_handle_t time_update_timer_ = nullptr;
-  uint32_t time_update_count_ = 0; // Just for testing.
+  uint32_t time_update_count_ = 0;  // Just for testing.
   WiFiStatus wifi_status_ = WiFiStatus::Offline;
   int64_t last_tick_time_ = -1;
   uint8_t test_covar_art_img_idx_ = 1;  // Just for testing.

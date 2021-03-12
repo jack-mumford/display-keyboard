@@ -7,6 +7,7 @@
 #include <lv_widgets/lv_label.h>
 
 #include "images/gear.h"
+#include "images/generic_cover.h"
 #include "images/rating_none.h"
 #include "images/rating_positive.h"
 #include "images/spotify.h"
@@ -282,9 +283,7 @@ esp_err_t MainScreen::CreateAlbumArtwork() {
   if (!img_album_)
     return ESP_FAIL;
 
-  constexpr char fname[] = "S:/spiffs/album_2_cover.jpg";
-  ESP_LOGI(TAG, "Loading image \"%s\".", fname);
-  lv_img_set_src(img_album_, fname);
+  lv_img_set_src(img_album_, &generic_cover);
   lv_obj_set_pos(img_album_, kAlbumArtworkLeft, kAlbumArtworkTop);
   lv_obj_set_size(img_album_, kAlbumArtworkWidth, kAlbumArtworkHeight);
   // lv_img_set_zoom(img_album_, /*50%=*/128);
