@@ -94,6 +94,12 @@ void UITask::UpdateTime() {
   if (xSemaphoreTake(mutex_, kUpdateTimeTimeout) == pdTRUE) {
     if (main_display_.screen())
       main_display_.screen()->UpdateTime();
+    time_update_count_++;
+    if ((time_update_count_ % 5) == 0 && wifi_status_ == WiFiStatus::Online) {
+      fetcher_->QueueFetch(next_fetch_id_++, GetCoverArtURL());
+      if (++test_covar_art_img_idx_ >= 10)
+        test_covar_art_img_idx_ = 1;
+    }
     xSemaphoreGive(mutex_);
   }
 }
@@ -212,16 +218,12 @@ void UITask::SetWiFiStatus(WiFiStatus status) {
   if (g_ui_task->main_display_.screen())
     g_ui_task->main_display_.screen()->SetWiFiStatus(status);
   xSemaphoreGive(g_ui_task->mutex_);
-
-  // Start a task to download the cover artwork.
-  g_ui_task->fetcher_->QueueFetch(g_ui_task->next_fetch_id_++,
-                                  g_ui_task->GetCoverArtURL());
 }
 
 std::string UITask::GetCoverArtURL() const {
   char* tmp(nullptr);
   if (asprintf(&tmp, "http://10.0.9.104/album_covers/album_%u_cover.jpg",
-               test_img_idx_) < 0) {
+               test_covar_art_img_idx_) < 0) {
     return std::string();
   }
 
