@@ -229,20 +229,24 @@ std::string UITask::GetCoverArtURL() const {
   return url;
 }
 
+void UITask::FetchImageResult(uint32_t request_id, lv_img_dsc_t image) {
+  configASSERT(main_display_.screen());
+  if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
+    return;
+  main_display_.screen()->SetAlbumArtwork(std::move(image));
+  xSemaphoreGive(mutex_);
+}
+
 void UITask::FetchResult(uint32_t request_id,
                          int http_status_code,
-                         std::string resource_data) {
+                         std::string resource_data,
+                         std::string mime_type) {
   if (http_status_code != HttpStatus_Ok) {
     ESP_LOGW(TAG, "Unable to fetch resource: status_code: %d",
              http_status_code);
     return;
   }
-  ESP_LOGI(TAG, "Got cover art: %zu bytes", resource_data.size());
-  configASSERT(main_display_.screen());
-  if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
-    return;
-  main_display_.screen()->SetAlbumArtwork(std::move(resource_data));
-  xSemaphoreGive(mutex_);
+  ESP_LOGW(TAG, "Got cover art: %zu bytes", resource_data.size());
 }
 
 void UITask::FetchError(uint32_t request_id, esp_err_t err) {

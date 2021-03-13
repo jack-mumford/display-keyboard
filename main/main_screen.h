@@ -3,7 +3,7 @@
 #include <string>
 
 #include <esp_err.h>
-#include <lv_core/lv_obj.h>
+#include <lvgl.h>
 
 #include "event_ids.h"
 #include "screen.h"
@@ -19,7 +19,7 @@ class MainScreen : public Screen {
   void SetWiFiStatus(WiFiStatus status);
   void UpdateTime();
 
-  void SetAlbumArtwork(std::string image_src);
+  void SetAlbumArtwork(lv_img_dsc_t image);
 
  private:
   esp_err_t InitializeStatusBar();
@@ -33,7 +33,7 @@ class MainScreen : public Screen {
   void UpdateRating();
   esp_err_t LoadRatingImages();
 
-  std::string album_cover_img_src_;
+  lv_img_dsc_t album_cover_image_;
   lv_obj_t* lbl_test_ = nullptr;
   lv_obj_t* lbl_time_ = nullptr;
 #ifdef DISPLAY_MEMORY

@@ -12,9 +12,20 @@
 
 #include <esp_err.h>
 #include <esp_http_client.h>
+#include <lvgl.h>
 
+/**
+ * Clients using ResourceFetcher must implement this interface for
+ * async fetch results.
+ */
 class ResourceFetchClient {
  public:
+  /**
+   * Called iff the successfully fetched resource is an image and was
+   * successfully decompressed.
+   */
+  virtual void FetchImageResult(uint32_t request_id, lv_img_dsc_t image) = 0;
+
   /**
    * @brief Called when a resource request was completed successfully.
    *
@@ -24,7 +35,8 @@ class ResourceFetchClient {
    */
   virtual void FetchResult(uint32_t request_id,
                            int http_status_code,
-                           std::string resource_data) = 0;
+                           std::string resource_data,
+                           std::string mime_type) = 0;
 
   /**
    * @brief Called when an error occurred fetching a resource.

@@ -1,5 +1,6 @@
 #include "resource_fetcher.h"
 
+#include <cstring>
 #include <memory>
 
 #ifdef LOG_LOCAL_LEVEL
@@ -8,14 +9,57 @@
 #endif
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <esp_log.h>
+#include <lv_lib_split_jpg/tjpgd.h>
 
 #include "http_client.h"
 
 namespace {
+
+/**
+ * The JPEG decoding "device" - used when decoding.
+ */
+struct IODEV {
+  size_t image_data_pos;   // Read position within |image_data|.
+  std::string image_data;  // Full compressed image data being decompressed.
+};
+
 constexpr char TAG[] = "Fetcher";
 
 constexpr EventBits_t FETCH_EVENT = BIT0;
 constexpr EventBits_t EVENT_ALL = BIT0;
+
+bool is_jpeg(const std::string& mime_type) {
+  return mime_type == "image/jpeg";
+}
+
+/**
+ * JPEG decompressor input callback function.
+ *
+ * @param jd Decompression object.
+ * @param buff Pointer to the read buffer (null to remove data).
+ * @param buff Number of bytes to read/skip.
+ *
+ * @return number of bytes read (zero on error).
+ */
+unsigned int input_func(JDEC* jd, uint8_t* buff, unsigned int ndata) {
+  IODEV* dev = static_cast<IODEV*>(jd->device);
+
+  size_t bytes_left = dev->image_data.size() - dev->image_data_pos;
+  if (!bytes_left)
+    return 0;
+  if (ndata < bytes_left)
+    ndata = bytes_left;
+
+  if (buff) {
+    // Read bytes from current position.
+    std::memcpy(buff, dev->image_data.c_str() + dev->image_data_pos, ndata);
+  }
+
+  // Advance current position.
+  dev->image_data_pos += ndata;
+  return ndata;
+}
+
 }  // namespace
 
 ResourceFetcher::ResourceFetcher(ResourceFetchClient* fetch_client)
@@ -69,9 +113,11 @@ void ResourceFetcher::QueueFetch(uint32_t request_id, std::string url) {
 
 void ResourceFetcher::DownloadResource(RequestData resource) {
   std::string response;
+  std::string mime_type;
   HTTPClient https_client;
   int status_code(0);
   const std::vector<HTTPClient::HeaderValue> header_values;
+
   ESP_LOGD(TAG, "GETting %s", resource.url.c_str());
   esp_err_t err = https_client.DoGET(
       resource.url, header_values,
@@ -88,8 +134,27 @@ void ResourceFetcher::DownloadResource(RequestData resource) {
     return;
   }
 
+  constexpr unsigned int kWorkPoolSize = 4096;
+  std::unique_ptr<uint8_t[]> work_pool(new uint8_t[kWorkPoolSize]);
+  std::unique_ptr<JDEC> jd(new JDEC);
+  bzero(jd.get(), sizeof(JDEC));
+  IODEV iodev;
+  JRESULT res;
+
+  if (!is_jpeg(mime_type))
+    goto decode_error;
+
+  iodev.image_data = std::move(response);
+  iodev.image_data_pos = 0;
+
+  res =
+      jd_prepare(jd.get(), input_func, work_pool.get(), kWorkPoolSize, &iodev);
+  if (res != JDR_OK)
+    goto decode_error;
+
+decode_error:
   fetch_client_->FetchResult(resource.request_id, status_code,
-                             std::move(response));
+                             std::move(response), std::move(mime_type));
 }
 
 void IRAM_ATTR ResourceFetcher::Run() {

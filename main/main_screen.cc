@@ -52,7 +52,9 @@ std::string DisplayMem(size_t bytes) {
 #endif
 }  // namespace
 
-MainScreen::MainScreen(MainDisplay& display) : Screen(display) {}
+MainScreen::MainScreen(MainDisplay& display) : Screen(display) {
+  bzero(&album_cover_image_, sizeof(album_cover_image_));
+}
 
 void MainScreen::UpdateTime() {
   char tmbuf[40];
@@ -268,14 +270,12 @@ esp_err_t MainScreen::CreateSongDataLabels() {
   return ESP_OK;
 }
 
-void MainScreen::SetAlbumArtwork(std::string image_src) {
-  // We could handle empty in the future, but don't at present.
-  configASSERT(!image_src.empty());
-  album_cover_img_src_ = std::move(image_src);
+void MainScreen::SetAlbumArtwork(lv_img_dsc_t image) {
   if (!img_album_)
     return;
-  // This doesn't work (at least for JPEG images).
-  // lv_img_set_src(img_album_, album_cover_img_src_.c_str());
+  delete album_cover_image_.data;
+  album_cover_image_ = image;
+  lv_img_set_src(img_album_, &album_cover_image_);
 }
 
 esp_err_t MainScreen::CreateAlbumArtwork() {
@@ -286,7 +286,6 @@ esp_err_t MainScreen::CreateAlbumArtwork() {
   lv_img_set_src(img_album_, &generic_cover);
   lv_obj_set_pos(img_album_, kAlbumArtworkLeft, kAlbumArtworkTop);
   lv_obj_set_size(img_album_, kAlbumArtworkWidth, kAlbumArtworkHeight);
-  // lv_img_set_zoom(img_album_, /*50%=*/128);
   return ESP_OK;
 }
 

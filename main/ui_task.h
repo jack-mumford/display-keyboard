@@ -28,9 +28,11 @@ class UITask : public ResourceFetchClient {
   static void SetWiFiStatus(WiFiStatus status);
 
   // ResourceFetchClient:
+  void FetchImageResult(uint32_t request_id, lv_img_dsc_t image) override;
   void FetchResult(uint32_t request_id,
                    int http_status_code,
-                   std::string resource_data) override;
+                   std::string resource_data,
+                   std::string mime_type) override;
   void FetchError(uint32_t request_id, esp_err_t err) override;
 
  private:
