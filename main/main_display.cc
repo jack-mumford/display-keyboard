@@ -10,7 +10,6 @@
 #include <lvgl_helpers.h>
 #include <lvgl_touch/touch_driver.h>
 
-#include "lvgl_drive.h"
 #include "main_screen.h"
 
 namespace {
@@ -89,9 +88,6 @@ esp_err_t MainDisplay::Initialize() {
 
   lv_screen_ = lv_disp_get_scr_act(disp_driver_);
   if (!lv_screen_)
-    return ESP_FAIL;
-
-  if (lvgl::Drive::Initialize() != ESP_OK)
     return ESP_FAIL;
 
   err = screen_->Initialize();

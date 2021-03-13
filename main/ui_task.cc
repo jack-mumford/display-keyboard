@@ -5,7 +5,6 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <lv_lib_png/lv_png.h>
-#include <lv_lib_split_jpg/lv_sjpg.h>
 #include <lvgl.h>
 #include <lvgl_helpers.h>
 
@@ -173,8 +172,6 @@ void IRAM_ATTR UITask::Run() {
     return;
   lv_init();
   lvgl_driver_init();
-  lv_png_init();
-  lv_split_jpeg_init();
 
   ESP_ERROR_CHECK(main_display_.Initialize());
   SetDarkMode();
