@@ -51,6 +51,9 @@ class UITask : public ResourceFetchClient {
   void Tick();
   esp_err_t Initialize();
   void IRAM_ATTR Run();
+  uint8_t last_cover_idx() const {
+    return test_cover_art_img_idx_ == 1 ? 9 : test_cover_art_img_idx_ - 1;
+  }
 
   SemaphoreHandle_t mutex_;
   MainDisplay main_display_;
@@ -60,7 +63,7 @@ class UITask : public ResourceFetchClient {
   uint32_t time_update_count_ = 0;  // Just for testing.
   WiFiStatus wifi_status_ = WiFiStatus::Offline;
   int64_t last_tick_time_ = -1;
-  uint8_t test_covar_art_img_idx_ = 1;  // Just for testing.
+  uint8_t test_cover_art_img_idx_ = 1;  // Just for testing.
   ResourceFetcher* fetcher_;
   uint32_t next_fetch_id_ = 1;
 };

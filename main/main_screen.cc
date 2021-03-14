@@ -198,6 +198,7 @@ esp_err_t MainScreen::CreateTimeLabel() {
   lbl_debug_msg_ = lv_label_create(disp().lv_screen(), nullptr);
   if (!lbl_debug_msg_)
     return ESP_FAIL;
+  lv_label_set_text(lbl_debug_msg_, "");
   lv_obj_set_pos(lbl_debug_msg_, 0,
                  kScreenHeight - 5 * kLineHeight - kBottomMargin);
 #endif
