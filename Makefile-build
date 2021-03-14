@@ -15,11 +15,11 @@ PARTITION_OFFSET=0x110000
 GIT_SUBMODULES=components/i2clib \
 							 components/inih \
 							 components/lv_lib_png \
-							 components/lv_lib_split_jpg \
 							 components/lvgl \
 							 components/lvgl_esp32_drivers \
 							 components/tarablessd1306 \
-							 components/tinyusb
+							 components/tinyusb \
+							 libs/tjpgdec
 
 .PHONY: format
 format:

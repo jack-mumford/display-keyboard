@@ -13,8 +13,7 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/components/i2clib/src/operation.cc"
     "${CMAKE_SOURCE_DIR}/components/lv_lib_png/lodepng.c"
     "${CMAKE_SOURCE_DIR}/components/lv_lib_png/lv_png.c"
-    "${CMAKE_SOURCE_DIR}/components/lv_lib_split_jpg/lv_sjpg.c"
-    "${CMAKE_SOURCE_DIR}/components/lv_lib_split_jpg/tjpgd.c"
+    "${CMAKE_SOURCE_DIR}/libs/tjpgdec/src/tjpgd.c"
   INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/components"
     "${CMAKE_SOURCE_DIR}/components/i2clib/include"
@@ -22,6 +21,7 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/components/lvgl/src"
     "${CMAKE_SOURCE_DIR}/components/tarablessd1306"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src"
+    "${CMAKE_SOURCE_DIR}/libs"
     "${CMAKE_SOURCE_DIR}/main"
     "${IDF_PATH}/components/driver/include"
     "${IDF_PATH}/components/esp-tls"

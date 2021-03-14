@@ -9,7 +9,7 @@
 #endif
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <esp_log.h>
-#include <lv_lib_split_jpg/tjpgd.h>
+#include <tjpgdec/src/tjpgd.h>
 
 #include "http_client.h"
 
@@ -50,6 +50,7 @@ unsigned int input_func(JDEC* jd, uint8_t* buff, unsigned int ndata) {
   if (ndata < bytes_left)
     ndata = bytes_left;
 
+  return 0;
   if (buff) {
     // Read bytes from current position.
     std::memcpy(buff, dev->image_data.c_str() + dev->image_data_pos, ndata);

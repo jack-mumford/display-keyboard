@@ -10,9 +10,6 @@
 [submodule "components/lv_lib_png"]
 	path = components/lv_lib_png
 	url = https://github.com/lvgl/lv_lib_png.git
-[submodule "components/lv_lib_split_jpg"]
-	path = components/lv_lib_split_jpg
-	url = https://github.com/lvgl/lv_lib_split_jpg.git
 [submodule "components/tarablessd1306"]
 	path = components/tarablessd1306
 	url = https://github.com/cmumford/tarablessd1306.git
@@ -23,3 +20,6 @@
 [submodule "components/lvgl_esp32_drivers"]
 	path = components/lvgl_esp32_drivers
 	url = https://github.com/lvgl/lvgl_esp32_drivers.git
+[submodule "libs/tjpgdec"]
+	path = libs/tjpgdec
+	url = https://github.com/cmumford/TJpgDec.git

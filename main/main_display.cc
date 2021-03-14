@@ -4,8 +4,6 @@
 #include <esp_err.h>
 #include <esp_idf_version.h>
 #include <esp_log.h>
-#include <lv_lib_png/lv_png.h>
-#include <lv_lib_split_jpg/lv_sjpg.h>
 #include <lvgl.h>
 #include <lvgl_helpers.h>
 #include <lvgl_touch/touch_driver.h>
