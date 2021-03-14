@@ -122,16 +122,28 @@ int jpeg_output_cb(JDEC* jd, void* bitmap, JRECT* rect) {
  * @return esp_err_t
  */
 esp_err_t ScaleImage(lv_img_dsc_t* dst, const lv_img_dsc_t& src) {
-#if 1
-  configASSERT(dst->header.h == src.header.h);
-  configASSERT(dst->header.w == src.header.w);
-  dst->header = src.header;
-  dst->data_size = src.data_size;
+  configASSERT(dst->header.w <= src.header.w);
+  configASSERT(dst->header.h <= src.header.h);
+
+  dst->header.always_zero = src.header.always_zero;
+  dst->header.reserved = src.header.reserved;
+  dst->header.cf = src.header.cf;
+  dst->data_size = dst->header.w * sizeof(lv_color_t) * dst->header.h;
   dst->data = new uint8_t[dst->data_size];
   if (!dst->data)
     return ESP_ERR_NO_MEM;
-  std::memcpy(const_cast<uint8_t*>(dst->data), src.data, dst->data_size);
-#endif
+
+  lv_color_t* dst_pixel =
+      const_cast<lv_color_t*>(reinterpret_cast<const lv_color_t*>(dst->data));
+  const lv_color_t* src_fb = reinterpret_cast<const lv_color_t*>(src.data);
+  // Just getting the TL corner to start (no resizing).
+  for (lv_coord_t y = 0; y < dst->header.h; y++) {
+    for (lv_coord_t x = 0; x < dst->header.w; x++) {
+      lv_coord_t src_x = x;
+      lv_coord_t src_y = y;
+      *dst_pixel++ = src_fb[src_y * src.header.w + src_x];
+    }
+  }
 
   return ESP_OK;
 }
@@ -285,13 +297,9 @@ void ResourceFetcher::DownloadResource(RequestData resource) {
   iodev->image_data.clear();  // No longer need compressed resource.
 
   lv_img_dsc_t scaled_image;
-  scaled_image.header.w = iodev->lv_image.header.w;
-  scaled_image.header.h = iodev->lv_image.header.h;
-  scaled_image.header.always_zero = 0;
-  scaled_image.header.cf = iodev->lv_image.header.cf;
-  scaled_image.header.reserved = 0;
-  scaled_image.data_size = 0;
-  scaled_image.data = nullptr;
+  bzero(&scaled_image, sizeof(scaled_image));
+  scaled_image.header.w = 130;
+  scaled_image.header.h = 130;
 
   err = ScaleImage(&scaled_image, iodev->lv_image);
   delete[] iodev->lv_image.data;  // Delete (success or not).
