@@ -95,6 +95,9 @@ void UITask::UpdateTime() {
       main_display_.screen()->UpdateTime();
     time_update_count_++;
     if ((time_update_count_ % 5) == 0 && wifi_status_ == WiFiStatus::Online) {
+      char buf[20];
+      snprintf(buf, sizeof(buf), "Fetching cover %d", test_covar_art_img_idx_);
+      main_display_.screen()->SetDebugString(buf);
       fetcher_->QueueFetch(next_fetch_id_++, GetCoverArtURL());
       if (++test_covar_art_img_idx_ >= 10)
         test_covar_art_img_idx_ = 1;
@@ -219,7 +222,7 @@ void UITask::SetWiFiStatus(WiFiStatus status) {
 
 std::string UITask::GetCoverArtURL() const {
   char* tmp(nullptr);
-  if (asprintf(&tmp, "http://10.0.9.104/album_covers/album_%u_cover.jpg",
+  if (asprintf(&tmp, "http://10.0.9.120/album_covers/album_%u_cover.jpg",
                test_covar_art_img_idx_) < 0) {
     return std::string();
   }
@@ -233,6 +236,7 @@ void UITask::FetchImageResult(uint32_t request_id, lv_img_dsc_t image) {
   configASSERT(main_display_.screen());
   if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
     return;
+  main_display_.screen()->SetDebugString("Got cover image");
   main_display_.screen()->SetAlbumArtwork(std::move(image));
   xSemaphoreGive(mutex_);
 }
@@ -241,14 +245,31 @@ void UITask::FetchResult(uint32_t request_id,
                          int http_status_code,
                          std::string resource_data,
                          std::string mime_type) {
+  char msg[20];
   if (http_status_code != HttpStatus_Ok) {
     ESP_LOGW(TAG, "Unable to fetch resource: status_code: %d",
              http_status_code);
+    if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
+      snprintf(msg, sizeof(msg), "Fetch code: %d", http_status_code);
+      main_display_.screen()->SetDebugString(msg);
+      xSemaphoreGive(mutex_);
+    }
     return;
+  }
+  snprintf(msg, sizeof(msg), "Unexpected fetch: %zu", resource_data.size());
+  if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
+    main_display_.screen()->SetDebugString(msg);
+    xSemaphoreGive(mutex_);
   }
   ESP_LOGW(TAG, "Got cover art: %zu bytes", resource_data.size());
 }
 
 void UITask::FetchError(uint32_t request_id, esp_err_t err) {
   ESP_LOGE(TAG, "Error fetching resource: %s", esp_err_to_name(err));
+  if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
+    char msg[40];
+    snprintf(msg, sizeof(msg), "Fetch Error: %s", esp_err_to_name(err));
+    main_display_.screen()->SetDebugString(msg);
+    xSemaphoreGive(mutex_);
+  }
 }

@@ -191,9 +191,18 @@ esp_err_t MainScreen::CreateTimeLabel() {
     return ESP_FAIL;
   lv_obj_set_pos(lbl_time_, kScreenWidth - kStatusBarIconWidth - kTimeWidth, 2);
 
-#ifdef DISPLAY_MEMORY
   constexpr lv_coord_t kLineHeight = 15;
   constexpr lv_coord_t kBottomMargin = 2;
+
+#ifdef DEBUG_STRING
+  lbl_debug_msg_ = lv_label_create(disp().lv_screen(), nullptr);
+  if (!lbl_debug_msg_)
+    return ESP_FAIL;
+  lv_obj_set_pos(lbl_debug_msg_, 0,
+                 kScreenHeight - 5 * kLineHeight - kBottomMargin);
+#endif
+
+#ifdef DISPLAY_MEMORY
   lbl_memory_caps_ = lv_label_create(disp().lv_screen(), nullptr);
   if (!lbl_memory_caps_)
     return ESP_FAIL;
@@ -269,6 +278,12 @@ esp_err_t MainScreen::CreateSongDataLabels() {
   lv_obj_set_pos(song, kMargin, top += kLineHeight);
   return ESP_OK;
 }
+
+#ifdef DEBUG_STRING
+void MainScreen::SetDebugString(const char* str) {
+  lv_label_set_text(lbl_debug_msg_, str);
+}
+#endif
 
 void MainScreen::SetAlbumArtwork(lv_img_dsc_t image) {
   if (!img_album_)

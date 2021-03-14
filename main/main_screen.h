@@ -9,6 +9,7 @@
 #include "screen.h"
 
 #define DISPLAY_MEMORY
+#define DEBUG_STRING
 
 class MainScreen : public Screen {
  public:
@@ -18,7 +19,9 @@ class MainScreen : public Screen {
   esp_err_t Initialize();
   void SetWiFiStatus(WiFiStatus status);
   void UpdateTime();
-
+#ifdef DEBUG_STRING
+  void SetDebugString(const char* str);
+#endif
   void SetAlbumArtwork(lv_img_dsc_t image);
 
  private:
@@ -36,6 +39,9 @@ class MainScreen : public Screen {
   lv_img_dsc_t album_cover_image_;
   lv_obj_t* lbl_test_ = nullptr;
   lv_obj_t* lbl_time_ = nullptr;
+#ifdef DEBUG_STRING
+  lv_obj_t* lbl_debug_msg_ = nullptr;
+#endif
 #ifdef DISPLAY_MEMORY
   lv_obj_t* lbl_memory_caps_ = nullptr;
   lv_obj_t* lbl_memory_dma_ = nullptr;
