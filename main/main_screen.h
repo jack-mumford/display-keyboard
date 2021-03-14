@@ -43,8 +43,6 @@ class MainScreen : public Screen {
   lv_obj_t* lbl_debug_msg_ = nullptr;
 #endif
 #ifdef DISPLAY_MEMORY
-  lv_obj_t* lbl_memory_caps_ = nullptr;
-  lv_obj_t* lbl_memory_dma_ = nullptr;
   lv_obj_t* lbl_memory_spiram_ = nullptr;
   lv_obj_t* lbl_memory_internal_ = nullptr;
 #endif

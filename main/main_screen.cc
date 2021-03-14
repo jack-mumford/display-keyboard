@@ -60,22 +60,6 @@ void MainScreen::UpdateTime() {
   char tmbuf[40];
 
 #ifdef DISPLAY_MEMORY
-  if (lbl_memory_caps_) {
-    snprintf(
-        tmbuf, sizeof(tmbuf), "8bit: %s, min:%s (%s)",
-        DisplayMem(heap_caps_get_free_size(MALLOC_CAP_8BIT)).c_str(),
-        DisplayMem(heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT)).c_str(),
-        DisplayMem(heap_caps_get_total_size(MALLOC_CAP_8BIT)).c_str());
-    lv_label_set_text(lbl_memory_caps_, tmbuf);
-  }
-  if (lbl_memory_dma_) {
-    snprintf(
-        tmbuf, sizeof(tmbuf), "DMA: %s, min:%s (%s)",
-        DisplayMem(heap_caps_get_free_size(MALLOC_CAP_DMA)).c_str(),
-        DisplayMem(heap_caps_get_minimum_free_size(MALLOC_CAP_DMA)).c_str(),
-        DisplayMem(heap_caps_get_total_size(MALLOC_CAP_DMA)).c_str());
-    lv_label_set_text(lbl_memory_dma_, tmbuf);
-  }
   if (lbl_memory_spiram_) {
     snprintf(
         tmbuf, sizeof(tmbuf), "SPIRAM: %s, min:%s (%s)",
@@ -200,20 +184,10 @@ esp_err_t MainScreen::CreateTimeLabel() {
     return ESP_FAIL;
   lv_label_set_text(lbl_debug_msg_, "");
   lv_obj_set_pos(lbl_debug_msg_, 0,
-                 kScreenHeight - 5 * kLineHeight - kBottomMargin);
+                 kScreenHeight - 3 * kLineHeight - kBottomMargin);
 #endif
 
 #ifdef DISPLAY_MEMORY
-  lbl_memory_caps_ = lv_label_create(disp().lv_screen(), nullptr);
-  if (!lbl_memory_caps_)
-    return ESP_FAIL;
-  lv_obj_set_pos(lbl_memory_caps_, 0,
-                 kScreenHeight - 4 * kLineHeight - kBottomMargin);
-  lbl_memory_dma_ = lv_label_create(disp().lv_screen(), nullptr);
-  if (!lbl_memory_dma_)
-    return ESP_FAIL;
-  lv_obj_set_pos(lbl_memory_dma_, 0,
-                 kScreenHeight - 3 * kLineHeight - kBottomMargin);
   lbl_memory_spiram_ = lv_label_create(disp().lv_screen(), nullptr);
   if (!lbl_memory_spiram_)
     return ESP_FAIL;

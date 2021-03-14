@@ -246,7 +246,7 @@ void ResourceFetcher::DownloadResource(RequestData resource) {
     return;
   }
 
-  std::vector<uint8_t> work_pool(4096);
+  std::vector<uint8_t> work_pool(4096, 0x0);
   std::unique_ptr<JDEC> jd(new JDEC);
   std::unique_ptr<IODEV> iodev(new IODEV);
 
