@@ -4,6 +4,7 @@
 #include <memory>
 #include <queue>
 #include <string>
+#include <vector>
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
@@ -35,7 +36,7 @@ class ResourceFetchClient {
    */
   virtual void FetchResult(uint32_t request_id,
                            int http_status_code,
-                           std::string resource_data,
+                           std::vector<uint8_t> resource_data,
                            std::string mime_type) = 0;
 
   /**

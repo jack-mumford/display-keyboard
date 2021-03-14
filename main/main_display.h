@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 #include <lvgl.h>
 
@@ -33,8 +34,8 @@ class MainDisplay {
 
   std::unique_ptr<MainScreen> screen_;
   bool initialized_ = false;
-  std::unique_ptr<lv_color_t[]> display_buf_1_;
-  std::unique_ptr<lv_color_t[]> display_buf_2_;
+  std::vector<lv_color_t> display_buf_1_;
+  std::vector<lv_color_t> display_buf_2_;
   lv_disp_buf_t disp_buf_;
   lv_disp_t* disp_driver_ = nullptr;
   lv_obj_t* lv_screen_ = nullptr;

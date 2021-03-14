@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -31,7 +32,7 @@ class UITask : public ResourceFetchClient {
   void FetchImageResult(uint32_t request_id, lv_img_dsc_t image) override;
   void FetchResult(uint32_t request_id,
                    int http_status_code,
-                   std::string resource_data,
+                   std::vector<uint8_t> resource_data,
                    std::string mime_type) override;
   void FetchError(uint32_t request_id, esp_err_t err) override;
 

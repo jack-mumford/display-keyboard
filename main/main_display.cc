@@ -11,13 +11,13 @@
 #include "main_screen.h"
 
 namespace {
-const char TAG[] = "MainDisp";
+constexpr char TAG[] = "MainDisp";
 }  // namespace
 
 MainDisplay::MainDisplay()
     : screen_(new MainScreen(*this)),
-      display_buf_1_(new lv_color_t[DISP_BUF_SIZE]),
-      display_buf_2_(new lv_color_t[DISP_BUF_SIZE]) {}
+      display_buf_1_(DISP_BUF_SIZE),
+      display_buf_2_(DISP_BUF_SIZE) {}
 
 MainDisplay::~MainDisplay() = default;
 
@@ -37,7 +37,7 @@ esp_err_t MainDisplay::InitializeDisplayDriver() {
   constexpr uint32_t kDispBufSizeInPixels = DISP_BUF_SIZE;
 #endif
 
-  lv_disp_buf_init(&disp_buf_, display_buf_1_.get(), display_buf_2_.get(),
+  lv_disp_buf_init(&disp_buf_, display_buf_1_.data(), display_buf_2_.data(),
                    kDispBufSizeInPixels);
 
   lv_disp_drv_t disp_drv;

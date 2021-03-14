@@ -288,9 +288,11 @@ void MainScreen::SetDebugString(const char* str) {
 void MainScreen::SetAlbumArtwork(lv_img_dsc_t image) {
   if (!img_album_)
     return;
-  delete album_cover_image_.data;
+  delete[] album_cover_image_.data;
   album_cover_image_ = image;
   lv_img_set_src(img_album_, &album_cover_image_);
+  lv_obj_set_size(img_album_, album_cover_image_.header.w,
+                  album_cover_image_.header.h);
 }
 
 esp_err_t MainScreen::CreateAlbumArtwork() {
@@ -307,15 +309,15 @@ esp_err_t MainScreen::CreateAlbumArtwork() {
 esp_err_t MainScreen::Initialize() {
   esp_err_t err;
 
+  err = CreateAlbumArtwork();
+  if (err != ESP_OK)
+    return err;
+
   err = InitializeStatusBar();
   if (err != ESP_OK)
     return err;
 
   err = CreateSongDataLabels();
-  if (err != ESP_OK)
-    return err;
-
-  err = CreateAlbumArtwork();
   if (err != ESP_OK)
     return err;
 

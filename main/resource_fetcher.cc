@@ -19,46 +19,145 @@ namespace {
  * The JPEG decoding "device" - used when decoding.
  */
 struct IODEV {
-  size_t image_data_pos;   // Read position within |image_data|.
-  std::string image_data;  // Full compressed image data being decompressed.
+  IODEV() : image_data_read_pos(0) { bzero(&lv_image, sizeof(lv_image)); }
+  std::vector<uint8_t> image_data;  // Compressed image data being decompressed.
+  size_t image_data_read_pos;       // Read position within |image_data|.
+  lv_img_dsc_t lv_image;            // Destination decompressed image.
 };
 
 constexpr char TAG[] = "Fetcher";
-
 constexpr EventBits_t FETCH_EVENT = BIT0;
 constexpr EventBits_t EVENT_ALL = BIT0;
 
-bool is_jpeg(const std::string& mime_type) {
+bool IsJpeg(const std::string& mime_type) {
   return mime_type == "image/jpeg";
+}
+
+std::string GetFileExtension(const std::string& file_name) {
+  size_t idx = file_name.rfind('.', file_name.length());
+  if (idx != std::string::npos)
+    return file_name.substr(idx + 1, file_name.length() - idx);
+
+  return "";
+}
+
+std::string GetContentTypeFromUrl(const std::string& url) {
+  const std::string extn = GetFileExtension(url);
+  if (extn == "jpg" || extn == "JPG")
+    return "image/jpeg";
+  if (extn == "png" || extn == "png")
+    return "image/pmg";
+  return "";
 }
 
 /**
  * JPEG decompressor input callback function.
  *
- * @param jd Decompression object.
- * @param buff Pointer to the read buffer (null to remove data).
+ * @param jd   JPEG decompression object.
+ * @param buff Pointer to the buffer where |ndata| number of bytes should be
+ *             written. A null value indicates the read position shall be
+ *             advanced |ndata| bytes w/o reading.
  * @param buff Number of bytes to read/skip.
  *
  * @return number of bytes read (zero on error).
  */
-unsigned int input_func(JDEC* jd, uint8_t* buff, unsigned int ndata) {
+unsigned int jpeg_input_cb(JDEC* jd, uint8_t* buff, unsigned int ndata) {
   IODEV* dev = static_cast<IODEV*>(jd->device);
 
-  size_t bytes_left = dev->image_data.size() - dev->image_data_pos;
+  const size_t bytes_left = dev->image_data.size() - dev->image_data_read_pos;
   if (!bytes_left)
     return 0;
-  if (ndata < bytes_left)
+  if (ndata > bytes_left)
     ndata = bytes_left;
 
-  return 0;
   if (buff) {
-    // Read bytes from current position.
-    std::memcpy(buff, dev->image_data.c_str() + dev->image_data_pos, ndata);
+    // Read bytes from current read position.
+    std::memcpy(buff, &dev->image_data.at(dev->image_data_read_pos), ndata);
   }
 
-  // Advance current position.
-  dev->image_data_pos += ndata;
+  // Advance current read position.
+  dev->image_data_read_pos += ndata;
   return ndata;
+}
+
+/**
+ * @brief JPEG Decompresser output callback function.
+ *
+ * @param jd     Decompression object.
+ * @param bitmap Bitmap data to be output.
+ * @param rect   Rectangular region to output.
+ *
+ * @return 1:OK, 0:abort.
+ */
+int jpeg_output_cb(JDEC* jd, void* bitmap, JRECT* rect) {
+  IODEV* dev = static_cast<IODEV*>(jd->device);
+
+  constexpr uint32_t kSrcPixelSize = 3;
+  const uint32_t dst_row_bytes = dev->lv_image.header.w * sizeof(lv_color_t);
+  const lv_coord_t rect_num_cols = rect->right - rect->left + 1;
+  lv_coord_t rect_num_rows = rect->bottom - rect->top + 1;
+
+  const uint8_t* src = static_cast<const uint8_t*>(bitmap);
+  uint8_t* dst = const_cast<uint8_t*>(dev->lv_image.data) +
+                 rect->top * dst_row_bytes + rect->left * sizeof(lv_color_t);
+
+  // Copy the pixels bounded by |rect| from |src| to |dst| bitmaps.
+  do {
+    lv_color16_t* d = reinterpret_cast<lv_color16_t*>(dst);
+    for (lv_coord_t col = 0; col < rect_num_cols; col++) {
+      *d++ = LV_COLOR_MAKE(src[0], src[1], src[2]);
+      src += kSrcPixelSize;
+    }
+    dst += dst_row_bytes;
+  } while (--rect_num_rows);
+
+  return 1; /* Continue to decompress */
+}
+
+/**
+ * @brief Scale an image (up or down).
+ *
+ * @param dst Destination to hold the scaled image.
+ * @param src The image to be scaled.
+ * @return esp_err_t
+ */
+esp_err_t ScaleImage(lv_img_dsc_t* dst, const lv_img_dsc_t& src) {
+#if 1
+  configASSERT(dst->header.h == src.header.h);
+  configASSERT(dst->header.w == src.header.w);
+  dst->header = src.header;
+  dst->data_size = src.data_size;
+  dst->data = new uint8_t[dst->data_size];
+  if (!dst->data)
+    return ESP_ERR_NO_MEM;
+  std::memcpy(const_cast<uint8_t*>(dst->data), src.data, dst->data_size);
+#endif
+
+  return ESP_OK;
+}
+
+esp_err_t TJpgDecErrToEspErr(JRESULT err) {
+  switch (err) {
+    case JDR_OK:
+      return ESP_OK;
+    case JDR_INP:
+      return ESP_ERR_INVALID_STATE;
+    case JDR_PAR:
+      return ESP_ERR_INVALID_ARG;
+    case JDR_MEM1:
+      return ESP_ERR_NO_MEM;
+    case JDR_MEM2:
+      return ESP_ERR_INVALID_SIZE;
+    case JDR_FMT1:
+      return ESP_ERR_INVALID_CRC;
+    case JDR_FMT2:
+    case JDR_FMT3:  // JDR_FMT3 returned for progressive JPEG.
+      return ESP_ERR_NOT_SUPPORTED;
+    case JDR_INTR:
+      return ESP_ERR_TIMEOUT;  // Not a good match, but not ESP_FAIL!
+    default:
+      return ESP_FAIL;
+  }
 }
 
 }  // namespace
@@ -93,7 +192,7 @@ ResourceFetcher* ResourceFetcher::Start(ResourceFetchClient* fetch_client) {
 
 esp_err_t ResourceFetcher::Initialize() {
   // https://www.freertos.org/FAQMem.html#StackSize
-  constexpr uint32_t kStackDepthWords = 4096;
+  constexpr uint32_t kStackDepthWords = 8 * 1024;
 
   if (!event_group_)
     return ESP_FAIL;
@@ -113,8 +212,7 @@ void ResourceFetcher::QueueFetch(uint32_t request_id, std::string url) {
 }
 
 void ResourceFetcher::DownloadResource(RequestData resource) {
-  std::string response;
-  std::string mime_type;
+  std::vector<uint8_t> response;
   HTTPClient https_client;
   int status_code(0);
   const std::vector<HTTPClient::HeaderValue> header_values;
@@ -123,7 +221,8 @@ void ResourceFetcher::DownloadResource(RequestData resource) {
   esp_err_t err = https_client.DoGET(
       resource.url, header_values,
       [&response](const void* data, int data_len) {
-        response.append(static_cast<const char*>(data), data_len);
+        response.insert(response.end(), static_cast<const uint8_t*>(data),
+                        static_cast<const uint8_t*>(data) + data_len);
         return ESP_OK;
       },
       &status_code);
@@ -135,27 +234,74 @@ void ResourceFetcher::DownloadResource(RequestData resource) {
     return;
   }
 
-  constexpr unsigned int kWorkPoolSize = 4096;
-  std::unique_ptr<uint8_t[]> work_pool(new uint8_t[kWorkPoolSize]);
+  std::vector<uint8_t> work_pool(4096);
   std::unique_ptr<JDEC> jd(new JDEC);
+  std::unique_ptr<IODEV> iodev(new IODEV);
+
+  if (work_pool.empty() || !jd || !iodev) {
+    fetch_client_->FetchError(resource.request_id, ESP_ERR_NO_MEM);
+    return;
+  }
   bzero(jd.get(), sizeof(JDEC));
-  IODEV iodev;
-  JRESULT res;
 
-  if (!is_jpeg(mime_type))
-    goto decode_error;
+  // TODO: Get the content-type from the HTTP response.
+  std::string mime_type = GetContentTypeFromUrl(resource.url);
+  if (!IsJpeg(mime_type)) {
+    ESP_LOGW(TAG, "content type \"%s\" not a JPEG", mime_type.c_str());
+    fetch_client_->FetchResult(resource.request_id, status_code,
+                               std::move(response), std::move(mime_type));
+    return;
+  }
 
-  iodev.image_data = std::move(response);
-  iodev.image_data_pos = 0;
+  iodev->image_data = std::move(response);
 
-  res =
-      jd_prepare(jd.get(), input_func, work_pool.get(), kWorkPoolSize, &iodev);
-  if (res != JDR_OK)
-    goto decode_error;
+  JRESULT res = jd_prepare(jd.get(), jpeg_input_cb, work_pool.data(),
+                           work_pool.size(), iodev.get());
+  if (res != JDR_OK) {
+    ESP_LOGE(TAG, "Failure decompressing image: %s.", resource.url.c_str());
+    fetch_client_->FetchError(resource.request_id, TJpgDecErrToEspErr(res));
+    return;
+  }
 
-decode_error:
-  fetch_client_->FetchResult(resource.request_id, status_code,
-                             std::move(response), std::move(mime_type));
+  ESP_LOGV(TAG, "Got JPEG %dx%d", jd->width, jd->height);
+  iodev->lv_image.header.w = jd->width;
+  iodev->lv_image.header.h = jd->height;
+  iodev->lv_image.header.cf = LV_IMG_CF_TRUE_COLOR;
+  iodev->lv_image.data_size = jd->height * jd->width * sizeof(lv_color_t);
+  iodev->lv_image.data = new uint8_t[iodev->lv_image.data_size];
+
+  if (!iodev->lv_image.data) {
+    fetch_client_->FetchError(resource.request_id, ESP_ERR_NO_MEM);
+    return;
+  }
+
+  res = jd_decomp(jd.get(), jpeg_output_cb, /*scale(1.0)=*/0);
+  if (res != JDR_OK) {
+    delete[] iodev->lv_image.data;
+    fetch_client_->FetchError(resource.request_id, TJpgDecErrToEspErr(res));
+    return;
+  }
+
+  iodev->image_data.clear();  // No longer need compressed resource.
+
+  lv_img_dsc_t scaled_image;
+  scaled_image.header.w = iodev->lv_image.header.w;
+  scaled_image.header.h = iodev->lv_image.header.h;
+  scaled_image.header.always_zero = 0;
+  scaled_image.header.cf = iodev->lv_image.header.cf;
+  scaled_image.header.reserved = 0;
+  scaled_image.data_size = 0;
+  scaled_image.data = nullptr;
+
+  err = ScaleImage(&scaled_image, iodev->lv_image);
+  delete[] iodev->lv_image.data;  // Delete (success or not).
+  if (err != ESP_OK) {
+    delete[] scaled_image.data;
+    fetch_client_->FetchError(resource.request_id, err);
+    return;
+  }
+
+  fetch_client_->FetchImageResult(resource.request_id, std::move(scaled_image));
 }
 
 void IRAM_ATTR ResourceFetcher::Run() {

@@ -133,7 +133,7 @@ esp_err_t MainTask::InitializeI2C() {
 
 esp_err_t MainTask::Initialize() {
   // https://www.freertos.org/FAQMem.html#StackSize
-  constexpr uint32_t kStackDepthWords = 2048;
+  constexpr uint32_t kStackDepthWords = 3 * 1024;
 
   if (!event_group_)
     return ESP_FAIL;

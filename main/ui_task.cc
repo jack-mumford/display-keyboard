@@ -27,22 +27,6 @@ static_assert(kMaxMainLoopWaitMSecs > kMinMainLoopWaitMSecs);
 
 UITask* g_ui_task = nullptr;
 
-void LogMemory() {
-  ESP_LOGW(TAG, "Memory:");
-  ESP_LOGD(TAG, "MALLOC_CAP_8BIT:     %u (min: %u)",
-           heap_caps_get_free_size(MALLOC_CAP_8BIT),
-           heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT));
-  ESP_LOGD(TAG, "MALLOC_CAP_DMA:      %u (min: %u)",
-           heap_caps_get_free_size(MALLOC_CAP_DMA),
-           heap_caps_get_minimum_free_size(MALLOC_CAP_DMA));
-  ESP_LOGD(TAG, "MALLOC_CAP_SPIRAM:   %u (min: %u)",
-           heap_caps_get_free_size(MALLOC_CAP_SPIRAM),
-           heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM));
-  ESP_LOGD(TAG, "MALLOC_CAP_INTERNAL: %u (min: %u)",
-           heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
-           heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL));
-}
-
 }  // namespace
 
 UITask::UITask() : mutex_(xSemaphoreCreateMutex()) {}
@@ -94,12 +78,12 @@ void UITask::UpdateTime() {
     if (main_display_.screen())
       main_display_.screen()->UpdateTime();
     time_update_count_++;
-    if ((time_update_count_ % 5) == 0 && wifi_status_ == WiFiStatus::Online) {
+    if ((time_update_count_ % 10) == 0 && wifi_status_ == WiFiStatus::Online) {
       char buf[20];
       snprintf(buf, sizeof(buf), "Fetching cover %d", test_covar_art_img_idx_);
       main_display_.screen()->SetDebugString(buf);
       fetcher_->QueueFetch(next_fetch_id_++, GetCoverArtURL());
-      if (++test_covar_art_img_idx_ >= 10)
+      if (++test_covar_art_img_idx_ >= 15)
         test_covar_art_img_idx_ = 1;
     }
     xSemaphoreGive(mutex_);
@@ -183,8 +167,6 @@ void IRAM_ATTR UITask::Run() {
 
   xSemaphoreGive(mutex_);
 
-  uint32_t loop_count = 0;
-
   while (true) {
     if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
       uint32_t wait_msecs = lv_task_handler() / 1000;
@@ -197,9 +179,6 @@ void IRAM_ATTR UITask::Run() {
       // Need to use vTaskDelay to avoid triggering the task WDT.
       vTaskDelay(pdMS_TO_TICKS(wait_msecs));
     }
-    if ((loop_count % 500) == 0)
-      LogMemory();
-    loop_count++;
     taskYIELD();  // Not sure if this is necessary.
   }
 }
@@ -243,7 +222,7 @@ void UITask::FetchImageResult(uint32_t request_id, lv_img_dsc_t image) {
 
 void UITask::FetchResult(uint32_t request_id,
                          int http_status_code,
-                         std::string resource_data,
+                         std::vector<uint8_t> resource_data,
                          std::string mime_type) {
   char msg[20];
   if (http_status_code != HttpStatus_Ok) {
@@ -251,24 +230,28 @@ void UITask::FetchResult(uint32_t request_id,
              http_status_code);
     if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
       snprintf(msg, sizeof(msg), "Fetch code: %d", http_status_code);
+      msg[sizeof(msg) - 1] = '\0';
       main_display_.screen()->SetDebugString(msg);
       xSemaphoreGive(mutex_);
     }
     return;
   }
-  snprintf(msg, sizeof(msg), "Unexpected fetch: %zu", resource_data.size());
   if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
+    snprintf(msg, sizeof(msg), "Unexpected fetch: %zu", resource_data.size());
+    msg[sizeof(msg) - 1] = '\0';
     main_display_.screen()->SetDebugString(msg);
     xSemaphoreGive(mutex_);
   }
-  ESP_LOGW(TAG, "Got cover art: %zu bytes", resource_data.size());
+  ESP_LOGW(TAG, "Got compressed image: %zu bytes", resource_data.size());
 }
 
 void UITask::FetchError(uint32_t request_id, esp_err_t err) {
   ESP_LOGE(TAG, "Error fetching resource: %s", esp_err_to_name(err));
   if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
     char msg[40];
-    snprintf(msg, sizeof(msg), "Fetch Error: %s", esp_err_to_name(err));
+    snprintf(msg, sizeof(msg), "Fetch %u error: %s", test_covar_art_img_idx_,
+             esp_err_to_name(err));
+    msg[sizeof(msg) - 1] = '\0';
     main_display_.screen()->SetDebugString(msg);
     xSemaphoreGive(mutex_);
   }
