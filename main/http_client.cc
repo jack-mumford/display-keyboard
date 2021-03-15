@@ -61,7 +61,7 @@ esp_err_t HTTPClient::EventHandler(esp_http_client_event_t* evt) {
     case HTTP_EVENT_ON_DATA:
       ESP_LOGV(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
       if (client->data_callback_)
-        client->data_callback_(evt->data, evt->data_len);
+        return client->data_callback_(evt->data, evt->data_len);
       break;
     default:
       // fallthrough
@@ -85,7 +85,6 @@ esp_err_t HTTPClient::DoGET(const std::string& url,
                             const std::vector<HeaderValue>& header_values,
                             DataCallback data_callback,
                             int* status_code) {
-  data_callback_ = data_callback;
   const esp_http_client_config_t config =
       CreateClientConfig(url, HTTP_METHOD_GET);
   esp_http_client_handle_t client = esp_http_client_init(&config);
@@ -98,13 +97,16 @@ esp_err_t HTTPClient::DoGET(const std::string& url,
     if (err != ESP_OK)
       goto exit;
   }
+  data_callback_ = data_callback;
   err = esp_http_client_perform(client);
+  data_callback_ = nullptr;
 
 exit:
-  data_callback_ = nullptr;
   if (err == ESP_OK)
     *status_code = esp_http_client_get_status_code(client);
-  esp_http_client_cleanup(client);
+  esp_err_t e = esp_http_client_cleanup(client);
+  if (err == ESP_OK)
+    err = e;
   return err;
 }
 
