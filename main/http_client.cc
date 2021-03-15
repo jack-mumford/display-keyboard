@@ -16,10 +16,10 @@ esp_http_client_config_t HTTPClient::CreateClientConfig(
   esp_http_client_config_t config = {
     .url = url.c_str(),
     .host = 0,
-    .port = 443,
+    .port = 0,
     .username = nullptr,
     .password = nullptr,
-    .auth_type = HTTP_AUTH_TYPE_BASIC,
+    .auth_type = HTTP_AUTH_TYPE_NONE,
     .path = nullptr,
     .query = nullptr,
     .cert_pem = nullptr,
