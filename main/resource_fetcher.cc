@@ -12,6 +12,7 @@
 #include <tjpgdec/src/tjpgd.h>
 
 #include "http_client.h"
+#include "main_screen.h"
 
 namespace {
 
@@ -27,7 +28,7 @@ struct IODEV {
 
 constexpr char TAG[] = "Fetcher";
 constexpr EventBits_t FETCH_EVENT = BIT0;
-constexpr EventBits_t EVENT_ALL = BIT0;
+constexpr EventBits_t FETCH_EVENT_ALL = BIT0;
 
 bool IsJpeg(const std::string& mime_type) {
   return mime_type == "image/jpeg";
@@ -133,14 +134,21 @@ esp_err_t ScaleImage(lv_img_dsc_t* dst, const lv_img_dsc_t& src) {
   if (!dst->data)
     return ESP_ERR_NO_MEM;
 
+  const float x_scale = static_cast<float>(src.header.w) / dst->header.w;
+  const float y_scale = static_cast<float>(src.header.h) / dst->header.h;
+
   lv_color_t* dst_pixel =
       const_cast<lv_color_t*>(reinterpret_cast<const lv_color_t*>(dst->data));
   const lv_color_t* src_fb = reinterpret_cast<const lv_color_t*>(src.data);
-  // Just getting the TL corner to start (no resizing).
   for (lv_coord_t y = 0; y < dst->header.h; y++) {
     for (lv_coord_t x = 0; x < dst->header.w; x++) {
-      lv_coord_t src_x = x;
-      lv_coord_t src_y = y;
+      // Simple nearest neighbor.
+      lv_coord_t src_x = x_scale * x;
+      lv_coord_t src_y = y_scale * y;
+      if (src_x > src.header.w - 1)
+        src_x = src.header.w - 1;
+      if (src_y > src.header.h - 1)
+        src_y = src.header.h - 1;
       *dst_pixel++ = src_fb[src_y * src.header.w + src_x];
     }
   }
@@ -298,8 +306,8 @@ void ResourceFetcher::DownloadResource(RequestData resource) {
 
   lv_img_dsc_t scaled_image;
   bzero(&scaled_image, sizeof(scaled_image));
-  scaled_image.header.w = 130;
-  scaled_image.header.h = 130;
+  scaled_image.header.w = kAlbumArtworkWidth;
+  scaled_image.header.h = kAlbumArtworkHeight;
 
   err = ScaleImage(&scaled_image, iodev->lv_image);
   delete[] iodev->lv_image.data;  // Delete (success or not).
@@ -314,9 +322,9 @@ void ResourceFetcher::DownloadResource(RequestData resource) {
 
 void IRAM_ATTR ResourceFetcher::Run() {
   while (true) {
-    EventBits_t bits =
-        xEventGroupWaitBits(event_group_, EVENT_ALL, /*xClearOnExit=*/pdFALSE,
-                            /*xWaitForAllBits=*/pdFALSE, portMAX_DELAY);
+    EventBits_t bits = xEventGroupWaitBits(
+        event_group_, FETCH_EVENT_ALL, /*xClearOnExit=*/pdFALSE,
+        /*xWaitForAllBits=*/pdFALSE, portMAX_DELAY);
     if (bits & FETCH_EVENT) {
       if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
         return;

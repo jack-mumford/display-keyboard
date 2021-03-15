@@ -11,6 +11,9 @@
 #define DISPLAY_MEMORY
 #define DEBUG_STRING
 
+constexpr lv_coord_t kAlbumArtworkWidth = 130;
+constexpr lv_coord_t kAlbumArtworkHeight = 130;
+
 class MainScreen : public Screen {
  public:
   MainScreen(MainDisplay& display);

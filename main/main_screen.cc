@@ -26,8 +26,6 @@ constexpr lv_coord_t kSpotifyIconHeight = 20;
 constexpr int kStatusBarHeight = 20;
 constexpr lv_coord_t kRatingImageWidth = 38;
 constexpr lv_coord_t kRatingImageHeight = 42;
-constexpr lv_coord_t kAlbumArtworkWidth = 130;
-constexpr lv_coord_t kAlbumArtworkHeight = 130;
 constexpr lv_coord_t kAlbumArtworkLeft =
     (kScreenWidth - kAlbumArtworkWidth) / 2;
 constexpr lv_coord_t kAlbumArtworkTop = 20;
