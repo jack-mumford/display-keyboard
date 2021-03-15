@@ -266,13 +266,12 @@ void ResourceFetcher::DecodeAndScaleJPEG(RequestData request_data,
   }
 
   res = jd_decomp(jd.get(), jpeg_output_cb, /*scale(1.0)=*/0);
+  iodev->image_data.clear();  // No longer need compressed resource.
   if (res != JDR_OK) {
     delete[] iodev->lv_image.data;
     fetch_client_->FetchError(request_data.request_id, TJpgDecErrToEspErr(res));
     return;
   }
-
-  iodev->image_data.clear();  // No longer need compressed resource.
 
   lv_img_dsc_t scaled_image;
   bzero(&scaled_image, sizeof(scaled_image));
