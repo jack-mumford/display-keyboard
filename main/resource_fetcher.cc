@@ -312,19 +312,24 @@ void ResourceFetcher::DownloadResource(RequestData request_data) {
     fetch_client_->FetchError(request_data.request_id, err);
     return;
   }
+  // TODO: Get the content-type from the HTTP response.
+  std::string mime_type = GetContentTypeFromUrl(request_data.url);
+  if (status_code != HttpStatus_Ok) {
+    fetch_client_->FetchResult(request_data.request_id, status_code,
+                               std::move(response), std::move(mime_type));
+    return;
+  }
   if (response.empty()) {
     fetch_client_->FetchError(request_data.request_id, ESP_ERR_INVALID_SIZE);
     return;
   }
-  // TODO: Get the content-type from the HTTP response.
-  std::string mime_type = GetContentTypeFromUrl(request_data.url);
-  if (IsJpeg(mime_type)) {
-    DecodeAndScaleJPEG(std::move(request_data), std::move(response));
+  if (!IsJpeg(mime_type)) {
+    ESP_LOGW(TAG, "content type \"%s\" not a JPEG", mime_type.c_str());
+    fetch_client_->FetchResult(request_data.request_id, status_code,
+                               std::move(response), std::move(mime_type));
     return;
   }
-  ESP_LOGW(TAG, "content type \"%s\" not a JPEG", mime_type.c_str());
-  fetch_client_->FetchResult(request_data.request_id, status_code,
-                             std::move(response), std::move(mime_type));
+  DecodeAndScaleJPEG(std::move(request_data), std::move(response));
 }
 
 void IRAM_ATTR ResourceFetcher::Run() {
