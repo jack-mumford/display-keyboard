@@ -231,55 +231,25 @@ void ResourceFetcher::QueueFetch(uint32_t request_id, std::string url) {
   xEventGroupSetBits(event_group_, FETCH_EVENT);
 }
 
-void ResourceFetcher::DownloadResource(RequestData resource) {
-  std::vector<uint8_t> response;
-  HTTPClient https_client;
-  int status_code(0);
-  const std::vector<HTTPClient::HeaderValue> header_values;
-
-  ESP_LOGD(TAG, "GETting %s", resource.url.c_str());
-  esp_err_t err = https_client.DoGET(
-      resource.url, header_values,
-      [&response](const void* data, int data_len) {
-        response.insert(response.end(), static_cast<const uint8_t*>(data),
-                        static_cast<const uint8_t*>(data) + data_len);
-        return ESP_OK;
-      },
-      &status_code);
-
-  if (err != ESP_OK) {
-    ESP_LOGE(TAG, "Error GETting %s: %s", resource.url.c_str(),
-             esp_err_to_name(err));
-    fetch_client_->FetchError(resource.request_id, err);
-    return;
-  }
-
+void ResourceFetcher::DecodeAndScaleJPEG(RequestData request_data,
+                                         std::vector<uint8_t> jpeg_data) {
   std::vector<uint8_t> work_pool(4096, 0x0);
   std::unique_ptr<JDEC> jd(new JDEC);
   std::unique_ptr<IODEV> iodev(new IODEV);
 
   if (work_pool.empty() || !jd || !iodev) {
-    fetch_client_->FetchError(resource.request_id, ESP_ERR_NO_MEM);
+    fetch_client_->FetchError(request_data.request_id, ESP_ERR_NO_MEM);
     return;
   }
   bzero(jd.get(), sizeof(JDEC));
 
-  // TODO: Get the content-type from the HTTP response.
-  std::string mime_type = GetContentTypeFromUrl(resource.url);
-  if (!IsJpeg(mime_type)) {
-    ESP_LOGW(TAG, "content type \"%s\" not a JPEG", mime_type.c_str());
-    fetch_client_->FetchResult(resource.request_id, status_code,
-                               std::move(response), std::move(mime_type));
-    return;
-  }
-
-  iodev->image_data = std::move(response);
+  iodev->image_data = std::move(jpeg_data);
 
   JRESULT res = jd_prepare(jd.get(), jpeg_input_cb, work_pool.data(),
                            work_pool.size(), iodev.get());
   if (res != JDR_OK) {
-    ESP_LOGE(TAG, "Failure decompressing image: %s.", resource.url.c_str());
-    fetch_client_->FetchError(resource.request_id, TJpgDecErrToEspErr(res));
+    ESP_LOGE(TAG, "Failure decompressing image: %s.", request_data.url.c_str());
+    fetch_client_->FetchError(request_data.request_id, TJpgDecErrToEspErr(res));
     return;
   }
 
@@ -291,14 +261,14 @@ void ResourceFetcher::DownloadResource(RequestData resource) {
   iodev->lv_image.data = new uint8_t[iodev->lv_image.data_size];
 
   if (!iodev->lv_image.data) {
-    fetch_client_->FetchError(resource.request_id, ESP_ERR_NO_MEM);
+    fetch_client_->FetchError(request_data.request_id, ESP_ERR_NO_MEM);
     return;
   }
 
   res = jd_decomp(jd.get(), jpeg_output_cb, /*scale(1.0)=*/0);
   if (res != JDR_OK) {
     delete[] iodev->lv_image.data;
-    fetch_client_->FetchError(resource.request_id, TJpgDecErrToEspErr(res));
+    fetch_client_->FetchError(request_data.request_id, TJpgDecErrToEspErr(res));
     return;
   }
 
@@ -309,15 +279,51 @@ void ResourceFetcher::DownloadResource(RequestData resource) {
   scaled_image.header.w = kAlbumArtworkWidth;
   scaled_image.header.h = kAlbumArtworkHeight;
 
-  err = ScaleImage(&scaled_image, iodev->lv_image);
+  esp_err_t err = ScaleImage(&scaled_image, iodev->lv_image);
   delete[] iodev->lv_image.data;  // Delete (success or not).
   if (err != ESP_OK) {
     delete[] scaled_image.data;
-    fetch_client_->FetchError(resource.request_id, err);
+    fetch_client_->FetchError(request_data.request_id, err);
     return;
   }
 
-  fetch_client_->FetchImageResult(resource.request_id, std::move(scaled_image));
+  fetch_client_->FetchImageResult(request_data.request_id,
+                                  std::move(scaled_image));
+}
+
+void ResourceFetcher::DownloadResource(RequestData request_data) {
+  std::vector<uint8_t> response;
+  HTTPClient https_client;
+  int status_code(0);
+  const std::vector<HTTPClient::HeaderValue> header_values;
+
+  ESP_LOGD(TAG, "GETting %s", request_data.url.c_str());
+  esp_err_t err = https_client.DoGET(
+      request_data.url, header_values,
+      [&response](const void* data, int data_len) {
+        response.insert(response.end(), static_cast<const uint8_t*>(data),
+                        static_cast<const uint8_t*>(data) + data_len);
+        return ESP_OK;
+      },
+      &status_code);
+
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "Error GETting %s: %s", request_data.url.c_str(),
+             esp_err_to_name(err));
+    fetch_client_->FetchError(request_data.request_id, err);
+    return;
+  }
+
+  // TODO: Get the content-type from the HTTP response.
+  std::string mime_type = GetContentTypeFromUrl(request_data.url);
+  if (IsJpeg(mime_type)) {
+    DecodeAndScaleJPEG(std::move(request_data), std::move(response));
+    return;
+  }
+
+  ESP_LOGW(TAG, "content type \"%s\" not a JPEG", mime_type.c_str());
+  fetch_client_->FetchResult(request_data.request_id, status_code,
+                             std::move(response), std::move(mime_type));
 }
 
 void IRAM_ATTR ResourceFetcher::Run() {
@@ -329,10 +335,10 @@ void IRAM_ATTR ResourceFetcher::Run() {
       if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
         return;
       configASSERT(!requests_.empty());
-      RequestData resource = requests_.front();
+      RequestData request_data = requests_.front();
       requests_.pop();
       xSemaphoreGive(mutex_);
-      DownloadResource(std::move(resource));
+      DownloadResource(std::move(request_data));
 
       if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
         return;

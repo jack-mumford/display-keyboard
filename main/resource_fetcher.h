@@ -78,6 +78,7 @@ class ResourceFetcher {
   static void IRAM_ATTR TaskFunc(void* arg);
 
   void IRAM_ATTR Run();
+  void DecodeAndScaleJPEG(RequestData resource, std::vector<uint8_t> jpeg_data);
   void DownloadResource(RequestData resource);
   ResourceFetcher(ResourceFetchClient* fetch_client);
   ~ResourceFetcher() = default;

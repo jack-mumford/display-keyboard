@@ -80,7 +80,7 @@ void UITask::UpdateTime() {
     time_update_count_++;
     if ((time_update_count_ % 15) == 0 && wifi_status_ == WiFiStatus::Online) {
       char buf[20];
-      snprintf(buf, sizeof(buf), "Fetching cover %d...", test_cover_art_img_idx_);
+      snprintf(buf, sizeof(buf), "Fetching cover %d", test_cover_art_img_idx_);
       main_display_.screen()->SetDebugString(buf);
       fetcher_->QueueFetch(next_fetch_id_++, GetCoverArtURL());
       if (++test_cover_art_img_idx_ > 9)
