@@ -341,11 +341,11 @@ void IRAM_ATTR ResourceFetcher::Run() {
       xSemaphoreGive(mutex_);
       DownloadResource(std::move(request_data));
 
-      if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
-        return;
-      if (requests_.empty())
-        xEventGroupClearBits(event_group_, FETCH_EVENT);
-      xSemaphoreGive(mutex_);
+      if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
+        if (requests_.empty())
+          xEventGroupClearBits(event_group_, FETCH_EVENT);
+        xSemaphoreGive(mutex_);
+      }
     }
   }
 }
