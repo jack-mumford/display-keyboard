@@ -78,7 +78,7 @@ void UITask::UpdateTime() {
     if (main_display_.screen())
       main_display_.screen()->UpdateTime();
     time_update_count_++;
-    if ((time_update_count_ % 15) == 0 && wifi_status_ == WiFiStatus::Online) {
+    if ((time_update_count_ % 12) == 0 && wifi_status_ == WiFiStatus::Online) {
       char buf[20];
       snprintf(buf, sizeof(buf), "Fetching cover %d", test_cover_art_img_idx_);
       main_display_.screen()->SetDebugString(buf);
