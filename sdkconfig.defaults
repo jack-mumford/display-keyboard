@@ -68,7 +68,7 @@ CONFIG_LV_MEM_SIZE_KILOBYTES=600
 #
 # Image decoder and cache
 #
-CONFIG_LV_IMG_CACHE_DEF_SIZE=8
+CONFIG_LV_IMG_CACHE_DEF_SIZE=0
 # end of Image decoder and cache
 
 #
