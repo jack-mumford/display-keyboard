@@ -40,10 +40,12 @@ class UITask : public ResourceFetchClient {
   static void IRAM_ATTR TaskFunc(void* arg);
   static void IRAM_ATTR TickTimerCb(void* arg);
   static void IRAM_ATTR UpdateTimeCb(void* arg);
+  static void IRAM_ATTR TestCoverArtTimerCb(void* arg);
 
   UITask();
 
-  std::string GetCoverArtURL() const;
+  esp_err_t StartTestCoverArtTimer(uint32_t timer_seconds);
+  std::string GetTestCoverArtURL() const;
   void SetDarkMode();
   void UpdateTime();
   esp_err_t CreateUpdateTimeTimer();
@@ -51,19 +53,16 @@ class UITask : public ResourceFetchClient {
   void Tick();
   esp_err_t Initialize();
   void IRAM_ATTR Run();
-  uint8_t last_cover_idx() const {
-    return test_cover_art_img_idx_ == 1 ? 9 : test_cover_art_img_idx_ - 1;
-  }
 
   SemaphoreHandle_t mutex_;
   MainDisplay main_display_;
   TaskHandle_t task_ = nullptr;
   esp_timer_handle_t tick_timer_ = nullptr;
   esp_timer_handle_t time_update_timer_ = nullptr;
-  uint32_t time_update_count_ = 0;  // Just for testing.
   WiFiStatus wifi_status_ = WiFiStatus::Offline;
   int64_t last_tick_time_ = -1;
   uint8_t test_cover_art_img_idx_ = 1;  // Just for testing.
+  esp_timer_handle_t test_cover_art_timer_ = nullptr;
   ResourceFetcher* fetcher_;
   uint32_t next_fetch_id_ = 1;
 };

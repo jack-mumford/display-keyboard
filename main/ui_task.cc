@@ -77,16 +77,6 @@ void UITask::UpdateTime() {
   if (xSemaphoreTake(mutex_, kUpdateTimeTimeout) == pdTRUE) {
     if (main_display_.screen())
       main_display_.screen()->UpdateTime();
-    time_update_count_++;
-    if ((time_update_count_ % 12) == 0 && wifi_status_ == WiFiStatus::Online) {
-      char buf[24];
-      snprintf(buf, sizeof(buf), "Fetch #%u: cover %d", next_fetch_id_,
-               test_cover_art_img_idx_);
-      main_display_.screen()->SetDebugString(buf);
-      fetcher_->QueueFetch(next_fetch_id_++, GetCoverArtURL());
-      if (++test_cover_art_img_idx_ > 9)
-        test_cover_art_img_idx_ = 1;
-    }
     xSemaphoreGive(mutex_);
   }
 }
@@ -123,6 +113,18 @@ esp_err_t UITask::Initialize() {
 
   if (!mutex_)
     return ESP_FAIL;
+
+  const esp_timer_create_args_t cover_art_timer_args = {
+      .callback = TestCoverArtTimerCb,
+      .arg = this,
+      .dispatch_method = ESP_TIMER_TASK,
+      .name = "Cover Art",
+      .skip_unhandled_events = true,
+  };
+  esp_err_t err =
+      esp_timer_create(&cover_art_timer_args, &test_cover_art_timer_);
+  if (err != ESP_OK)
+    return err;
 
   fetcher_ = ResourceFetcher::Start(this);
   if (!fetcher_)
@@ -165,7 +167,7 @@ void IRAM_ATTR UITask::Run() {
   SetDarkMode();
   ESP_ERROR_CHECK(CreateTickTimer());
   ESP_ERROR_CHECK(CreateUpdateTimeTimer());
-
+  ESP_ERROR_CHECK(StartTestCoverArtTimer(2));
   xSemaphoreGive(mutex_);
 
   while (true) {
@@ -198,7 +200,7 @@ void UITask::SetWiFiStatus(WiFiStatus status) {
   xSemaphoreGive(g_ui_task->mutex_);
 }
 
-std::string UITask::GetCoverArtURL() const {
+std::string UITask::GetTestCoverArtURL() const {
   char* tmp(nullptr);
   if (asprintf(&tmp, "http://10.0.9.120/album_covers/album_%u_cover.jpg",
                test_cover_art_img_idx_) < 0) {
@@ -210,15 +212,44 @@ std::string UITask::GetCoverArtURL() const {
   return url;
 }
 
+// static
+void UITask::TestCoverArtTimerCb(void* arg) {
+  UITask* task = static_cast<UITask*>(arg);
+
+  if (xSemaphoreTake(task->mutex_, portMAX_DELAY) != pdTRUE)
+    return;
+
+  if (task->wifi_status_ != WiFiStatus::Online) {
+    task->StartTestCoverArtTimer(1);
+    xSemaphoreGive(task->mutex_);
+    return;
+  }
+
+  char buf[20];
+  snprintf(buf, sizeof(buf), "Fetching cover %d",
+           task->test_cover_art_img_idx_);
+  task->main_display_.screen()->SetDebugString(buf);
+  task->fetcher_->QueueFetch(task->next_fetch_id_, task->GetTestCoverArtURL());
+  xSemaphoreGive(task->mutex_);
+}
+
+esp_err_t UITask::StartTestCoverArtTimer(uint32_t timer_seconds) {
+  const uint64_t timeout_us = timer_seconds * 1000 * 1000;
+  return esp_timer_start_once(test_cover_art_timer_, timeout_us);
+}
+
 void UITask::FetchImageResult(uint32_t request_id, lv_img_dsc_t image) {
   configASSERT(main_display_.screen());
   if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
     return;
   char msg[20];
-  snprintf(msg, sizeof(msg), "Got cover %u (#%u).", last_cover_idx(),
-           next_fetch_id_ - 1);
+  snprintf(msg, sizeof(msg), "Got cover %u (#%u).", test_cover_art_img_idx_,
+           next_fetch_id_);
   main_display_.screen()->SetDebugString(msg);
   main_display_.screen()->SetAlbumArtwork(std::move(image));
+  if (++test_cover_art_img_idx_ > 9)
+    test_cover_art_img_idx_ = 1;
+  StartTestCoverArtTimer(8);
   xSemaphoreGive(mutex_);
 }
 
@@ -226,35 +257,35 @@ void UITask::FetchResult(uint32_t request_id,
                          int http_status_code,
                          std::vector<uint8_t> resource_data,
                          std::string mime_type) {
+  if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE)
+    return;
+
   char msg[20];
-  if (http_status_code != HttpStatus_Ok) {
+  if (http_status_code == HttpStatus_Ok) {
+    snprintf(msg, sizeof(msg), "Unexpected fetch: %zu", resource_data.size());
+  } else {
     ESP_LOGW(TAG, "Unable to fetch resource: status_code: %d",
              http_status_code);
-    if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
-      snprintf(msg, sizeof(msg), "Fetch code: %d.", http_status_code);
-      msg[sizeof(msg) - 1] = '\0';
-      main_display_.screen()->SetDebugString(msg);
-      xSemaphoreGive(mutex_);
-    }
-    return;
+    snprintf(msg, sizeof(msg), "Fetch code: %d.", http_status_code);
   }
-  if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
-    snprintf(msg, sizeof(msg), "Unexpected fetch: %zu", resource_data.size());
-    msg[sizeof(msg) - 1] = '\0';
-    main_display_.screen()->SetDebugString(msg);
-    xSemaphoreGive(mutex_);
-  }
-  ESP_LOGW(TAG, "Got compressed image: %zu bytes", resource_data.size());
+  msg[sizeof(msg) - 1] = '\0';
+  main_display_.screen()->SetDebugString(msg);
+  if (++test_cover_art_img_idx_ > 9)
+    test_cover_art_img_idx_ = 1;
+  StartTestCoverArtTimer(5);
+  xSemaphoreGive(mutex_);
 }
 
 void UITask::FetchError(uint32_t request_id, esp_err_t err) {
   ESP_LOGE(TAG, "Error fetching resource: %s", esp_err_to_name(err));
-  if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
-    char msg[40];
-    snprintf(msg, sizeof(msg), "Fetch %u error: %s.", last_cover_idx(),
-             esp_err_to_name(err));
-    msg[sizeof(msg) - 1] = '\0';
-    main_display_.screen()->SetDebugString(msg);
-    xSemaphoreGive(mutex_);
-  }
+  if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
+    return;
+
+  char msg[40];
+  snprintf(msg, sizeof(msg), "Fetch %u error: %s.", test_cover_art_img_idx_,
+           esp_err_to_name(err));
+  msg[sizeof(msg) - 1] = '\0';
+  main_display_.screen()->SetDebugString(msg);
+  StartTestCoverArtTimer(3);
+  xSemaphoreGive(mutex_);
 }
