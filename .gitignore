@@ -1,8 +1,10 @@
-sdkconfig.old
 *.swp
 build/
 .vscode/
 .DS_Store
 workspace.code-workspace
 # .net files are intermediate and easily regenerated.
+*.net
+# sdkconfig.defaults is committed.
 sdkconfig
+sdkconfig.old
