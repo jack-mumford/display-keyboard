@@ -253,7 +253,7 @@ void ResourceFetcher::DecodeAndScaleJPEG(RequestData request_data,
     return;
   }
 
-  ESP_LOGV(TAG, "Got JPEG %dx%d", jd->width, jd->height);
+  ESP_LOGV(TAG, "Decoding %dx%d JPEG", jd->width, jd->height);
   iodev->lv_image.header.w = jd->width;
   iodev->lv_image.header.h = jd->height;
   iodev->lv_image.header.cf = LV_IMG_CF_TRUE_COLOR;
@@ -277,6 +277,8 @@ void ResourceFetcher::DecodeAndScaleJPEG(RequestData request_data,
   bzero(&scaled_image, sizeof(scaled_image));
   scaled_image.header.w = kAlbumArtworkWidth;
   scaled_image.header.h = kAlbumArtworkHeight;
+  ESP_LOGV(TAG, "Scaling JPEG to %dx%d", scaled_image.header.w,
+           scaled_image.header.h);
 
   esp_err_t err = ScaleImage(&scaled_image, iodev->lv_image);
   delete[] iodev->lv_image.data;  // Delete (success or not).
@@ -296,7 +298,7 @@ void ResourceFetcher::DownloadResource(RequestData request_data) {
   int status_code(0);
   const std::vector<HTTPClient::HeaderValue> header_values;
 
-  ESP_LOGD(TAG, "GETting %s", request_data.url.c_str());
+  ESP_LOGD(TAG, "GET %s", request_data.url.c_str());
   esp_err_t err = https_client.DoGET(
       request_data.url, header_values,
       [&response](const void* data, int data_len) {
@@ -307,7 +309,7 @@ void ResourceFetcher::DownloadResource(RequestData request_data) {
       &status_code);
 
   if (err != ESP_OK) {
-    ESP_LOGE(TAG, "Error GETting %s: %s", request_data.url.c_str(),
+    ESP_LOGE(TAG, "Error GET %s: %s", request_data.url.c_str(),
              esp_err_to_name(err));
     fetch_client_->FetchError(request_data.request_id, err);
     return;

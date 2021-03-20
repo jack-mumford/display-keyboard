@@ -79,8 +79,9 @@ void UITask::UpdateTime() {
       main_display_.screen()->UpdateTime();
     time_update_count_++;
     if ((time_update_count_ % 12) == 0 && wifi_status_ == WiFiStatus::Online) {
-      char buf[20];
-      snprintf(buf, sizeof(buf), "Fetching cover %d", test_cover_art_img_idx_);
+      char buf[24];
+      snprintf(buf, sizeof(buf), "Fetch #%u: cover %d", next_fetch_id_,
+               test_cover_art_img_idx_);
       main_display_.screen()->SetDebugString(buf);
       fetcher_->QueueFetch(next_fetch_id_++, GetCoverArtURL());
       if (++test_cover_art_img_idx_ > 9)
@@ -168,18 +169,16 @@ void IRAM_ATTR UITask::Run() {
   xSemaphoreGive(mutex_);
 
   while (true) {
+    uint32_t wait_msecs = kMinMainLoopWaitMSecs;
     if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
-      uint32_t wait_msecs = lv_task_handler() / 1000;
+      wait_msecs = lv_task_handler() / 1000;
       xSemaphoreGive(mutex_);
       if (wait_msecs < kMinMainLoopWaitMSecs)
         wait_msecs = kMinMainLoopWaitMSecs;
       else if (wait_msecs > kMaxMainLoopWaitMSecs)
         wait_msecs = kMaxMainLoopWaitMSecs;
-
-      // Need to use vTaskDelay to avoid triggering the task WDT.
-      vTaskDelay(pdMS_TO_TICKS(wait_msecs));
     }
-    taskYIELD();  // Not sure if this is necessary.
+    vTaskDelay(pdMS_TO_TICKS(wait_msecs));
   }
 }
 
@@ -216,7 +215,8 @@ void UITask::FetchImageResult(uint32_t request_id, lv_img_dsc_t image) {
   if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
     return;
   char msg[20];
-  snprintf(msg, sizeof(msg), "Got cover img %u.", last_cover_idx());
+  snprintf(msg, sizeof(msg), "Got cover %u (#%u).", last_cover_idx(),
+           next_fetch_id_ - 1);
   main_display_.screen()->SetDebugString(msg);
   main_display_.screen()->SetAlbumArtwork(std::move(image));
   xSemaphoreGive(mutex_);

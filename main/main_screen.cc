@@ -39,7 +39,8 @@ std::string DisplayMem(size_t bytes) {
     snprintf(buff, sizeof(buff), "%0.1f MB",
              static_cast<float>(bytes) / 1024.0f / 1024.0f);
   } else if (bytes > 10000) {
-    snprintf(buff, sizeof(buff), "%zu KB", bytes / 1024);
+    snprintf(buff, sizeof(buff), "%0.1f KB",
+             static_cast<float>(bytes) / 1024.0f);
   } else {
     snprintf(buff, sizeof(buff), "%zu B", bytes);
   }
