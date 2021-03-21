@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 3.5)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
 set(EXTRA_COMPONENT_DIRS
-  components/i2clib
   components/lvgl
   components/lvgl_esp32_drivers
   components/tarablessd1306

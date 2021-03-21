@@ -9,20 +9,20 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src/portable/espressif/esp32s2/dcd_esp32s2.c"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src/class/hid/hid_device.c"
     "${CMAKE_SOURCE_DIR}/components/inih/ini.c"
-    "${CMAKE_SOURCE_DIR}/components/i2clib/src/address.cc"
-    "${CMAKE_SOURCE_DIR}/components/i2clib/src/master.cc"
-    "${CMAKE_SOURCE_DIR}/components/i2clib/src/operation.cc"
     "${CMAKE_SOURCE_DIR}/components/lv_lib_png/lodepng.c"
     "${CMAKE_SOURCE_DIR}/components/lv_lib_png/lv_png.c"
+    "${CMAKE_SOURCE_DIR}/libs/i2clib/src/address.cc"
+    "${CMAKE_SOURCE_DIR}/libs/i2clib/src/master.cc"
+    "${CMAKE_SOURCE_DIR}/libs/i2clib/src/operation.cc"
     "${CMAKE_SOURCE_DIR}/libs/tjpgdec/src/tjpgd.c"
   INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/components"
-    "${CMAKE_SOURCE_DIR}/components/i2clib/include"
     "${CMAKE_SOURCE_DIR}/components/inih"
     "${CMAKE_SOURCE_DIR}/components/lvgl/src"
     "${CMAKE_SOURCE_DIR}/components/tarablessd1306"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src"
     "${CMAKE_SOURCE_DIR}/libs"
+    "${CMAKE_SOURCE_DIR}/libs/i2clib/include"
     "${CMAKE_SOURCE_DIR}/main"
     "${IDF_PATH}/components/driver/include"
     "${IDF_PATH}/components/esp-tls"
@@ -41,7 +41,6 @@ idf_component_register(
     "${IDF_PATH}/components/soc/esp32s2/include"
     "${IDF_PATH}/components/spiffs/include"
   REQUIRES
-    i2clib
     lvgl_esp32_drivers
     spi_flash
     spiffs
