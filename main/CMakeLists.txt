@@ -9,6 +9,7 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src/portable/espressif/esp32s2/dcd_esp32s2.c"
     "${CMAKE_SOURCE_DIR}/components/tinyusb/src/class/hid/hid_device.c"
     "${CMAKE_SOURCE_DIR}/components/inih/ini.c"
+    "${CMAKE_SOURCE_DIR}/components/i2clib/src/address.cc"
     "${CMAKE_SOURCE_DIR}/components/i2clib/src/master.cc"
     "${CMAKE_SOURCE_DIR}/components/i2clib/src/operation.cc"
     "${CMAKE_SOURCE_DIR}/components/lv_lib_png/lodepng.c"

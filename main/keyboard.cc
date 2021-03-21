@@ -10,11 +10,13 @@
 #include <esp_log.h>
 #include <i2clib/operation.h>
 
+#include "gpio_pins.h"
 #include "lm8330_registers.h"
 
 namespace {
 constexpr char TAG[] = "Keyboard";
-constexpr uint8_t kSlaveAddress = 0x88;  // I2C address of LM8330 IC.
+constexpr uint8_t kSlaveAddress = 0x44;  // I2C address of LM8330 IC.
+constexpr i2c::AddressMode kI2CAddressMode = i2c::AddressMode::bit7;
 constexpr uint8_t k12msec = 0x80;
 constexpr uint8_t kInvalidEventCode = 0x7F;
 }  // namespace
@@ -26,7 +28,36 @@ Keyboard::~Keyboard() = default;
 
 esp_err_t Keyboard::Initialize() {
   ESP_LOGD(TAG, "Initializing keyboard");
-  esp_err_t err = WriteByte(Register::KBDSETTLE, k12msec);
+
+#if 1
+  constexpr gpio_config_t config = {
+      .pin_bit_mask = (1UL << kKeyboardResetGPIO),
+      .mode = GPIO_MODE_OUTPUT,
+      .pull_up_en = GPIO_PULLUP_DISABLE,
+      .pull_down_en = GPIO_PULLDOWN_ENABLE,
+      .intr_type = GPIO_INTR_DISABLE,
+  };
+  esp_err_t err = gpio_config(&config);
+  if (err != ESP_OK)
+    return err;
+
+  // Reset is active low.
+  ESP_ERROR_CHECK_WITHOUT_ABORT(gpio_set_level(kKeyboardResetGPIO, 1));
+  vTaskDelay(pdMS_TO_TICKS(200));
+  ESP_ERROR_CHECK_WITHOUT_ABORT(gpio_set_level(kKeyboardResetGPIO, 0));
+  vTaskDelay(pdMS_TO_TICKS(200));
+  ESP_ERROR_CHECK_WITHOUT_ABORT(gpio_set_level(kKeyboardResetGPIO, 1));
+  vTaskDelay(pdMS_TO_TICKS(200));
+#endif
+
+#if 0
+for (int i = 0; i < 0x89; i++) {
+  if (i2c_master_.Ping(i))
+    ESP_LOGW(TAG, "Echo from 0x%x", i);
+}
+#endif
+
+  err = WriteByte(Register::KBDSETTLE, k12msec);
   if (err != ESP_OK)
     return err;
   err = WriteByte(Register::KBDBOUNCE, k12msec);
@@ -127,22 +158,24 @@ esp_err_t Keyboard::HandleEvents() {
 }
 
 esp_err_t Keyboard::ReadByte(Register reg, void* value) {
-  return i2c_master_.ReadRegister(kSlaveAddress, static_cast<uint8_t>(reg),
+  return i2c_master_.ReadRegister(kSlaveAddress, kI2CAddressMode,
+                                  static_cast<uint8_t>(reg),
                                   reinterpret_cast<uint8_t*>(value))
              ? ESP_OK
              : ESP_FAIL;
 }
 
 esp_err_t Keyboard::WriteByte(Register reg, uint8_t value) {
-  return i2c_master_.WriteRegister(kSlaveAddress, static_cast<uint8_t>(reg),
-                                   value)
+  return i2c_master_.WriteRegister(kSlaveAddress, kI2CAddressMode,
+                                   static_cast<uint8_t>(reg), value)
              ? ESP_OK
              : ESP_FAIL;
 }
 
 esp_err_t Keyboard::WriteWord(Register reg, uint16_t value) {
-  i2c::Operation op = i2c_master_.CreateWriteOp(
-      kSlaveAddress, static_cast<uint8_t>(reg), "Kbd::WriteWord");
+  i2c::Operation op =
+      i2c_master_.CreateWriteOp(kSlaveAddress, kI2CAddressMode,
+                                static_cast<uint8_t>(reg), "Kbd::WriteWord");
   if (!op.ready())
     return ESP_FAIL;
   return op.Write(&value, sizeof(value)) ? ESP_OK : ESP_FAIL;
