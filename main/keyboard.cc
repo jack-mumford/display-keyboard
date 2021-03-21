@@ -16,7 +16,7 @@
 namespace {
 constexpr char TAG[] = "Keyboard";
 constexpr uint8_t kSlaveAddress = 0x44;  // I2C address of LM8330 IC.
-constexpr i2c::AddressMode kI2CAddressMode = i2c::AddressMode::bit7;
+constexpr i2c::Address::Size kI2CAddressSize = i2c::Address::Size::bit7;
 constexpr uint8_t k12msec = 0x80;
 constexpr uint8_t kInvalidEventCode = 0x7F;
 }  // namespace
@@ -158,7 +158,7 @@ esp_err_t Keyboard::HandleEvents() {
 }
 
 esp_err_t Keyboard::ReadByte(Register reg, void* value) {
-  return i2c_master_.ReadRegister(kSlaveAddress, kI2CAddressMode,
+  return i2c_master_.ReadRegister(kSlaveAddress, kI2CAddressSize,
                                   static_cast<uint8_t>(reg),
                                   reinterpret_cast<uint8_t*>(value))
              ? ESP_OK
@@ -166,7 +166,7 @@ esp_err_t Keyboard::ReadByte(Register reg, void* value) {
 }
 
 esp_err_t Keyboard::WriteByte(Register reg, uint8_t value) {
-  return i2c_master_.WriteRegister(kSlaveAddress, kI2CAddressMode,
+  return i2c_master_.WriteRegister(kSlaveAddress, kI2CAddressSize,
                                    static_cast<uint8_t>(reg), value)
              ? ESP_OK
              : ESP_FAIL;
@@ -174,7 +174,7 @@ esp_err_t Keyboard::WriteByte(Register reg, uint8_t value) {
 
 esp_err_t Keyboard::WriteWord(Register reg, uint16_t value) {
   i2c::Operation op =
-      i2c_master_.CreateWriteOp(kSlaveAddress, kI2CAddressMode,
+      i2c_master_.CreateWriteOp(kSlaveAddress, kI2CAddressSize,
                                 static_cast<uint8_t>(reg), "Kbd::WriteWord");
   if (!op.ready())
     return ESP_FAIL;
