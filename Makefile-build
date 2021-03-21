@@ -12,13 +12,13 @@ FS_PAGE_SIZE=256
 FS_IMAGE_SIZE=0x100000
 PARTITION_OFFSET=0x110000
 
-GIT_SUBMODULES=components/inih \
-							 components/lv_lib_png \
+GIT_SUBMODULES=components/lv_lib_png \
 							 components/lvgl \
 							 components/lvgl_esp32_drivers \
 							 components/tarablessd1306 \
 							 components/tinyusb \
 							 libs/i2clib \
+							 libs/inih \
 							 libs/tjpgdec
 
 .PHONY: format

@@ -1,9 +1,6 @@
 [submodule "components/tinyusb"]
 	path = components/tinyusb
 	url = https://github.com/hathach/tinyusb.git
-[submodule "components/inih"]
-	path = components/inih
-	url = https://github.com/benhoyt/inih
 [submodule "components/lv_lib_png"]
 	path = components/lv_lib_png
 	url = https://github.com/lvgl/lv_lib_png.git
@@ -23,3 +20,6 @@
 [submodule "libs/i2clib"]
 	path = libs/i2clib
 	url = https://github.com/cmumford/i2clib.git
+[submodule "libs/inih"]
+	path = libs/inih
+	url = https://github.com/benhoyt/inih
