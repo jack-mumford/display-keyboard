@@ -44,6 +44,7 @@ esp_http_client_config_t HTTPClient::CreateClientConfig(
     .keep_alive_idle = false,
     .keep_alive_interval = 0,
     .keep_alive_count = 0,
+    .if_name = nullptr,
 #endif  // ESP-IDF 4.3.0
   };
   return config;
