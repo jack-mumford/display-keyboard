@@ -16,9 +16,9 @@ GIT_SUBMODULES=components/lv_lib_png \
 							 components/lvgl \
 							 components/lvgl_esp32_drivers \
 							 components/tarablessd1306 \
-							 components/tinyusb \
 							 libs/i2clib \
 							 libs/inih \
+							 libs/tinyusb \
 							 libs/tjpgdec
 
 .PHONY: format

@@ -3,26 +3,26 @@ file( GLOB SOURCES *.cc *.c )
 idf_component_register(
   SRCS
     ${SOURCES}
-    "${CMAKE_SOURCE_DIR}/components/tinyusb/src/tusb.c"
-    "${CMAKE_SOURCE_DIR}/components/tinyusb/src/device/usbd.c"
-    "${CMAKE_SOURCE_DIR}/components/tinyusb/src/device/usbd_control.c"
-    "${CMAKE_SOURCE_DIR}/components/tinyusb/src/portable/espressif/esp32s2/dcd_esp32s2.c"
-    "${CMAKE_SOURCE_DIR}/components/tinyusb/src/class/hid/hid_device.c"
     "${CMAKE_SOURCE_DIR}/components/lv_lib_png/lodepng.c"
     "${CMAKE_SOURCE_DIR}/components/lv_lib_png/lv_png.c"
     "${CMAKE_SOURCE_DIR}/libs/i2clib/src/address.cc"
     "${CMAKE_SOURCE_DIR}/libs/i2clib/src/master.cc"
     "${CMAKE_SOURCE_DIR}/libs/i2clib/src/operation.cc"
     "${CMAKE_SOURCE_DIR}/libs/inih/ini.c"
+    "${CMAKE_SOURCE_DIR}/libs/tinyusb/src/class/hid/hid_device.c"
+    "${CMAKE_SOURCE_DIR}/libs/tinyusb/src/device/usbd.c"
+    "${CMAKE_SOURCE_DIR}/libs/tinyusb/src/device/usbd_control.c"
+    "${CMAKE_SOURCE_DIR}/libs/tinyusb/src/portable/espressif/esp32s2/dcd_esp32s2.c"
+    "${CMAKE_SOURCE_DIR}/libs/tinyusb/src/tusb.c"
     "${CMAKE_SOURCE_DIR}/libs/tjpgdec/src/tjpgd.c"
   INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/components"
     "${CMAKE_SOURCE_DIR}/components/lvgl/src"
     "${CMAKE_SOURCE_DIR}/components/tarablessd1306"
-    "${CMAKE_SOURCE_DIR}/components/tinyusb/src"
     "${CMAKE_SOURCE_DIR}/libs"
     "${CMAKE_SOURCE_DIR}/libs/i2clib/include"
     "${CMAKE_SOURCE_DIR}/libs/inih"
+    "${CMAKE_SOURCE_DIR}/libs/tinyusb/src"
     "${CMAKE_SOURCE_DIR}/main"
     "${IDF_PATH}/components/driver/include"
     "${IDF_PATH}/components/esp-tls"
@@ -44,7 +44,6 @@ idf_component_register(
     lvgl_esp32_drivers
     spi_flash
     spiffs
-    tinyusb
 )
 
 target_compile_options(
