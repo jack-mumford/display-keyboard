@@ -172,8 +172,6 @@ Wire Wire Line
 	4550 2600 4550 2850
 Text GLabel 8200 1950 0    50   Input ~ 0
 1V8_RST
-Text GLabel 4800 4350 0    50   Input ~ 0
-3V3_RST
 Text GLabel 4800 4450 0    50   Input ~ 0
 3V3
 Text GLabel 4800 4650 0    50   Input ~ 0
@@ -377,9 +375,9 @@ Wire Wire Line
 	1900 1950 1200 1950
 Wire Wire Line
 	1900 1950 1900 2050
-Text GLabel 1850 3250 1    50   Input ~ 0
-3V3
 Text GLabel 1950 3250 1    50   Input ~ 0
+3V3
+Text GLabel 1850 3250 1    50   Input ~ 0
 1V8
 Text GLabel 1900 4150 3    50   Input ~ 0
 GND
@@ -387,21 +385,21 @@ Text GLabel 1500 3500 0    50   Input ~ 0
 GND
 Text GLabel 4800 5350 0    50   Input ~ 0
 SCK
-Text GLabel 1500 3600 0    50   Input ~ 0
-3V3_SDA
-Text GLabel 1500 3700 0    50   Input ~ 0
-3V3_SCL
 Text GLabel 2300 3600 2    50   Input ~ 0
-1V8_SDA
+3V3_SDA
 Text GLabel 2300 3700 2    50   Input ~ 0
+3V3_SCL
+Text GLabel 1500 3600 0    50   Input ~ 0
+1V8_SDA
+Text GLabel 1500 3700 0    50   Input ~ 0
 1V8_SCL
-Text GLabel 1500 3800 0    50   Input ~ 0
-3V3_KBDINT
 Text GLabel 2300 3800 2    50   Input ~ 0
+3V3_KBDINT
+Text GLabel 1500 3800 0    50   Input ~ 0
 1V8_KBDINT
-Text GLabel 1500 3900 0    50   Input ~ 0
-3V3_RST
 Text GLabel 2300 3900 2    50   Input ~ 0
+3V3_RST
+Text GLabel 1500 3900 0    50   Input ~ 0
 1V8_RST
 Text GLabel 2350 6850 2    50   Input ~ 0
 1V8_SDA
@@ -474,7 +472,7 @@ L Device:R_Small R4
 U 1 1 5FEC5323
 P 1850 5650
 F 0 "R4" V 1750 5650 50  0000 C CNN
-F 1 "5kΩ" V 1950 5650 50  0000 C CNN
+F 1 "2.2kΩ" V 1950 5650 50  0000 C CNN
 F 2 "Resistor_SMD:R_0603_1608Metric" H 1850 5650 50  0001 C CNN
 F 3 "~" H 1850 5650 50  0001 C CNN
 	1    1850 5650
@@ -487,7 +485,7 @@ L Device:R_Small R2
 U 1 1 5FEC6AE7
 P 1600 5900
 F 0 "R2" V 1500 5900 50  0000 C CNN
-F 1 "5kΩ" V 1700 5900 50  0000 C CNN
+F 1 "2.2kΩ" V 1700 5900 50  0000 C CNN
 F 2 "Resistor_SMD:R_0603_1608Metric" H 1600 5900 50  0001 C CNN
 F 3 "~" H 1600 5900 50  0001 C CNN
 	1    1600 5900
@@ -603,7 +601,6 @@ NoConn ~ 5650 4750
 NoConn ~ 5650 4950
 NoConn ~ 5650 5550
 NoConn ~ 4800 5850
-NoConn ~ 4800 4850
 NoConn ~ 4800 4750
 NoConn ~ 4800 4550
 $Comp
@@ -645,7 +642,7 @@ L Device:R_Small R7
 U 1 1 5FEB56DF
 P 4400 6950
 F 0 "R7" H 4500 7000 50  0000 C CNN
-F 1 "5kΩ" H 4550 6900 50  0000 C CNN
+F 1 "2.2kΩ" H 4550 6900 50  0000 C CNN
 F 2 "Resistor_SMD:R_0603_1608Metric" H 4400 6950 50  0001 C CNN
 F 3 "~" H 4400 6950 50  0001 C CNN
 	1    4400 6950
@@ -656,7 +653,7 @@ L Device:R_Small R8
 U 1 1 5FEB5F07
 P 4650 6950
 F 0 "R8" H 4550 7000 50  0000 C CNN
-F 1 "5kΩ" H 4500 6900 50  0000 C CNN
+F 1 "2.2kΩ" H 4500 6900 50  0000 C CNN
 F 2 "Resistor_SMD:R_0603_1608Metric" H 4650 6950 50  0001 C CNN
 F 3 "~" H 4650 6950 50  0001 C CNN
 	1    4650 6950
@@ -691,17 +688,6 @@ Text GLabel 4800 5450 0    50   Input ~ 0
 MOSI
 Text GLabel 4800 5550 0    50   Input ~ 0
 MISO
-$Comp
-L FeatherS2:FeatherS2 U5
-U 1 1 60105E93
-P 5250 5050
-F 0 "U5" H 5225 6015 50  0000 C CNN
-F 1 "FeatherS2" H 5225 5924 50  0000 C CNN
-F 2 "FeatherS2:FeatherS2" H 5300 4050 50  0001 C CNN
-F 3 "https://www.adafruit.com/product/4062" H 4900 5950 50  0001 C CNN
-	1    5250 5050
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	8700 1200 8700 1300
 $Comp
@@ -735,4 +721,18 @@ Wire Wire Line
 	9200 1300 9450 1300
 Wire Wire Line
 	9450 1300 9450 1350
+Text GLabel 4800 4850 0    50   Input ~ 0
+3V3_RST
+$Comp
+L FeatherS2:FeatherS2 U5
+U 1 1 60105E93
+P 5250 5050
+F 0 "U5" H 5225 6015 50  0000 C CNN
+F 1 "FeatherS2" H 5225 5924 50  0000 C CNN
+F 2 "FeatherS2:FeatherS2" H 5300 4050 50  0001 C CNN
+F 3 "https://www.adafruit.com/product/4062" H 4900 5950 50  0001 C CNN
+	1    5250 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4800 4350
 $EndSCHEMATC
