@@ -12,12 +12,12 @@ FS_PAGE_SIZE=256
 FS_IMAGE_SIZE=0x100000
 PARTITION_OFFSET=0x110000
 
-GIT_SUBMODULES=components/lv_lib_png \
-							 components/lvgl \
+GIT_SUBMODULES=components/lvgl \
 							 components/lvgl_esp32_drivers \
 							 components/tarablessd1306 \
 							 libs/i2clib \
 							 libs/inih \
+							 libs/lv_lib_png \
 							 libs/tinyusb \
 							 libs/tjpgdec
 
