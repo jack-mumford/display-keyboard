@@ -23,7 +23,7 @@ Text GLabel 8200 1750 0    50   Input ~ 0
 1V8_SCL
 Text GLabel 8200 1850 0    50   Input ~ 0
 1V8_KBDINT
-Text GLabel 5650 5650 2    50   Input ~ 0
+Text GLabel 5650 5550 2    50   Input ~ 0
 3V3_KBDINT
 $Comp
 L Switch:SW_Push Q1
@@ -385,21 +385,21 @@ Text GLabel 1500 3500 0    50   Input ~ 0
 GND
 Text GLabel 4800 5350 0    50   Input ~ 0
 SCK
-Text GLabel 2300 3600 2    50   Input ~ 0
-3V3_SDA
 Text GLabel 2300 3700 2    50   Input ~ 0
+3V3_SDA
+Text GLabel 2300 3600 2    50   Input ~ 0
 3V3_SCL
-Text GLabel 1500 3600 0    50   Input ~ 0
-1V8_SDA
 Text GLabel 1500 3700 0    50   Input ~ 0
+1V8_SDA
+Text GLabel 1500 3600 0    50   Input ~ 0
 1V8_SCL
-Text GLabel 2300 3800 2    50   Input ~ 0
-3V3_KBDINT
-Text GLabel 1500 3800 0    50   Input ~ 0
-1V8_KBDINT
 Text GLabel 2300 3900 2    50   Input ~ 0
-3V3_RST
+3V3_KBDINT
 Text GLabel 1500 3900 0    50   Input ~ 0
+1V8_KBDINT
+Text GLabel 2300 3800 2    50   Input ~ 0
+3V3_RST
+Text GLabel 1500 3800 0    50   Input ~ 0
 1V8_RST
 Text GLabel 2350 6850 2    50   Input ~ 0
 1V8_SDA
@@ -599,7 +599,7 @@ NoConn ~ 5650 4450
 NoConn ~ 5650 4550
 NoConn ~ 5650 4750
 NoConn ~ 5650 4950
-NoConn ~ 5650 5550
+NoConn ~ 4800 4850
 NoConn ~ 4800 5850
 NoConn ~ 4800 4750
 NoConn ~ 4800 4550
@@ -721,7 +721,7 @@ Wire Wire Line
 	9200 1300 9450 1300
 Wire Wire Line
 	9450 1300 9450 1350
-Text GLabel 4800 4850 0    50   Input ~ 0
+Text GLabel 5650 5650 2    50   Input ~ 0
 3V3_RST
 $Comp
 L FeatherS2:FeatherS2 U5
