@@ -184,9 +184,9 @@ Text GLabel 9250 1950 2    50   Input ~ 0
 ROW0
 Text GLabel 9250 1850 2    50   Input ~ 0
 ROW1
-Text GLabel 9250 2200 2    50   Input ~ 0
-COL0
 Text GLabel 9250 2300 2    50   Input ~ 0
+COL0
+Text GLabel 9250 2200 2    50   Input ~ 0
 COL1
 Text GLabel 9250 2400 2    50   Input ~ 0
 COL2
@@ -243,7 +243,7 @@ GND
 Text GLabel 9750 5150 0    50   Input ~ 0
 D_CS
 Text GLabel 9750 5250 0    50   Input ~ 0
-3V3_RST
+RST
 Text GLabel 9750 5450 0    50   Input ~ 0
 MOSI
 Text GLabel 9750 5550 0    50   Input ~ 0
@@ -734,5 +734,6 @@ F 3 "https://www.adafruit.com/product/4062" H 4900 5950 50  0001 C CNN
 	1    5250 5050
 	1    0    0    -1  
 $EndComp
-NoConn ~ 4800 4350
+Text GLabel 4800 4350 0    50   Input ~ 0
+RST
 $EndSCHEMATC
