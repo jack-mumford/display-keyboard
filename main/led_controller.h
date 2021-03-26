@@ -18,6 +18,8 @@
 #include <esp_err.h>
 #include <esp_timer.h>
 
+#include "apa102.h"
+
 class LEDController {
  public:
   LEDController(gpio_num_t activity_gpio);
@@ -33,4 +35,5 @@ class LEDController {
 
   gpio_num_t activity_gpio_;
   esp_timer_handle_t led_off_timer_;
+  APA102 rgbled_;  // For Feather S2.
 };
