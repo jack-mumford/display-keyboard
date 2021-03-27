@@ -230,6 +230,7 @@ void UITask::TestCoverArtTimerCb(void* arg) {
            task->test_cover_art_img_idx_);
   task->main_display_.screen()->SetDebugString(buf);
   task->fetcher_->QueueFetch(task->next_fetch_id_, task->GetTestCoverArtURL());
+  task->next_fetch_id_++;
   xSemaphoreGive(task->mutex_);
 }
 
@@ -242,9 +243,9 @@ void UITask::FetchImageResult(uint32_t request_id, lv_img_dsc_t image) {
   configASSERT(main_display_.screen());
   if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
     return;
-  char msg[20];
-  snprintf(msg, sizeof(msg), "Got cover %u (#%u).", test_cover_art_img_idx_,
-           next_fetch_id_);
+  char msg[30];
+  snprintf(msg, sizeof(msg), "Got cover %u (fetch #%u).",
+           test_cover_art_img_idx_, request_id);
   main_display_.screen()->SetDebugString(msg);
   main_display_.screen()->SetAlbumArtwork(std::move(image));
   if (++test_cover_art_img_idx_ > 9)
@@ -260,7 +261,7 @@ void UITask::FetchResult(uint32_t request_id,
   if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE)
     return;
 
-  char msg[20];
+  char msg[30];
   if (http_status_code == HttpStatus_Ok) {
     snprintf(msg, sizeof(msg), "Unexpected fetch: %zu", resource_data.size());
   } else {
@@ -277,12 +278,12 @@ void UITask::FetchResult(uint32_t request_id,
 }
 
 void UITask::FetchError(uint32_t request_id, esp_err_t err) {
-  ESP_LOGE(TAG, "Error fetching resource: %s", esp_err_to_name(err));
+  ESP_LOGE(TAG, "Fetch #%u: %s", request_id, esp_err_to_name(err));
   if (xSemaphoreTake(mutex_, portMAX_DELAY) != pdTRUE)
     return;
 
   char msg[40];
-  snprintf(msg, sizeof(msg), "Fetch %u error: %s.", test_cover_art_img_idx_,
+  snprintf(msg, sizeof(msg), "Fetch #%u: %s.", request_id,
            esp_err_to_name(err));
   msg[sizeof(msg) - 1] = '\0';
   main_display_.screen()->SetDebugString(msg);
