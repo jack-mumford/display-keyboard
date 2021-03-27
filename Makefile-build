@@ -11,6 +11,8 @@ FS_BLOCK_SIZE=4096
 FS_PAGE_SIZE=256
 FS_IMAGE_SIZE=0x100000
 PARTITION_OFFSET=0x110000
+FeatherS2Files=FeatherS2Files
+
 
 GIT_SUBMODULES=components/lvgl \
 							 components/lvgl_esp32_drivers \
@@ -78,11 +80,10 @@ flash-feathers2-stock-bootloader:
 	esptool.py --chip esp32s2 --port ${FLASH_PORT} --baud ${BAUD} \
 		--before=default_reset --after=no_reset write_flash \
 		--flash_mode dio --flash_size detect --flash_freq 80m \
-		0x1000 FeatherS2Files/bootloader.bin \
-		0x8000 FeatherS2Files/partition-table.bin \
-		0xe000 FeatherS2Files/ota_data_initial.bin \
-		0x410000 FeatherS2Files/tinyuf2.bin; \
-		echo "Press the RST button."
+		0x1000 ${FeatherS2Files}/bootloader.bin \
+		0x8000 ${FeatherS2Files}/partition-table.bin \
+		0xe000 ${FeatherS2Files}/ota_data_initial.bin \
+		0x410000 ${FeatherS2Files}/tinyuf2.bin
 
 .PHONY: submodules
 submodules:
