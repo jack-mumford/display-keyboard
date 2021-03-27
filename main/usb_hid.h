@@ -4,8 +4,8 @@
 
 #include <esp_err.h>
 
-#include <class/hid/hid.h>
-#include <class/hid/hid_device.h>
+#include <tinyusb/tinyusb/src/class/hid/hid.h>
+#include <tinyusb/tinyusb/src/class/hid/hid_device.h>
 #include <device/usbd.h>
 #include "usb_string_ids.h"
 

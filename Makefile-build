@@ -20,7 +20,6 @@ GIT_SUBMODULES=components/lvgl \
 							 libs/i2clib \
 							 libs/inih \
 							 libs/lv_lib_png \
-							 libs/tinyusb \
 							 libs/tjpgdec
 
 .PHONY: format

@@ -17,9 +17,6 @@
 [submodule "libs/inih"]
 	path = libs/inih
 	url = https://github.com/benhoyt/inih
-[submodule "libs/tinyusb"]
-	path = libs/tinyusb
-	url = https://github.com/hathach/tinyusb.git
 [submodule "libs/lv_lib_png"]
 	path = libs/lv_lib_png
 	url = https://github.com/lvgl/lv_lib_png.git

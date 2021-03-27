@@ -9,12 +9,12 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/libs/inih/ini.c"
     "${CMAKE_SOURCE_DIR}/libs/lv_lib_png/lodepng.c"
     "${CMAKE_SOURCE_DIR}/libs/lv_lib_png/lv_png.c"
-    "${CMAKE_SOURCE_DIR}/libs/tinyusb/src/class/hid/hid_device.c"
-    "${CMAKE_SOURCE_DIR}/libs/tinyusb/src/device/usbd.c"
-    "${CMAKE_SOURCE_DIR}/libs/tinyusb/src/device/usbd_control.c"
-    "${CMAKE_SOURCE_DIR}/libs/tinyusb/src/portable/espressif/esp32s2/dcd_esp32s2.c"
-    "${CMAKE_SOURCE_DIR}/libs/tinyusb/src/tusb.c"
     "${CMAKE_SOURCE_DIR}/libs/tjpgdec/src/tjpgd.c"
+    "${IDF_PATH}/components/tinyusb/tinyusb/src/class/hid/hid_device.c"
+    "${IDF_PATH}/components/tinyusb/tinyusb/src/device/usbd.c"
+    "${IDF_PATH}/components/tinyusb/tinyusb/src/device/usbd_control.c"
+    "${IDF_PATH}/components/tinyusb/tinyusb/src/portable/espressif/esp32s2/dcd_esp32s2.c"
+    "${IDF_PATH}/components/tinyusb/tinyusb/src/tusb.c"
   INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/components"
     "${CMAKE_SOURCE_DIR}/components/lvgl/src"
@@ -22,13 +22,13 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/libs"
     "${CMAKE_SOURCE_DIR}/libs/i2clib/include"
     "${CMAKE_SOURCE_DIR}/libs/inih"
-    "${CMAKE_SOURCE_DIR}/libs/tinyusb/src"
     "${CMAKE_SOURCE_DIR}/main"
     "${IDF_PATH}/components"
     "${IDF_PATH}/components/freertos/include/freertos"
     "${IDF_PATH}/components/mbedtls/mbedtls/include"
     "${IDF_PATH}/components/mbedtls/port/include"
     "${IDF_PATH}/components/nghttp/port/include"
+    "${IDF_PATH}/components/tinyusb/tinyusb/src"
   REQUIRES
     lvgl_esp32_drivers
     spi_flash
