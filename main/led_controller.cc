@@ -30,7 +30,7 @@ constexpr uint64_t kLEDOffDelayUsec = 50 * 1000;
 LEDController::LEDController(gpio_num_t activity_gpio)
     : activity_gpio_(activity_gpio),
       led_off_timer_(nullptr),
-      rgbled_(GPIO_NUM_45, GPIO_NUM_40) {}
+      rgbled_(GPIO_NUM_45, GPIO_NUM_40, HSPI_HOST) {}
 
 LEDController::~LEDController() {
   esp_timer_stop(led_off_timer_);
@@ -47,8 +47,9 @@ esp_err_t LEDController::Initialize() {
 
   err = rgbled_.Initlialize();
   ESP_ERROR_CHECK_WITHOUT_ABORT(err);
-  if (err == ESP_OK)
-    ESP_ERROR_CHECK_WITHOUT_ABORT(rgbled_.Set(0xeeeeeeee));
+  if (err == ESP_OK) {
+    ESP_ERROR_CHECK_WITHOUT_ABORT(rgbled_.Set(APA102::Color(0, 255, 0)));
+  }
 
 #if (BOARD_FEATHERS2 == 1)
   const gpio_config_t config = {

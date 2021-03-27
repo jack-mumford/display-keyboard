@@ -2,31 +2,35 @@
 
 #include <cstring>
 
+#include <driver/gpio.h>
 #include <esp_log.h>
-#include <hal/spi_types.h>
 
 namespace {
 
-struct LEDFrame {
-  uint32_t frame_start_indicator;  // 0x000000.
-  APAColor color;                  // The LED color value.
-  uint32_t frame_end_indicator;    // 0xffffffff
+struct LEDFrames {
+  uint32_t frame_start_indicator;  // APA102 start frame: 0x00000000.
+  APA102::Color color;             // The LED color value.
+  uint32_t frame_end_indicator;    // APA102 end frame: 0xffffffff.
 };
 
-constexpr uint8_t kBytesPerPixel = 4;
+constexpr size_t kBitsPerByte = 8;
 constexpr int kMaxSPIFrameBytes = 256;
-constexpr int kSPIClockFrequencyHz = 1000000;
-constexpr spi_host_device_t kSPIHost = HSPI_HOST;
+constexpr int kSPIClockFrequencyHz = 1e6;
 
 constexpr char TAG[] = "APA102";
 
 }  // namespace
 
-APA102::APA102(gpio_num_t sclk_gpio, gpio_num_t mosi_gpio)
+APA102::APA102(gpio_num_t sclk_gpio,
+               gpio_num_t mosi_gpio,
+               spi_host_device_t spi_host)
     : sclk_gpio_(sclk_gpio),
       mosi_gpio_(mosi_gpio),
+      spi_host_(spi_host),
       spi_device_(nullptr),
-      led_frame_(nullptr) {}
+      led_frame_(nullptr) {
+  std::memset(&trans_desc_, 0, sizeof(trans_desc_));
+}
 
 APA102::~APA102() {
   if (spi_device_)
@@ -36,12 +40,22 @@ APA102::~APA102() {
 }
 
 esp_err_t APA102::Initlialize() {
-  static_assert(sizeof(LEDFrame) == 12);
-  led_frame_ = heap_caps_malloc(sizeof(LEDFrame), MALLOC_CAP_DMA);
-  LEDFrame* frame = static_cast<LEDFrame*>(led_frame_);
+  static_assert(sizeof(LEDFrames) == 12);
+  led_frame_ = heap_caps_malloc(sizeof(LEDFrames), MALLOC_CAP_DMA);
+  LEDFrames* frame = static_cast<LEDFrames*>(led_frame_);
   frame->frame_start_indicator = 0x0;
-  frame->color = 0x0;
-  frame->frame_start_indicator = 0xffffffff;
+  frame->frame_end_indicator = 0xffffffff;
+
+  const gpio_config_t config = {
+      .pin_bit_mask = (1UL << sclk_gpio_) | (1UL << mosi_gpio_),
+      .mode = GPIO_MODE_OUTPUT,
+      .pull_up_en = GPIO_PULLUP_DISABLE,
+      .pull_down_en = GPIO_PULLDOWN_DISABLE,
+      .intr_type = GPIO_INTR_DISABLE,
+  };
+  esp_err_t err = gpio_config(&config);
+  if (err != ESP_OK)
+    return err;
 
   const spi_bus_config_t buscfg = {
       .mosi_io_num = mosi_gpio_,
@@ -50,11 +64,11 @@ esp_err_t APA102::Initlialize() {
       .quadwp_io_num = -1,  // not used.
       .quadhd_io_num = -1,  // not used.
       .max_transfer_sz = kMaxSPIFrameBytes,
-      .flags = 0x0,
-      .intr_flags = SPICOMMON_BUSFLAG_MASTER,
+      .flags = SPICOMMON_BUSFLAG_MASTER,
+      .intr_flags = 0x0,
   };
 
-  esp_err_t err = spi_bus_initialize(kSPIHost, &buscfg, SPI_DMA_CH_AUTO);
+  err = spi_bus_initialize(spi_host_, &buscfg, SPI_DMA_CH_AUTO);
   if (err != ESP_OK)
     return err;
 
@@ -75,26 +89,21 @@ esp_err_t APA102::Initlialize() {
       .post_cb = nullptr,
   };
 
-  return spi_bus_add_device(kSPIHost, &devcfg, &spi_device_);
+  return spi_bus_add_device(spi_host_, &devcfg, &spi_device_);
 }
 
-esp_err_t APA102::Set(APAColor color) {
-  LEDFrame* frame = static_cast<LEDFrame*>(led_frame_);
+esp_err_t APA102::Set(Color color) {
+  LEDFrames* frame = static_cast<LEDFrames*>(led_frame_);
   frame->color = color;
-  spi_transaction_t trans_desc = {
-      .flags = 0,
-      .cmd = 0,
-      .addr = 0,
-      .length = sizeof(LEDFrame) * sizeof(uint8_t),  // # of bits.
-      .rxlength = 0,
-      .user = nullptr,
-      .tx_buffer = led_frame_,
-      .rx_buffer = nullptr,
-  };
+  trans_desc_.length = sizeof(LEDFrames) * kBitsPerByte,
+  trans_desc_.tx_buffer = led_frame_;
 
-  ESP_LOGW(TAG, "Setting RGB LED to 0x%08x.", color);
+  ESP_LOGW(TAG, "Setting RGB LED to (%u, %u, %u) %u", color.red, color.green,
+           color.blue, color.intensity);
+
   esp_err_t err =
-      spi_device_queue_trans(spi_device_, &trans_desc, portMAX_DELAY);
+      spi_device_queue_trans(spi_device_, &trans_desc_, portMAX_DELAY);
+
   ESP_LOGW(TAG, "SPI xfer done: %s", esp_err_to_name(err));
   return err;
 }
