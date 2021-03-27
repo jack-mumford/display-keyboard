@@ -22,8 +22,7 @@ class APA102 {
     uint32_t red : 8;
 
     Color() : Color(0, 0, 0) {}
-    Color(uint8_t red, uint8_t green, uint8_t blue)
-        : unused(0b001), intensity(2), blue(blue), green(green), red(red) {}
+    Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t intensity = 31);
   };
 
   APA102(gpio_num_t sclk_gpio,

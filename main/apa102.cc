@@ -21,6 +21,18 @@ constexpr char TAG[] = "APA102";
 
 }  // namespace
 
+APA102::Color::Color(uint8_t red,
+                     uint8_t green,
+                     uint8_t blue,
+                     uint8_t intensity)
+    : unused(0b111),
+      intensity(intensity),
+      // APA102 is supposed to be 8 bits, but seems to only be five!
+      // hacking in shift for the time being.
+      blue(blue >> 3),
+      green(green >> 3),
+      red(red >> 3) {}
+
 APA102::APA102(gpio_num_t sclk_gpio,
                gpio_num_t mosi_gpio,
                spi_host_device_t spi_host)
@@ -97,13 +109,5 @@ esp_err_t APA102::Set(Color color) {
   frame->color = color;
   trans_desc_.length = sizeof(LEDFrames) * kBitsPerByte,
   trans_desc_.tx_buffer = led_frame_;
-
-  ESP_LOGW(TAG, "Setting RGB LED to (%u, %u, %u) %u", color.red, color.green,
-           color.blue, color.intensity);
-
-  esp_err_t err =
-      spi_device_queue_trans(spi_device_, &trans_desc_, portMAX_DELAY);
-
-  ESP_LOGW(TAG, "SPI xfer done: %s", esp_err_to_name(err));
-  return err;
+  return spi_device_queue_trans(spi_device_, &trans_desc_, portMAX_DELAY);
 }

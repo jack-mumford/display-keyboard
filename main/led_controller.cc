@@ -24,22 +24,31 @@ namespace {
 
 constexpr char TAG[] = "LED";
 constexpr uint64_t kLEDOffDelayUsec = 50 * 1000;
+LEDController* g_led_controller;  // For testing.
 
 }  // namespace
 
 LEDController::LEDController(gpio_num_t activity_gpio)
     : activity_gpio_(activity_gpio),
       led_off_timer_(nullptr),
-      rgbled_(GPIO_NUM_45, GPIO_NUM_40, HSPI_HOST) {}
+      rgbled_(GPIO_NUM_45, GPIO_NUM_40, HSPI_HOST) {
+  g_led_controller = this;
+}
 
 LEDController::~LEDController() {
   esp_timer_stop(led_off_timer_);
   gpio_set_level(activity_gpio_, 0);
+  g_led_controller = nullptr;
 }
 
 // static:
 void IRAM_ATTR LEDController::ActivityTimerCb(void* param) {
   gpio_set_level(static_cast<LEDController*>(param)->activity_gpio_, 0);
+}
+
+// static:
+LEDController* LEDController::GetForTesting() {
+  return g_led_controller;
 }
 
 esp_err_t LEDController::Initialize() {
@@ -86,4 +95,13 @@ void LEDController::FlashActivityLED() {
   esp_timer_stop(led_off_timer_);
   gpio_set_level(activity_gpio_, 1);
   esp_timer_start_once(led_off_timer_, kLEDOffDelayUsec);
+}
+
+void LEDController::SetRGBLED(uint8_t red,
+                              uint8_t green,
+                              uint8_t blue,
+                              uint8_t intensity) {
+  // APA102 intensity is a 5-bit value (0..31) - hence the shift.
+  ESP_ERROR_CHECK_WITHOUT_ABORT(
+      rgbled_.Set(APA102::Color(red, green, blue, intensity >> 3)));
 }

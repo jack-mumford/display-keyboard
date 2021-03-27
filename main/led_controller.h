@@ -25,8 +25,19 @@ class LEDController {
   LEDController(gpio_num_t activity_gpio);
   ~LEDController();
 
+  static LEDController* GetForTesting();
+
   esp_err_t Initialize();
   void FlashActivityLED();
+  /**
+   * @brief Set the RGB LED.
+   *
+   * @param red       Red color: 0..255.
+   * @param green     Green color: 0..255.
+   * @param blue      Blue color: 0..255.
+   * @param intensity Intensity: 0..255.
+   */
+  void SetRGBLED(uint8_t red, uint8_t green, uint8_t blue, uint8_t intensity);
 
  private:
   static void IRAM_ATTR ActivityTimerCb(void*);
