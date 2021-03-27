@@ -1,10 +1,10 @@
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <esp_log.h>
 #include <esp_system.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
+#include <freertos/include/freertos/FreeRTOS.h>
+#include <freertos/include/freertos/task.h>
 #include <i2clib/master.h>
-#include <nvs_flash.h>
+#include <nvs_flash/include/nvs_flash.h>
 #include <sdkconfig.h>
 
 #include "gpio_pins.h"

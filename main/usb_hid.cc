@@ -1,7 +1,7 @@
 #include "usb_hid.h"
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
-#include <freertos/FreeRTOS.h>
+#include <freertos/include/freertos/FreeRTOS.h>
 
 #include <class/hid/hid_device.h>
 #include <esp_log.h>

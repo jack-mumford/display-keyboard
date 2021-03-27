@@ -4,7 +4,7 @@
 #include <esp_log.h>
 #include <esp_sntp.h>
 #include <i2clib/master.h>
-#include <nvs_flash.h>
+#include <nvs_flash/include/nvs_flash.h>
 
 #include "config_reader.h"
 #include "event_ids.h"

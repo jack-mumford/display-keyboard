@@ -3,11 +3,11 @@
 #include <cstdint>
 #include <string>
 
-#include <esp_http_server.h>
+#include <esp_http_server/include/esp_http_server.h>
 #include <esp_timer.h>
-#include <event_groups.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
+#include <freertos/include/freertos/FreeRTOS.h>
+#include <freertos/include/freertos/event_groups.h>
+#include <freertos/include/freertos/semphr.h>
 
 class Config;
 class HTTPServer;

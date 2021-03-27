@@ -2,8 +2,8 @@
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <esp_log.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
+#include <freertos/include/freertos/FreeRTOS.h>
+#include <freertos/include/freertos/task.h>
 #include <lv_lib_png/lv_png.h>
 #include <lvgl.h>
 #include <lvgl_helpers.h>

@@ -6,10 +6,10 @@
 #include <string>
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
-#include <cJSON/cJSON.h>
 #include <esp_err.h>
 #include <esp_log.h>
-#include <mbedtls/base64.h>
+#include <json/cJSON/cJSON.h>
+#include <mbedtls/mbedtls/include/mbedtls/base64.h>
 
 #include "config.h"
 #include "event_ids.h"

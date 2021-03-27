@@ -6,13 +6,13 @@
 #include <string>
 #include <vector>
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/event_groups.h>
-#include <freertos/semphr.h>
-#include <freertos/task.h>
+#include <freertos/include/freertos/FreeRTOS.h>
+#include <freertos/include/freertos/event_groups.h>
+#include <freertos/include/freertos/semphr.h>
+#include <freertos/include/freertos/task.h>
 
 #include <esp_err.h>
-#include <esp_http_client.h>
+#include <esp_http_client/include/esp_http_client.h>
 #include <lvgl.h>
 
 /**

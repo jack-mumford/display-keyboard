@@ -1,8 +1,8 @@
 #pragma once
 
-#include <freertos/FreeRTOS.h>
+#include <freertos/include/freertos/FreeRTOS.h>
 
-#include <event_groups.h>
+#include <freertos/include/freertos/event_groups.h>
 
 constexpr EventBits_t EVENT_NETWORK_GOT_IP = BIT0;
 constexpr EventBits_t EVENT_NETWORK_DISCONNECTED = BIT1;

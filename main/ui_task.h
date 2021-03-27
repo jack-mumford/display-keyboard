@@ -3,9 +3,9 @@
 #include <string>
 #include <vector>
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
-#include <freertos/task.h>
+#include <freertos/include/freertos/FreeRTOS.h>
+#include <freertos/include/freertos/semphr.h>
+#include <freertos/include/freertos/task.h>
 
 #include <esp_err.h>
 #include <esp_timer.h>

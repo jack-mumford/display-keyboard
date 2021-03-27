@@ -4,8 +4,8 @@
 
 #include <esp_err.h>
 #include <esp_event.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/event_groups.h>
+#include <freertos/include/freertos/FreeRTOS.h>
+#include <freertos/include/freertos/event_groups.h>
 
 class WiFi {
  public:

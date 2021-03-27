@@ -1,8 +1,8 @@
 #pragma once
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/event_groups.h>
-#include <freertos/task.h>
+#include <freertos/include/freertos/FreeRTOS.h>
+#include <freertos/include/freertos/event_groups.h>
+#include <freertos/include/freertos/task.h>
 
 #include <esp_err.h>
 

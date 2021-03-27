@@ -24,22 +24,11 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/libs/inih"
     "${CMAKE_SOURCE_DIR}/libs/tinyusb/src"
     "${CMAKE_SOURCE_DIR}/main"
-    "${IDF_PATH}/components/driver/include"
-    "${IDF_PATH}/components/esp-tls"
-    "${IDF_PATH}/components/esp_common/include"
-    "${IDF_PATH}/components/esp_http_client/include"
-    "${IDF_PATH}/components/esp_http_server/include"
+    "${IDF_PATH}/components"
     "${IDF_PATH}/components/freertos/include/freertos"
-    "${IDF_PATH}/components/hal/esp32s2/include"
-    "${IDF_PATH}/components/hal/include"
-    "${IDF_PATH}/components/json"
-    "${IDF_PATH}/components/mbedtls/esp_crt_bundle/include"
     "${IDF_PATH}/components/mbedtls/mbedtls/include"
     "${IDF_PATH}/components/mbedtls/port/include"
     "${IDF_PATH}/components/nghttp/port/include"
-    "${IDF_PATH}/components/nvs_flash/include"
-    "${IDF_PATH}/components/soc/esp32s2/include"
-    "${IDF_PATH}/components/spiffs/include"
   REQUIRES
     lvgl_esp32_drivers
     spi_flash

@@ -1,10 +1,9 @@
 #include "http_client.h"
 
 #define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
-#include <esp_crt_bundle.h>
-#include <esp_http_client.h>
+#include <esp-tls/esp_tls.h>
 #include <esp_log.h>
-#include <esp_tls.h>
+#include <mbedtls/esp_crt_bundle/include/esp_crt_bundle.h>
 
 namespace {
 constexpr char TAG[] = "HTTPClient";

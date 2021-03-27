@@ -6,7 +6,7 @@
 #include <vector>
 
 #include <esp_err.h>
-#include <esp_http_client.h>
+#include <esp_http_client/include/esp_http_client.h>
 
 class HTTPClient {
  public:

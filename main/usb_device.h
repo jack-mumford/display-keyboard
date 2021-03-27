@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include <freertos/FreeRTOS.h>
+#include <freertos/include/freertos/FreeRTOS.h>
 
 #include <esp_err.h>
 
