@@ -2,7 +2,7 @@
   (lib (name TCA8418)(type Legacy)(uri ${KIPRJMOD}/library/TCA8418/TCA8418.lib)(options "")(descr ""))
   (lib (name Adafruit_Feather_nRF52840_Express)(type Legacy)(uri ${KIPRJMOD}/library/Adafruit_Feather_nRF52840_Express/Adafruit_Feather_nRF52840_Express.lib)(options "")(descr "Adafruit Feather nRF52840 Express"))
   (lib (name FeatherS2)(type Legacy)(uri ${KIPRJMOD}/library/FeatherS2/FeatherS2.lib)(options "")(descr FeatherS2))
-  (lib (name Keyboard-Proto-rescue)(type Legacy)(uri "${KIPRJMOD}/Keyboard Proto-rescue.lib")(options "")(descr ""))
+  (lib (name Keyboard-Proto-rescue)(type Legacy)(uri "${KIPRJMOD}/DispklayKeyboard-rescue.lib")(options "")(descr ""))
   (lib (name LM8330)(type Legacy)(uri ${KIPRJMOD}/library/LM8330/LM8330.lib)(options "")(descr ""))
   (lib (name LSF0204DPWR)(type Legacy)(uri ${KIPRJMOD}/library/LSF0204DPWR/LSF0204DPWR.lib)(options "")(descr ""))
   (lib (name 128x32_OLED_LCD_LED)(type Legacy)(uri ${KIPRJMOD}/library/128x32_OLED_LCD_LED/128x32_OLED_LCD_LED.lib)(options "")(descr ""))

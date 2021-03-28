@@ -4,7 +4,7 @@ EELAYER END
 $Descr A 11000 8500
 encoding utf-8
 Sheet 1 2
-Title "Keyboard Prototype Board"
+Title "DisplayKeyboardtype Board"
 Date "2020-12-27"
 Rev "2"
 Comp "Prototype Schematic"
