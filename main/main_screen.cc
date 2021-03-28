@@ -35,10 +35,10 @@ constexpr lv_coord_t kAlbumArtworkTop = 20;
 std::string DisplayMem(size_t bytes) {
   char buff[20];
 
-  if (bytes > 1000000) {
+  if (bytes > 1e6) {
     snprintf(buff, sizeof(buff), "%0.1f MB",
              static_cast<float>(bytes) / 1024.0f / 1024.0f);
-  } else if (bytes > 10000) {
+  } else if (bytes > 10'000) {
     snprintf(buff, sizeof(buff), "%0.1f KB",
              static_cast<float>(bytes) / 1024.0f);
   } else {
