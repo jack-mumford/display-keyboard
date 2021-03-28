@@ -233,7 +233,8 @@ void ResourceFetcher::QueueFetch(uint32_t request_id, std::string url) {
 
 void ResourceFetcher::DecodeAndScaleJPEG(RequestData request_data,
                                          std::vector<uint8_t> jpeg_data) {
-  std::vector<uint8_t> work_pool(4096, 0x0);
+  // Use 32-bit value to ensure buffer is 32-bit aligned.
+  std::vector<uint32_t> work_pool(1024, 0x0);
   std::unique_ptr<JDEC> jd = std::make_unique<JDEC>();
   std::unique_ptr<IODEV> iodev = std::make_unique<IODEV>();
 
@@ -246,7 +247,7 @@ void ResourceFetcher::DecodeAndScaleJPEG(RequestData request_data,
   iodev->image_data = std::move(jpeg_data);
 
   JRESULT res = jd_prepare(jd.get(), jpeg_input_cb, work_pool.data(),
-                           work_pool.size(), iodev.get());
+                           work_pool.size() * sizeof(uint32_t), iodev.get());
   if (res != JDR_OK) {
     ESP_LOGE(TAG, "Failure decompressing image: %s.", request_data.url.c_str());
     fetch_client_->FetchError(request_data.request_id, TJpgDecErrToEspErr(res));
