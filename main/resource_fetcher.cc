@@ -234,8 +234,8 @@ void ResourceFetcher::QueueFetch(uint32_t request_id, std::string url) {
 void ResourceFetcher::DecodeAndScaleJPEG(RequestData request_data,
                                          std::vector<uint8_t> jpeg_data) {
   std::vector<uint8_t> work_pool(4096, 0x0);
-  std::unique_ptr<JDEC> jd(new JDEC);
-  std::unique_ptr<IODEV> iodev(new IODEV);
+  std::unique_ptr<JDEC> jd = std::make_unique<JDEC>();
+  std::unique_ptr<IODEV> iodev = std::make_unique<IODEV>();
 
   if (work_pool.empty() || !jd || !iodev) {
     fetch_client_->FetchError(request_data.request_id, ESP_ERR_NO_MEM);

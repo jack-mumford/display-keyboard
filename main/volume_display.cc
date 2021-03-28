@@ -50,8 +50,8 @@ esp_err_t VolumeDisplay::Initialize() {
   SSD1306_Clear(&ssd_device_, SSD_COLOR_BLACK);
   SSD1306_SetHFlip(&ssd_device_, true);
 
-  volume_widget_.reset(
-      new VolumeWidget(&ssd_device_, 0, 0, kDisplayWidth, kDisplayHeight));
+  volume_widget_ = std::make_unique<VolumeWidget>(
+      &ssd_device_, 0, 0, kDisplayWidth, kDisplayHeight);
   if (!volume_widget_)
     return ESP_ERR_NO_MEM;
   esp_err_t err = volume_widget_->Initialize();

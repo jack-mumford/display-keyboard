@@ -15,7 +15,7 @@ constexpr char TAG[] = "MainDisp";
 }  // namespace
 
 MainDisplay::MainDisplay()
-    : screen_(new MainScreen(*this)),
+    : screen_(std::make_unique<MainScreen>(*this)),
       display_buf_1_(DISP_BUF_SIZE),
       display_buf_2_(DISP_BUF_SIZE) {}
 
