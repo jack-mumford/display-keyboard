@@ -225,9 +225,9 @@ void UITask::TestCoverArtTimerCb(void* arg) {
     return;
   }
 
-  char buf[20];
-  snprintf(buf, sizeof(buf), "Fetching cover %d",
-           task->test_cover_art_img_idx_);
+  char buf[30];
+  snprintf(buf, sizeof(buf), "Fetch #%u of cover %d",
+           task->next_fetch_id_, task->test_cover_art_img_idx_);
   task->main_display_.screen()->SetDebugString(buf);
   task->fetcher_->QueueFetch(task->next_fetch_id_, task->GetTestCoverArtURL());
   task->next_fetch_id_++;
