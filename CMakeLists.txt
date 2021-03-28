@@ -8,6 +8,7 @@ set(EXTRA_COMPONENT_DIRS
   components/lvgl_esp32_drivers
   components/tarablessd1306
 )
+set(CMAKE_CXX_STANDARD 17)
 
 idf_build_set_property(COMPILE_DEFINITIONS -DLV_MEM_CUSTOM=1 APPEND)
 
