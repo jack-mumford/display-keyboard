@@ -3,7 +3,7 @@ EELAYER 30 0
 EELAYER END
 $Descr A 11000 8500
 encoding utf-8
-Sheet 1 1
+Sheet 1 2
 Title "Keyboard Prototype Board"
 Date "2020-12-27"
 Rev "2"
@@ -736,4 +736,10 @@ F 3 "https://www.adafruit.com/product/4062" H 4900 5950 50  0001 C CNN
 $EndComp
 Text GLabel 4800 4350 0    50   Input ~ 0
 RST
+$Sheet
+S 13900 2700 4650 4050
+U 60611BA9
+F0 "NewKeyboardMatrix" 50
+F1 "NewKeyboardMatrix.sch" 50
+$EndSheet
 $EndSCHEMATC
