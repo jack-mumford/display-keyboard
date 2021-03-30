@@ -13,6 +13,11 @@ FS_IMAGE_SIZE=0x100000
 PARTITION_OFFSET=0x110000
 FeatherS2Files=FeatherS2Files
 
+ifeq ($(OS),Windows_NT)
+	RM_RF=powershell Remove-Item -Recurse -Force -ErrorAction Ignore
+else
+	RM_RF=rm -rf
+endif
 
 GIT_SUBMODULES=components/lvgl \
 							 components/lvgl_esp32_drivers \
@@ -28,7 +33,9 @@ format:
 
 .PHONY: clean
 clean:
-	rm -rf build sdkconfig sdkconfig.old
+	${RM_RF} build
+	${RM_RF} sdkconfig
+	${RM_RF} sdkconfig.old
 
 .PHONY: config
 config:
