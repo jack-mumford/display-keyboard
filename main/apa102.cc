@@ -8,9 +8,9 @@
 namespace {
 
 struct LEDFrames {
-  uint32_t frame_start_indicator;  // APA102 start frame: 0x00000000.
-  APA102::Color color;             // The LED color value.
-  uint32_t frame_end_indicator;    // APA102 end frame: 0xffffffff.
+  uint32_t start_frame;     // APA102 start frame: 0x00000000.
+  APA102::Color led_frame;  // The LED color value.
+  uint32_t end_frame;       // APA102 end frame: 0xffffffff.
 };
 
 constexpr size_t kBitsPerByte = 8;
@@ -55,8 +55,8 @@ esp_err_t APA102::Initlialize() {
   static_assert(sizeof(LEDFrames) == 12);
   led_frame_ = heap_caps_malloc(sizeof(LEDFrames), MALLOC_CAP_DMA);
   LEDFrames* frame = static_cast<LEDFrames*>(led_frame_);
-  frame->frame_start_indicator = 0x0;
-  frame->frame_end_indicator = 0xffffffff;
+  frame->start_frame = 0x0;
+  frame->end_frame = 0xffffffff;
 
   const gpio_config_t config = {
       .pin_bit_mask = (1UL << sclk_gpio_) | (1UL << mosi_gpio_),
@@ -106,7 +106,7 @@ esp_err_t APA102::Initlialize() {
 
 esp_err_t APA102::Set(Color color) {
   LEDFrames* frame = static_cast<LEDFrames*>(led_frame_);
-  frame->color = color;
+  frame->led_frame = color;
   trans_desc_.length = sizeof(LEDFrames) * kBitsPerByte,
   trans_desc_.tx_buffer = led_frame_;
   return spi_device_queue_trans(spi_device_, &trans_desc_, portMAX_DELAY);
