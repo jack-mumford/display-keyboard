@@ -29,31 +29,33 @@ Keyboard::~Keyboard() = default;
 esp_err_t Keyboard::Initialize() {
   ESP_LOGD(TAG, "Initializing keyboard");
 
-#if 1
-  constexpr gpio_config_t config = {
-      .pin_bit_mask = (1UL << kKeyboardResetGPIO),
+  constexpr gpio_config_t reset_pin_config = {
+      .pin_bit_mask = (1ULL << kKeyboardResetGPIO),
       .mode = GPIO_MODE_OUTPUT,
-      .pull_up_en = GPIO_PULLUP_DISABLE,
+      .pull_up_en = GPIO_PULLUP_ENABLE,
       .pull_down_en = GPIO_PULLDOWN_ENABLE,
       .intr_type = GPIO_INTR_DISABLE,
   };
-  esp_err_t err = gpio_config(&config);
+  esp_err_t err = gpio_config(&reset_pin_config);
   if (err != ESP_OK)
     return err;
 
+  ESP_ERROR_CHECK_WITHOUT_ABORT(gpio_set_level(kKeyboardResetGPIO, 1));
+  vTaskDelay(pdMS_TO_TICKS(100));
+
   // Reset is active low.
-  ESP_ERROR_CHECK_WITHOUT_ABORT(gpio_set_level(kKeyboardResetGPIO, 1));
-  vTaskDelay(pdMS_TO_TICKS(200));
   ESP_ERROR_CHECK_WITHOUT_ABORT(gpio_set_level(kKeyboardResetGPIO, 0));
-  vTaskDelay(pdMS_TO_TICKS(200));
+  vTaskDelay(pdMS_TO_TICKS(100));
   ESP_ERROR_CHECK_WITHOUT_ABORT(gpio_set_level(kKeyboardResetGPIO, 1));
-  vTaskDelay(pdMS_TO_TICKS(200));
-#endif
+  vTaskDelay(pdMS_TO_TICKS(100));
 
 #if 0
-for (int i = 0; i < 0x89; i++) {
-  if (i2c_master_.Ping(i))
+for (int i = 1; i < 0x20; i++) {
+  taskYIELD();
+  if (i2c_master_.Ping(i, i2c::Address::Size::bit7)) {
     ESP_LOGW(TAG, "Echo from 0x%x", i);
+    //return ESP_OK;
+  }
 }
 #endif
 
