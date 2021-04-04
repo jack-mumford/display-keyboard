@@ -26,9 +26,8 @@ Keyboard::Keyboard(i2c::Master i2c_master)
 
 Keyboard::~Keyboard() = default;
 
-esp_err_t Keyboard::Initialize() {
-  ESP_LOGD(TAG, "Initializing keyboard");
-
+// static
+esp_err_t Keyboard::Reset() {
   constexpr gpio_config_t reset_pin_config = {
       .pin_bit_mask = (1ULL << kKeyboardResetGPIO),
       .mode = GPIO_MODE_OUTPUT,
@@ -49,17 +48,23 @@ esp_err_t Keyboard::Initialize() {
   ESP_ERROR_CHECK_WITHOUT_ABORT(gpio_set_level(kKeyboardResetGPIO, 1));
   vTaskDelay(pdMS_TO_TICKS(100));
 
-#if 0
-for (int i = 1; i < 0x20; i++) {
-  taskYIELD();
-  if (i2c_master_.Ping(i, i2c::Address::Size::bit7)) {
-    ESP_LOGW(TAG, "Echo from 0x%x", i);
-    //return ESP_OK;
-  }
+  return ESP_OK;
 }
+
+esp_err_t Keyboard::Initialize() {
+  ESP_LOGD(TAG, "Initializing keyboard");
+
+#if 0
+  for (int i = 1; i < 0x20; i++) {
+    taskYIELD();
+    if (i2c_master_.Ping(i, i2c::Address::Size::bit7)) {
+      ESP_LOGW(TAG, "Echo from 0x%x", i);
+      return ESP_OK;
+    }
+  }
 #endif
 
-  err = WriteByte(Register::KBDSETTLE, k12msec);
+  esp_err_t err = WriteByte(Register::KBDSETTLE, k12msec);
   if (err != ESP_OK)
     return err;
   err = WriteByte(Register::KBDBOUNCE, k12msec);

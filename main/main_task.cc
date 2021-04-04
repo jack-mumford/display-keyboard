@@ -138,7 +138,11 @@ esp_err_t MainTask::Initialize() {
   if (!event_group_)
     return ESP_FAIL;
 
-  esp_err_t err = InitNVRAM();
+  esp_err_t err = Keyboard::Reset();
+  if (err != ESP_OK)
+    return err;
+
+  err = InitNVRAM();
   if (err != ESP_OK)
     return err;
 
