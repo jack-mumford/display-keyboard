@@ -14,7 +14,7 @@ constexpr i2c_port_t kKeyboardPort = I2C_NUM_0;       // I2C port for keyboard
 constexpr gpio_num_t kI2C0_SDA_GPIO = GPIO_NUM_8;     // I2C port 0 SDA pin.
 constexpr gpio_num_t kI2C0_SCL_GPIO = GPIO_NUM_9;     // I2C port 0 SCL pin.
 constexpr gpio_num_t kKeyboardINTGPIO = GPIO_NUM_38;  // Keyboard event INT pin.
-constexpr gpio_num_t kKeyboardResetGPIO = GPIO_NUM_18;  // Keyboard reset pin.
+constexpr gpio_num_t kKeyboardResetGPIO = GPIO_NUM_33;  // Keyboard reset pin.
 
 constexpr i2c_port_t kVolumeDisplayPort = I2C_NUM_1;  // I2C port for vol. disp.
 constexpr gpio_num_t kI2C1_SDA_GPIO = GPIO_NUM_1;     // I2C port 1 SDA pin.
