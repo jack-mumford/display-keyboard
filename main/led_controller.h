@@ -37,7 +37,10 @@ class LEDController {
    * @param blue      Blue color: 0..255.
    * @param intensity Intensity: 0..255.
    */
-  void SetRGBLED(uint8_t red, uint8_t green, uint8_t blue, uint8_t intensity);
+  void SetRGBLED(uint8_t red,
+                 uint8_t green,
+                 uint8_t blue,
+                 uint8_t intensity = 255);
 
  private:
   static void IRAM_ATTR ActivityTimerCb(void*);
