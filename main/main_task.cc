@@ -102,7 +102,7 @@ esp_err_t MainTask::InitializeI2C() {
       .i2c_bus = I2C_NUM_0,
       .sda_gpio = kI2C0_SDA_GPIO,
       .scl_gpio = kI2C0_SCL_GPIO,
-      .clk_speed = 100'000,
+      .clk_speed = 400'000,
       .sda_pullup_enable = false,
       .scl_pullup_enable = false,
   };
