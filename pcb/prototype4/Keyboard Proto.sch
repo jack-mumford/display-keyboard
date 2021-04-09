@@ -14,11 +14,9 @@ Comment3 "License: MIT"
 Comment4 "Design: cmumford"
 $EndDescr
 Text GLabel 5650 5850 2    50   Input ~ 0
-3V3_SDA
+I2C0_SDA
 Text GLabel 5650 5750 2    50   Input ~ 0
-3V3_SCL
-Text GLabel 5650 5550 2    50   Input ~ 0
-3V3_KBDINT
+I2C0_SCL
 $Comp
 L Switch:SW_Push Q1
 U 1 1 5FCC9F75
@@ -244,14 +242,12 @@ Text GLabel 5650 5150 2    50   Input ~ 0
 T_CS
 Text GLabel 5650 5050 2    50   Input ~ 0
 T_IRQ
-Text GLabel 5650 4850 2    50   Input ~ 0
-EN
 Text GLabel 4800 5350 0    50   Input ~ 0
 SCK
 Text GLabel 2000 5650 2    50   Input ~ 0
-3V3_SDA
+I2C0_SCL
 Text GLabel 2000 5900 2    50   Input ~ 0
-3V3_SCL
+I2C0_SCL
 Text GLabel 1450 5400 1    50   Input ~ 0
 3V3
 $Comp
@@ -268,10 +264,10 @@ $EndComp
 Wire Wire Line
 	2000 5650 1950 5650
 $Comp
-L Device:R_Small R2
+L Device:R_Small R3
 U 1 1 5FEC6AE7
 P 1600 5900
-F 0 "R2" V 1500 5900 50  0000 C CNN
+F 0 "R3" V 1500 5900 50  0000 C CNN
 F 1 "2.2kΩ" V 1700 5900 50  0000 C CNN
 F 2 "Resistor_SMD:R_0603_1608Metric" H 1600 5900 50  0001 C CNN
 F 3 "~" H 1600 5900 50  0001 C CNN
@@ -382,13 +378,9 @@ GND
 Text GLabel 4900 7300 0    50   Input ~ 0
 3V3
 Text GLabel 4000 7100 0    50   Input ~ 0
-SDA
-Text GLabel 5650 5450 2    50   Input ~ 0
-SDA
-Text GLabel 5650 5350 2    50   Input ~ 0
-SCL
+I2C1_SDA
 Text GLabel 4000 7200 0    50   Input ~ 0
-SCL
+I2C1_SCL
 Wire Notes Line
 	3400 6250 7000 6250
 Text Notes 3950 6550 0    118  ~ 0
@@ -450,8 +442,6 @@ Text GLabel 4800 5450 0    50   Input ~ 0
 MOSI
 Text GLabel 4800 5550 0    50   Input ~ 0
 MISO
-Text GLabel 5650 5650 2    50   Input ~ 0
-3V3_RST
 $Comp
 L FeatherS2:FeatherS2 U5
 U 1 1 60105E93
@@ -465,4 +455,114 @@ F 3 "https://www.adafruit.com/product/4062" H 4900 5950 50  0001 C CNN
 $EndComp
 Text GLabel 4800 4350 0    50   Input ~ 0
 RST
+$Comp
+L ADP5589:ADP5589 U2
+U 1 1 606FE7E2
+P 8750 2600
+F 0 "U2" H 8725 4056 50  0000 C CNN
+F 1 "ADP5589" H 8725 3965 50  0000 C CNN
+F 2 "" H 8100 4000 50  0001 C CNN
+F 3 "" H 8100 4000 50  0001 C CNN
+	1    8750 2600
+	1    0    0    -1  
+$EndComp
+Text GLabel 5650 5350 2    50   Input ~ 0
+I2C1_SCL
+Text GLabel 5650 5450 2    50   Input ~ 0
+I2C1_SDA
+Text GLabel 5650 5550 2    50   Input ~ 0
+KBDINT
+NoConn ~ 5650 5650
+Text GLabel 8300 2650 0    50   Input ~ 0
+KBDINT
+Text GLabel 8300 2050 0    50   Input ~ 0
+RST
+Text GLabel 8300 2350 0    50   Input ~ 0
+I2C0_SDA
+Text GLabel 8300 2450 0    50   Input ~ 0
+I2C0_SCL
+$Comp
+L power:GND #PWR0101
+U 1 1 60701E9D
+P 8750 3700
+F 0 "#PWR0101" H 8750 3450 50  0001 C CNN
+F 1 "GND" H 8755 3527 50  0000 C CNN
+F 2 "" H 8750 3700 50  0001 C CNN
+F 3 "" H 8750 3700 50  0001 C CNN
+	1    8750 3700
+	1    0    0    -1  
+$EndComp
+Text GLabel 8650 1400 0    50   Input ~ 0
+3V3
+Wire Wire Line
+	8650 1400 8750 1400
+Wire Wire Line
+	8750 1400 8750 1500
+Text GLabel 2000 7000 2    50   Input ~ 0
+I2C1_SCL
+Text GLabel 2000 7250 2    50   Input ~ 0
+I2C1_SCL
+Text GLabel 1450 6750 1    50   Input ~ 0
+3V3
+$Comp
+L Device:R_Small R2
+U 1 1 60708D97
+P 1850 7000
+F 0 "R2" V 1750 7000 50  0000 C CNN
+F 1 "2.2kΩ" V 1950 7000 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 1850 7000 50  0001 C CNN
+F 3 "~" H 1850 7000 50  0001 C CNN
+	1    1850 7000
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2000 7000 1950 7000
+$Comp
+L Device:R_Small R1
+U 1 1 60708D9E
+P 1600 7250
+F 0 "R1" V 1500 7250 50  0000 C CNN
+F 1 "2.2kΩ" V 1700 7250 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 1600 7250 50  0001 C CNN
+F 3 "~" H 1600 7250 50  0001 C CNN
+	1    1600 7250
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	1700 7250 2000 7250
+Wire Wire Line
+	1450 6750 1450 7000
+Wire Wire Line
+	1450 7250 1500 7250
+Wire Wire Line
+	1750 7000 1450 7000
+Connection ~ 1450 7000
+Wire Wire Line
+	1450 7000 1450 7250
+NoConn ~ 5650 4850
+Text GLabel 9150 2400 2    50   Input ~ 0
+ROW0
+Text GLabel 9150 2300 2    50   Input ~ 0
+ROW1
+Text GLabel 9150 2500 2    50   Input ~ 0
+COL0
+Text GLabel 9150 2600 2    50   Input ~ 0
+COL1
+Text GLabel 9150 2700 2    50   Input ~ 0
+COL2
+Text GLabel 9150 2800 2    50   Input ~ 0
+COL3
+NoConn ~ 9150 2900
+NoConn ~ 9150 3000
+NoConn ~ 9150 3100
+NoConn ~ 9150 3200
+NoConn ~ 9150 3300
+NoConn ~ 9150 3400
+NoConn ~ 9150 3500
+NoConn ~ 9150 1700
+NoConn ~ 9150 1800
+NoConn ~ 9150 1900
+NoConn ~ 9150 2000
+NoConn ~ 9150 2100
+NoConn ~ 9150 2200
 $EndSCHEMATC
