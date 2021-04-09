@@ -1,0 +1,8 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP LM8330
+D LM8330 I2C-Compatible Keypad Controller with GPIO, PWM, and IEC61000 ESD Protection.
+F https://www.ti.com/lit/ds/symlink/lm8330.pdf
+$ENDCMP
+#
+#End Doc Library
