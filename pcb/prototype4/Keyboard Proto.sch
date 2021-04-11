@@ -244,51 +244,49 @@ Text GLabel 5650 5050 2    50   Input ~ 0
 T_IRQ
 Text GLabel 4800 5350 0    50   Input ~ 0
 SCK
-Text GLabel 2000 5650 2    50   Input ~ 0
+Text GLabel 2000 4400 2    50   Input ~ 0
 I2C0_SCL
-Text GLabel 2000 5900 2    50   Input ~ 0
-I2C0_SCL
-Text GLabel 1450 5400 1    50   Input ~ 0
+Text GLabel 2000 4650 2    50   Input ~ 0
+I2C0_SDA
+Text GLabel 1450 4150 1    50   Input ~ 0
 3V3
 $Comp
 L Device:R_Small R4
 U 1 1 5FEC5323
-P 1850 5650
-F 0 "R4" V 1750 5650 50  0000 C CNN
-F 1 "2.2kΩ" V 1950 5650 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 1850 5650 50  0001 C CNN
-F 3 "~" H 1850 5650 50  0001 C CNN
-	1    1850 5650
+P 1850 4400
+F 0 "R4" V 1750 4400 50  0000 C CNN
+F 1 "2.2kΩ" V 1950 4400 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 1850 4400 50  0001 C CNN
+F 3 "~" H 1850 4400 50  0001 C CNN
+	1    1850 4400
 	0    1    1    0   
 $EndComp
 Wire Wire Line
-	2000 5650 1950 5650
+	2000 4400 1950 4400
 $Comp
 L Device:R_Small R3
 U 1 1 5FEC6AE7
-P 1600 5900
-F 0 "R3" V 1500 5900 50  0000 C CNN
-F 1 "2.2kΩ" V 1700 5900 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 1600 5900 50  0001 C CNN
-F 3 "~" H 1600 5900 50  0001 C CNN
-	1    1600 5900
+P 1600 4650
+F 0 "R3" V 1500 4650 50  0000 C CNN
+F 1 "2.2kΩ" V 1700 4650 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 1600 4650 50  0001 C CNN
+F 3 "~" H 1600 4650 50  0001 C CNN
+	1    1600 4650
 	0    1    1    0   
 $EndComp
 Wire Wire Line
-	1700 5900 2000 5900
+	1700 4650 2000 4650
 Wire Wire Line
-	1450 5400 1450 5650
+	1450 4150 1450 4400
 Wire Wire Line
-	1450 5900 1500 5900
+	1450 4650 1500 4650
 Wire Wire Line
-	1750 5650 1450 5650
-Connection ~ 1450 5650
+	1750 4400 1450 4400
+Connection ~ 1450 4400
 Wire Wire Line
-	1450 5650 1450 5900
+	1450 4400 1450 4650
 Wire Notes Line
 	3400 550  3400 8050
-Wire Notes Line
-	3400 4500 500  4500
 Wire Notes Line
 	3400 2500 500  2500
 Wire Notes Line
@@ -303,8 +301,8 @@ Text Notes 5100 3900 0    197  ~ 0
 MCU
 Text Notes 4500 1150 0    118  ~ 0
 Keyboard Matrix
-Text Notes 900  4950 0    118  ~ 0
-I2C pull-up resistors
+Text Notes 1050 3550 0    118  ~ 0
+Pull-up resistors
 Text Notes 7850 900  0    118  ~ 0
 Keyboard control IC
 $Comp
@@ -377,61 +375,14 @@ Text GLabel 4900 7400 0    50   Input ~ 0
 GND
 Text GLabel 4900 7300 0    50   Input ~ 0
 3V3
-Text GLabel 4000 7100 0    50   Input ~ 0
+Text GLabel 4900 7100 0    50   Input ~ 0
 I2C1_SDA
-Text GLabel 4000 7200 0    50   Input ~ 0
+Text GLabel 4900 7200 0    50   Input ~ 0
 I2C1_SCL
 Wire Notes Line
 	3400 6250 7000 6250
 Text Notes 3950 6550 0    118  ~ 0
 Volume Display
-Text GLabel 4300 6750 0    50   Input ~ 0
-3V3
-Wire Wire Line
-	4000 7100 4400 7100
-Wire Wire Line
-	4900 7200 4650 7200
-$Comp
-L Device:R_Small R7
-U 1 1 5FEB56DF
-P 4400 6950
-F 0 "R7" H 4500 7000 50  0000 C CNN
-F 1 "2.2kΩ" H 4550 6900 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 4400 6950 50  0001 C CNN
-F 3 "~" H 4400 6950 50  0001 C CNN
-	1    4400 6950
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R_Small R8
-U 1 1 5FEB5F07
-P 4650 6950
-F 0 "R8" H 4550 7000 50  0000 C CNN
-F 1 "2.2kΩ" H 4500 6900 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 4650 6950 50  0001 C CNN
-F 3 "~" H 4650 6950 50  0001 C CNN
-	1    4650 6950
-	-1   0    0    1   
-$EndComp
-Wire Wire Line
-	4300 6750 4400 6750
-Wire Wire Line
-	4650 6750 4650 6850
-Wire Wire Line
-	4650 7050 4650 7200
-Connection ~ 4650 7200
-Wire Wire Line
-	4650 7200 4000 7200
-Wire Wire Line
-	4400 6750 4400 6850
-Connection ~ 4400 6750
-Wire Wire Line
-	4400 6750 4650 6750
-Wire Wire Line
-	4400 7050 4400 7100
-Connection ~ 4400 7100
-Wire Wire Line
-	4400 7100 4900 7100
 Text Notes 5350 6550 0    79   ~ 0
 (separate I2C)
 Text GLabel 9750 5350 0    50   Input ~ 0
@@ -461,7 +412,7 @@ U 1 1 606FE7E2
 P 8750 2600
 F 0 "U2" H 8725 4056 50  0000 C CNN
 F 1 "ADP5589" H 8725 3965 50  0000 C CNN
-F 2 "" H 8100 4000 50  0001 C CNN
+F 2 "ADP5589:ADP5589" H 8100 4000 50  0001 C CNN
 F 3 "" H 8100 4000 50  0001 C CNN
 	1    8750 2600
 	1    0    0    -1  
@@ -477,9 +428,9 @@ Text GLabel 8300 2650 0    50   Input ~ 0
 KBDINT
 Text GLabel 8300 2050 0    50   Input ~ 0
 RST
-Text GLabel 8300 2350 0    50   Input ~ 0
+Text GLabel 7850 2350 0    50   Input ~ 0
 I2C0_SDA
-Text GLabel 8300 2450 0    50   Input ~ 0
+Text GLabel 7850 2450 0    50   Input ~ 0
 I2C0_SCL
 $Comp
 L power:GND #PWR0101
@@ -501,7 +452,7 @@ Wire Wire Line
 Text GLabel 2000 7000 2    50   Input ~ 0
 I2C1_SCL
 Text GLabel 2000 7250 2    50   Input ~ 0
-I2C1_SCL
+I2C1_SDA
 Text GLabel 1450 6750 1    50   Input ~ 0
 3V3
 $Comp
@@ -565,4 +516,63 @@ NoConn ~ 9150 1900
 NoConn ~ 9150 2000
 NoConn ~ 9150 2100
 NoConn ~ 9150 2200
+Text Notes 1800 4150 0    87   ~ 0
+Keyboard I2C
+Text Notes 1850 6650 0    87   ~ 0
+Volume Disp. I2C
+$Comp
+L Connector:TestPoint TP1
+U 1 1 6074E56B
+P 7950 2350
+F 0 "TP1" H 7750 2600 50  0000 L CNN
+F 1 "TestPoint" H 7550 2500 50  0000 L CNN
+F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 8150 2350 50  0001 C CNN
+F 3 "~" H 8150 2350 50  0001 C CNN
+	1    7950 2350
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:TestPoint TP2
+U 1 1 6074ECE2
+P 7950 2450
+F 0 "TP2" H 8100 2700 50  0000 R CNN
+F 1 "TestPoint" H 8350 2600 50  0000 R CNN
+F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 8150 2450 50  0001 C CNN
+F 3 "~" H 8150 2450 50  0001 C CNN
+	1    7950 2450
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	7850 2350 7950 2350
+Wire Wire Line
+	8300 2350 7950 2350
+Connection ~ 7950 2350
+Wire Wire Line
+	7850 2450 7950 2450
+Wire Wire Line
+	7950 2450 8300 2450
+Connection ~ 7950 2450
+Text GLabel 2000 5600 2    50   Input ~ 0
+KBDINT
+Text GLabel 1450 5350 1    50   Input ~ 0
+3V3
+$Comp
+L Device:R_Small R5
+U 1 1 6072DE79
+P 1850 5600
+F 0 "R5" V 1750 5600 50  0000 C CNN
+F 1 "2.2kΩ" V 1950 5600 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 1850 5600 50  0001 C CNN
+F 3 "~" H 1850 5600 50  0001 C CNN
+	1    1850 5600
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2000 5600 1950 5600
+Wire Wire Line
+	1450 5350 1450 5600
+Wire Wire Line
+	1750 5600 1450 5600
+Text Notes 1800 5350 0    87   ~ 0
+Keyboard INT
 $EndSCHEMATC
