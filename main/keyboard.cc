@@ -11,6 +11,7 @@
 #include <i2clib/operation.h>
 
 #include "gpio_pins.h"
+#include "adp5589_registers.h"
 #include "lm8330_registers.h"
 
 namespace {
