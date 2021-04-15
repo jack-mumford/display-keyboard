@@ -85,3 +85,31 @@ enum class ADPRegister : uint8_t {
   INT_EN             = 0x4E,
 };
 // clang-format on
+
+struct Register_ID {
+  uint8_t MAN : 4;
+  uint8_t REV : 4;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_INT_STATUS {
+  uint8_t Reserved : 2;
+  uint8_t LOGIC2_INT : 1;
+  uint8_t LOGIC1_INT : 1;
+  uint8_t LOCK_INT : 1;
+  uint8_t OVRFLOW_INT : 1;
+  uint8_t GPI_INT : 1;
+  uint8_t EVENT_INT : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_Status {
+  uint8_t LOGIC2_STAT : 1;
+  uint8_t LOGIC1_STAT : 1;
+  uint8_t LOCK_STAT : 1;
+  uint8_t EC : 5;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
