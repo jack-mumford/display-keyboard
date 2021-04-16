@@ -2,6 +2,13 @@
 
 #include <cstdint>
 
+/**
+ * Definitions for the ADP5589 keyboard IC.
+ *
+ * Datasheet:
+ * https://www.analog.com/media/en/technical-documentation/data-sheets/ADP5589.pdf
+ */
+
 // clang-format off
 enum class ADPRegister : uint8_t {
   ID                 = 0x00,
@@ -113,3 +120,67 @@ struct Register_Status {
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
+
+struct Register_FIFO {
+  uint8_t EventState : 1;
+  uint8_t IDENTIFIER : 7;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_UINT8 {
+  uint8_t val;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_UINT8_5_3 {
+  uint8_t Reserved : 5;
+  uint8_t val : 3;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+using Register_GPI_INT_STAT_A = Register_UINT8;
+using Register_GPI_INT_STAT_B = Register_UINT8;
+using Register_GPI_INT_STAT_C = Register_UINT8_5_3;
+
+using Register_RPULL_CONFIG_A = Register_UINT8;
+using Register_RPULL_CONFIG_B = Register_UINT8;
+using Register_RPULL_CONFIG_C = Register_UINT8;
+using Register_RPULL_CONFIG_D = Register_UINT8;
+
+struct Register_GPI_INT_STAT_E {
+  uint8_t Reserved : 2;
+  uint8_t val : 6;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+using Register_GPI_INT_LEVEL_A = Register_UINT8;
+using Register_GPI_INT_LEVEL_B = Register_UINT8;
+using Register_GPI_INT_LEVEL_C = Register_UINT8_5_3;
+
+using Register_GPI_EVENT_EN_A = Register_UINT8;
+using Register_GPI_EVENT_EN_B = Register_UINT8;
+using Register_GPI_EVENT_EN_C = Register_UINT8_5_3;
+
+using Register_GPI_INTERRUPT_EN_A = Register_UINT8;
+using Register_GPI_INTERRUPT_EN_B = Register_UINT8;
+using Register_GPI_INTERRUPT_EN_C = Register_UINT8_5_3;
+
+using Register_DEBOUNCE_DIS_A = Register_UINT8;
+using Register_DEBOUNCE_DIS_B = Register_UINT8;
+using Register_DEBOUNCE_DIS_C = Register_UINT8_5_3;
+
+using Register_GPO_DATA_OUT_A = Register_UINT8;
+using Register_GPO_DATA_OUT_B = Register_UINT8;
+using Register_GPO_DATA_OUT_C = Register_UINT8_5_3;
+
+using Register_GPO_OUT_MODE_A = Register_UINT8;
+using Register_GPO_OUT_MODE_B = Register_UINT8;
+using Register_GPO_OUT_MODE_C = Register_UINT8_5_3;
+
+using Register_GPIO_DIRECTION_A = Register_UINT8;
+using Register_GPIO_DIRECTION_B = Register_UINT8;
+using Register_GPIO_DIRECTION_C = Register_UINT8_5_3;
