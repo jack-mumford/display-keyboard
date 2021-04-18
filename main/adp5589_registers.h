@@ -184,3 +184,62 @@ using Register_GPO_OUT_MODE_C = Register_UINT8_5_3;
 using Register_GPIO_DIRECTION_A = Register_UINT8;
 using Register_GPIO_DIRECTION_B = Register_UINT8;
 using Register_GPIO_DIRECTION_C = Register_UINT8_5_3;
+
+struct Register_UNLOCK {
+  uint8_t UNLOCK_STATE : 1;
+  uint8_t UNLOCK : 7;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+using Register_UNLOCK1 = Register_UNLOCK;
+using Register_UNLOCK2 = Register_UNLOCK;
+
+struct Register_EXT_LOCK_EVENT {
+  uint8_t EXT_LOCK_STATE : 1;
+  uint8_t EXT_LOCK_EVENT : 7;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_UNLOCK_TIMERS {
+  uint8_t INT_MASK_TIMER : 5;
+  uint8_t UNLOCK_TIMER : 3;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_LOCK_CFG {
+  uint8_t Reserved : 7;
+  uint8_t LOCK_EN : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_RESET_EVENT {
+  uint8_t RESET_EVENT_Level : 1;
+  uint8_t RESET_EVENT : 7;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+using Register_RESET1_EVENT_A = Register_RESET_EVENT;
+using Register_RESET1_EVENT_B = Register_RESET_EVENT;
+using Register_RESET1_EVENT_C = Register_RESET_EVENT;
+using Register_RESET2_EVENT_A = Register_RESET_EVENT;
+using Register_RESET2_EVENT_B = Register_RESET_EVENT;
+
+struct Register_RESET2_EVENT_C {
+  uint8_t RESET2_POL : 1;
+  uint8_t RESET1_POL : 1;
+  uint8_t RST_PASSTHRU_EN : 1;
+  uint8_t RESET_TRIGGER_TIME : 3;
+  uint8_t RESET_PULSE_WIDTH : 2;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+using Register_PWM_OFFT_LOW = Register_UINT8;
+using Register_PWM_OFFT_HIGH = Register_UINT8;
+using Register_PWM_ONT_LOW = Register_UINT8;
+using Register_PWM_ONT_HIGH = Register_UINT8;
