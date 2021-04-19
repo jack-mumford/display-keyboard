@@ -243,3 +243,104 @@ using Register_PWM_OFFT_LOW = Register_UINT8;
 using Register_PWM_OFFT_HIGH = Register_UINT8;
 using Register_PWM_ONT_LOW = Register_UINT8;
 using Register_PWM_ONT_HIGH = Register_UINT8;
+
+struct Register_PWM_CFG {
+  uint8_t Reserved : 5;
+  uint8_t PWM_IN_AND : 1;
+  uint8_t PWM_MODE : 1;
+  uint8_t PWM_EN : 3;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_CLOCK_DIV_CFG {
+  uint8_t Reserved : 1;
+  uint8_t CLK_INV : 1;
+  uint8_t CLK_DIV : 5;
+  uint8_t CLK_DIV_EN : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_LOGIC_CFG {
+  uint8_t Reserved : 1;
+  uint8_t LY_INV : 1;
+  uint8_t LC_INV : 1;
+  uint8_t LB_INV : 1;
+  uint8_t LA_INV : 1;
+  uint8_t LOGIC_SEL : 3;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+using Register_LOGIC_1_CFG = Register_LOGIC_CFG;
+using Register_LOGIC_2_CFG = Register_LOGIC_CFG;
+
+struct Register_LOGIC_FF_CFG {
+  uint8_t Reserved : 4;
+  uint8_t FF2_SET : 1;
+  uint8_t FF2_CLR : 1;
+  uint8_t FF1_SET : 1;
+  uint8_t FF1_CLR : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_LOGIC_INT_EVENT_EN {
+  uint8_t Reserved : 2;
+  uint8_t LY2_DBNC_DIS : 1;
+  uint8_t LOGIC2_EVENT_EN : 1;
+  uint8_t LOGIC2_INT_LEVEL : 1;
+  uint8_t LY1_DBNC_DIS : 1;
+  uint8_t LOGIC1_EVENT_EN : 1;
+  uint8_t LOGIC1_INT_LEVEL : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_POLL_TIME_CFG {
+  uint8_t Reserved : 6;
+  uint8_t KEY_POLL_TIME : 2;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+using Register_PIN_CONFIG_A = Register_UINT8;
+using Register_PIN_CONFIG_B = Register_UINT8;
+using Register_PIN_CONFIG_C = Register_UINT8_5_3;
+
+struct Register_PIN_CONFIG_D {
+  uint8_t PULL_SELECT : 1;
+  uint8_t C4_EXTEND_CFG : 1;
+  uint8_t R4_EXTEND_CFG : 1;
+  uint8_t C6_EXTEND_CFG : 1;
+  uint8_t R3_EXTEND_CFG : 2;
+  uint8_t C9_EXTEND_CFG : 1;
+  uint8_t R0_EXTEND_CFG : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_GENERAL_CFG_B {
+  uint8_t OSC_EN : 1;
+  uint8_t CORE_FREQ : 2;
+  uint8_t LCK_TRK_LOGIC : 1;
+  uint8_t LCK_TRK_GPI : 1;
+  uint8_t Unused : 1;
+  uint8_t INT_CFG : 1;
+  uint8_t RST_CFG : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_INT_EN {
+  uint8_t Reserved : 2;
+  uint8_t LOGIC2_IEN : 1;
+  uint8_t LOGIC1_IEN : 1;
+  uint8_t LOCK_IEN : 1;
+  uint8_t OVRFLOW_IEN : 1;
+  uint8_t GPI_IEN : 1;
+  uint8_t EVENT_IEN : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
