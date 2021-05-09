@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name DT280QV10-CT)(type Legacy)(uri ${KIPRJMOD}/libraries/DT280QV10-CT.lib)(options "")(descr ""))
+)
