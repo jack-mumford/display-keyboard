@@ -60,7 +60,7 @@ void VolumeTask::Run() {
     }
     volume_display_.SetVolume(vol);
 
-    if (led_controller) {
+    if (false && led_controller) {
       uint8_t color_val = (vol * 255) / 100;
       constexpr uint8_t intensity = 2 << 3;
       switch (color_idx % 3) {

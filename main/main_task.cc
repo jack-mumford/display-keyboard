@@ -179,7 +179,10 @@ esp_err_t MainTask::Initialize() {
     return err;
 
   // TODO: Fail on error.
-  ESP_ERROR_CHECK_WITHOUT_ABORT(KeyboardTask::Start());
+  if (KeyboardTask::Start() == ESP_OK)
+    led_controller_.SetRGBLED(0, 255, 0);
+  else
+    led_controller_.SetRGBLED(255, 0, 0);
 
 #if 0
   // Just for testing.

@@ -8,18 +8,16 @@
 #include <class/hid/hid.h>
 #include <esp_err.h>
 #include <esp_log.h>
+#include <esp_task_wdt.h>
 #include <i2clib/operation.h>
 
 #include "adp5589_registers.h"
 #include "gpio_pins.h"
-#include "lm8330_registers.h"
 
 namespace {
 constexpr char TAG[] = "Keyboard";
-constexpr uint8_t kSlaveAddress = 0x44;  // I2C address of LM8330 IC.
+constexpr uint8_t kSlaveAddress = 0x34;  // I2C address of ADP5589 IC.
 constexpr i2c::Address::Size kI2CAddressSize = i2c::Address::Size::bit7;
-constexpr uint8_t k12msec = 0x80;
-constexpr uint8_t kInvalidEventCode = 0x7F;
 }  // namespace
 
 Keyboard::Keyboard(i2c::Master i2c_master)
@@ -29,6 +27,9 @@ Keyboard::~Keyboard() = default;
 
 // static
 esp_err_t Keyboard::Reset() {
+#if 1
+  return ESP_OK;
+#else
   constexpr gpio_config_t reset_pin_config = {
       .pin_bit_mask = (1ULL << kKeyboardResetGPIO),
       .mode = GPIO_MODE_OUTPUT,
@@ -50,34 +51,46 @@ esp_err_t Keyboard::Reset() {
   vTaskDelay(pdMS_TO_TICKS(100));
 
   return ESP_OK;
+#endif
 }
 
 esp_err_t Keyboard::Initialize() {
   ESP_LOGD(TAG, "Initializing keyboard");
 
 #if 0
-  for (int i = 1; i < 0x20; i++) {
-    taskYIELD();
+  return ESP_OK;
+#endif
+
+#if 1
+  Register_GENERAL_CFG_B config;
+  return ReadByte(ADPRegister::GENERAL_CFG_B, &config);
+#endif
+
+#if 0
+  for (int i = 1; i < 128; i++) {
     if (i2c_master_.Ping(i, i2c::Address::Size::bit7)) {
       ESP_LOGW(TAG, "Echo from 0x%x", i);
       return ESP_OK;
     }
+    vTaskDelay(pdMS_TO_TICKS(1));
   }
+  return ESP_FAIL;
 #endif
 
-  esp_err_t err = WriteByte(Register::KBDSETTLE, k12msec);
+#if 0
+  esp_err_t err = WriteByte(ADPRegister::KBDSETTLE, k12msec);
   if (err != ESP_OK)
     return err;
-  err = WriteByte(Register::KBDBOUNCE, k12msec);
+  err = WriteByte(ADPRegister::KBDBOUNCE, k12msec);
   if (err != ESP_OK)
     return err;
-  err = WriteByte(Register::KBDSIZE, Register_KBDSIZE{
+  err = WriteByte(ADPRegister::KBDSIZE, Register_KBDSIZE{
                                          .ROWSIZE = 8,
                                          .COLSIZE = 8,
                                      });
   if (err != ESP_OK)
     return err;
-  err = WriteWord(Register::KBDDEDCFG0, Register_KBDDEDCFG{
+  err = WriteWord(ADPRegister::KBDDEDCFG0, Register_KBDDEDCFG{
                                             .KPX7 = 1,
                                             .KPX6 = 1,
                                             .KPX5 = 1,
@@ -97,7 +110,7 @@ esp_err_t Keyboard::Initialize() {
                                         });
   if (err != ESP_OK)
     return err;
-  err = WriteByte(Register::IOCFG, Register_IOCFG{
+  err = WriteByte(ADPRegister::IOCFG, Register_IOCFG{
                                        .Reserved1 = 0,
                                        .GPIOSEL = 1,
                                        .Reserved2 = 0,
@@ -105,7 +118,7 @@ esp_err_t Keyboard::Initialize() {
                                    });
   if (err != ESP_OK)
     return err;
-  err = WriteWord(Register::IOPC0, Register_IOCFG{
+  err = WriteWord(ADPRegister::IOPC0, Register_IOCFG{
                                        .Reserved1 = 0,
                                        .GPIOSEL = 0,
                                        .Reserved2 = 0,
@@ -113,7 +126,7 @@ esp_err_t Keyboard::Initialize() {
                                    });
   if (err != ESP_OK)
     return err;
-  err = WriteWord(Register::IOPC1, Register_IOPC1{
+  err = WriteWord(ADPRegister::IOPC1, Register_IOPC1{
                                        .KPY7PR = Pull::Down,
                                        .KPY6PR = Pull::Down,
                                        .KPY5PR = Pull::Down,
@@ -125,7 +138,7 @@ esp_err_t Keyboard::Initialize() {
                                    });
   if (err != ESP_OK)
     return err;
-  err = WriteByte(Register::KBDIC, Register_KBDIC{
+  err = WriteByte(ADPRegister::KBDIC, Register_KBDIC{
                                        .SFOFF = false,
                                        .Reserved = 0,
                                        .EVTIC = true,
@@ -133,7 +146,7 @@ esp_err_t Keyboard::Initialize() {
                                    });
   if (err != ESP_OK)
     return err;
-  err = WriteByte(Register::KBDMSK, Register_KBDMSK{
+  err = WriteByte(ADPRegister::KBDMSK, Register_KBDMSK{
                                         .Reserved = 0,
                                         .MSKELINT = 0,
                                         .MSKEINT = 0,
@@ -142,7 +155,7 @@ esp_err_t Keyboard::Initialize() {
                                     });
   if (err != ESP_OK)
     return err;
-  err = WriteByte(Register::CLKEN, Register_CLKEN{
+  err = WriteByte(ADPRegister::CLKEN, Register_CLKEN{
                                        .Reserved1 = 0,
                                        .TIMEN = false,
                                        .Reserved2 = 0,
@@ -154,6 +167,7 @@ esp_err_t Keyboard::Initialize() {
 
   ESP_LOGD(TAG, "keyboard successfully initialized");
   return ESP_OK;
+#endif
 }
 
 esp_err_t Keyboard::ReportHIDEvents() {
@@ -165,7 +179,7 @@ esp_err_t Keyboard::HandleEvents() {
   return ESP_OK;
 }
 
-esp_err_t Keyboard::ReadByte(Register reg, void* value) {
+esp_err_t Keyboard::ReadByte(ADPRegister reg, void* value) {
   return i2c_master_.ReadRegister(kSlaveAddress, kI2CAddressSize,
                                   static_cast<uint8_t>(reg),
                                   reinterpret_cast<uint8_t*>(value))
@@ -173,14 +187,14 @@ esp_err_t Keyboard::ReadByte(Register reg, void* value) {
              : ESP_FAIL;
 }
 
-esp_err_t Keyboard::WriteByte(Register reg, uint8_t value) {
+esp_err_t Keyboard::WriteByte(ADPRegister reg, uint8_t value) {
   return i2c_master_.WriteRegister(kSlaveAddress, kI2CAddressSize,
                                    static_cast<uint8_t>(reg), value)
              ? ESP_OK
              : ESP_FAIL;
 }
 
-esp_err_t Keyboard::WriteWord(Register reg, uint16_t value) {
+esp_err_t Keyboard::WriteWord(ADPRegister reg, uint16_t value) {
   i2c::Operation op =
       i2c_master_.CreateWriteOp(kSlaveAddress, kI2CAddressSize,
                                 static_cast<uint8_t>(reg), "Kbd::WriteWord");
