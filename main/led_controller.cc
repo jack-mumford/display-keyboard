@@ -54,7 +54,7 @@ LEDController* LEDController::GetForTesting() {
 esp_err_t LEDController::Initialize() {
   esp_err_t err;
 
-  err = rgbled_.Initlialize();
+  err = rgbled_.Initialize();
   ESP_ERROR_CHECK_WITHOUT_ABORT(err);
   if (err == ESP_OK) {
     ESP_ERROR_CHECK_WITHOUT_ABORT(rgbled_.Set(APA102::Color(0, 255, 0)));

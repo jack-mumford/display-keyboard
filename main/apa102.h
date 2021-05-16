@@ -40,7 +40,7 @@ class APA102 {
          spi_host_device_t spi_host);
   ~APA102();
 
-  esp_err_t Initlialize();
+  esp_err_t Initialize();
   esp_err_t Set(Color color);
 
  private:

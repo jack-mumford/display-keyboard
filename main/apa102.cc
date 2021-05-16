@@ -39,7 +39,7 @@ APA102::~APA102() {
     heap_caps_free(led_frame_);
 }
 
-esp_err_t APA102::Initlialize() {
+esp_err_t APA102::Initialize() {
   static_assert(sizeof(LEDFrames) == 12);
   led_frame_ = heap_caps_malloc(sizeof(LEDFrames), MALLOC_CAP_DMA);
   LEDFrames* frame = static_cast<LEDFrames*>(led_frame_);
