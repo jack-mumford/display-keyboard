@@ -42,12 +42,14 @@ APA102::~APA102() {
 esp_err_t APA102::Initialize() {
   static_assert(sizeof(LEDFrames) == 12);
   led_frame_ = heap_caps_malloc(sizeof(LEDFrames), MALLOC_CAP_DMA);
+  if (!led_frame_)
+    return ESP_ERR_NO_MEM;
   LEDFrames* frame = static_cast<LEDFrames*>(led_frame_);
   frame->start_frame = 0x0;
   frame->end_frame = 0xffffffff;
 
   const gpio_config_t config = {
-      .pin_bit_mask = (1UL << sclk_gpio_) | (1UL << mosi_gpio_),
+      .pin_bit_mask = (1ULL << sclk_gpio_) | (1ULL << mosi_gpio_),
       .mode = GPIO_MODE_OUTPUT,
       .pull_up_en = GPIO_PULLUP_DISABLE,
       .pull_down_en = GPIO_PULLDOWN_DISABLE,

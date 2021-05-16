@@ -62,7 +62,7 @@ esp_err_t LEDController::Initialize() {
 
 #if (BOARD_FEATHERS2 == 1)
   const gpio_config_t config = {
-      .pin_bit_mask = (1UL << activity_gpio_),
+      .pin_bit_mask = (1ULL << activity_gpio_),
       .mode = GPIO_MODE_OUTPUT,
       .pull_up_en = GPIO_PULLUP_DISABLE,
       .pull_down_en = GPIO_PULLDOWN_DISABLE,
