@@ -21,18 +21,6 @@ constexpr char TAG[] = "APA102";
 
 }  // namespace
 
-APA102::Color::Color(uint8_t red,
-                     uint8_t green,
-                     uint8_t blue,
-                     uint8_t intensity)
-    : unused(0b111),
-      intensity(intensity),
-      // APA102 is supposed to be 8 bits, but seems to only be five!
-      // hacking in shift for the time being.
-      blue(blue >> 3),
-      green(green >> 3),
-      red(red >> 3) {}
-
 APA102::APA102(gpio_num_t sclk_gpio,
                gpio_num_t mosi_gpio,
                spi_host_device_t spi_host)

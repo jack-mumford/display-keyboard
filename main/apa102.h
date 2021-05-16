@@ -15,14 +15,24 @@
 class APA102 {
  public:
   struct Color {
+    constexpr Color() : Color(0, 0, 0) {}
+    constexpr Color(uint8_t red,
+                    uint8_t green,
+                    uint8_t blue,
+                    uint8_t intensity = 31)
+        : unused(0b111),
+          intensity(intensity),
+          // APA102 is supposed to be 8 bits, but seems to only be five!
+          // Hacking in shift for the time being.
+          blue(blue >> 3),
+          green(green >> 3),
+          red(red >> 3) {}
+
     uint32_t unused : 3;
     uint32_t intensity : 5;
     uint32_t blue : 8;
     uint32_t green : 8;
     uint32_t red : 8;
-
-    Color() : Color(0, 0, 0) {}
-    Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t intensity = 31);
   };
 
   APA102(gpio_num_t sclk_gpio,
