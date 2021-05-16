@@ -96,6 +96,7 @@ esp_err_t MainTask::InitializSNTP() {
   return ESP_OK;
 }
 
+// static
 esp_err_t MainTask::InitializeI2C() {
   // Used for Keyboard.
   constexpr i2c::Master::InitParams i2c_0_config = {

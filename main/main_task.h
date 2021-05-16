@@ -25,6 +25,7 @@ class MainTask {
 
  private:
   static void IRAM_ATTR TaskFunc(void* arg);
+  static esp_err_t InitializeI2C();
 
   MainTask();
   ~MainTask();
@@ -32,7 +33,6 @@ class MainTask {
   void UpdateSpotify();
   esp_err_t SetTimezone();
   esp_err_t InitializSNTP();
-  esp_err_t InitializeI2C();
   esp_err_t Initialize();
   void IRAM_ATTR Run();
 
