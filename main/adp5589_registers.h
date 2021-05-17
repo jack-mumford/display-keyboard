@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+namespace adp5589 {
+
 /**
  * Definitions for the ADP5589 keyboard IC.
  *
@@ -10,7 +12,7 @@
  */
 
 // clang-format off
-enum class ADPRegister : uint8_t {
+enum class Register : uint8_t {
   ID                 = 0x00,
   INT_STATUS         = 0x01,
   Status             = 0x02,
@@ -344,3 +346,5 @@ struct Register_INT_EN {
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
+
+}  // namespace adp5589

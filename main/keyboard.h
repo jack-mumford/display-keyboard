@@ -5,7 +5,9 @@
 #include <esp_err.h>
 #include <i2clib/master.h>
 
-enum class ADPRegister : uint8_t;
+namespace adp5589 {
+enum class Register : uint8_t;
+}
 
 class Keyboard {
  public:
@@ -33,9 +35,8 @@ class Keyboard {
    * @return esp_err_t
    */
   esp_err_t ReportHIDEvents();
-  esp_err_t WriteByte(ADPRegister reg, uint8_t value);
-  esp_err_t WriteWord(ADPRegister reg, uint16_t value);
-  esp_err_t ReadByte(ADPRegister reg, void* value);
+  esp_err_t WriteByte(adp5589::Register reg, uint8_t value);
+  esp_err_t ReadByte(adp5589::Register reg, void* value);
 
   i2c::Master i2c_master_;
 
