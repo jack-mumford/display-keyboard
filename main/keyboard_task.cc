@@ -52,6 +52,10 @@ esp_err_t KeyboardTask::Initialize() {
   if (err != ESP_OK)
     return err;
 
+  err = keyboard_.Reset();
+  if (err != ESP_OK)
+    return err;
+
   err = keyboard_.Initialize();
   if (err != ESP_OK)
     return err;

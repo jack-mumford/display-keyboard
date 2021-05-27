@@ -104,11 +104,65 @@ struct Register_ID {
 
 struct Register_INT_STATUS {
   uint8_t Reserved : 2;
+  /**
+   * Logic 2 interrupt condition.
+   *
+   * 0 = no interrupt.
+   * 1 = interrupt due to a general Logic 2 condition. Write a 1 to this bit to
+   * clear it.
+   */
   uint8_t LOGIC2_INT : 1;
+  /**
+   * Logic 1 interrupt condition..
+   *
+   * 0 = no interrupt.
+   * 1 = interrupt due to a general Logic 1 condition. Write a 1 to this bit to
+   * clear it.
+   */
   uint8_t LOGIC1_INT : 1;
+  /**
+   * 0 = no interrupt.
+   * 1 = interrupt due to a lock/unlock condition.
+   *
+   * The user can read LOCK_STAT (0x02[5]) to determine if LOCK_INT is due to a
+   * lock or unlock event. If LOCK_STAT = 1, LOCK_INT is due to a lock event. If
+   * LOCK_STAT = 0, LOCK_INT is due to an unlock event. Write a 1 to this bit to
+   * clear it. If lock mode is enabled via the software bit LOCK_EN (0x37[0]), a
+   * LOCK_INT is not generated because the processor knows it just enabled lock
+   * mode. If lock mode is disabled (while locked) via the software bit LOCK_EN,
+   * a LOCK_INT is not generated because the processor knows it just disabled
+   * lock mode
+   */
   uint8_t LOCK_INT : 1;
+
+  /**
+   *
+   * Overflow interrupt condition.
+   *
+   * 0 = no interrupt.
+   * 1 = interrupt due to an overflow condition.
+   *
+   * Write a 1 to this bit to clear it.
+   */
   uint8_t OVRFLOW_INT : 1;
+
+  /**
+   *
+   * 0 = no interrupt.
+   * 1 = interrupt due to a general GPI condition.
+   *
+   * This bit is not set by a GPI that has been configured to update the FIFO
+   * and event count. Write a 1 to this bit to clear it. This bit cannot be
+   * cleared until all GPI_x_INT bits are cleared.
+   */
   uint8_t GPI_INT : 1;
+
+  /**
+   * 0 = no interrupt.
+   * 1 = interrupt due to key event (press/release), GPI event (GPI programmed
+   * for FIFO updates), or Logic 1/Logic 2 event (programmed for FIFO
+   * updates). Write a 1 to this bit to clear it.
+   */
   uint8_t EVENT_INT : 1;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
@@ -324,12 +378,52 @@ struct Register_PIN_CONFIG_D {
 };
 
 struct Register_GENERAL_CFG_B {
+  /**
+   * Enable internal 1 MHz oscillator.
+   *
+   * 0 = disabled
+   * 1 = enabled.
+   */
   uint8_t OSC_EN : 1;
+
+  /**
+   * Sets the input clock frequency fed from the base 1 MHz oscillator
+   * to the digital core. Slower frequencies result in less IDD. However,
+   * key and GPI scan times increase.
+   *
+   * 0b00 = 50 kHz.
+   * 0b00 = 100 kHz.
+   * 0b00 = 200 kHz.
+   * 0b00 = 500 kHz
+   */
   uint8_t CORE_FREQ : 2;
+
+  // 0 = allow logic outputs (programmed for FIFO updates) to be tracked on
+  // the FIFO if the keypad is locked.
+  // 1 = do not track.
   uint8_t LCK_TRK_LOGIC : 1;
+
+  // 0 = allow GPIs (programmed for FIFO updates) to be tracked on the FIFO
+  // if the keypad is locked.
+  // 1 = do not track.
   uint8_t LCK_TRK_GPI : 1;
   uint8_t Unused : 1;
+
+  /**
+   * Configure the behavior of the INT pin if the user tries to clear it while
+   * an interrupt is pending.
+   *
+   * 0 = INT pin remains asserted if an interrupt is pending.
+   * 1 = INT pin deasserts for 50 µs and reasserts if an interrupt is pending.
+   */
   uint8_t INT_CFG : 1;
+
+  /**
+   * Configure the response ADP5589 has to the RST pin.
+   *
+   * 0 = ADP5589 resets if RST is low.
+   * 1 = ADP5589 does not reset if RST is low.
+   */
   uint8_t RST_CFG : 1;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
@@ -337,11 +431,44 @@ struct Register_GENERAL_CFG_B {
 
 struct Register_INT_EN {
   uint8_t Reserved : 2;
+  /**
+   * Logic 2 interrupt.
+   *
+   * 0 = Disabled.
+   * 1 = Assert the INT pin if LOGIC2_INT is set.
+   */
   uint8_t LOGIC2_IEN : 1;
+
+  /**
+   * Logic 1 interrupt.
+   *
+   * 0 = Disabled.
+   * 1 = Assert the INT pin if LOGIC1_INT is set.
+   */
   uint8_t LOGIC1_IEN : 1;
+
+  /**
+   * 0 = lock interrupt is disabled.
+   * 1 = assert the INT pin if LOCK_INT is set.
+   */
   uint8_t LOCK_IEN : 1;
+
+  /**
+   * 0 = overflow interrupt is disabled.
+   * 1 = assert the INT pin if OVRFLOW_INT is set.
+   */
   uint8_t OVRFLOW_IEN : 1;
+
+  /**
+   * 0 = GPI interrupt is disabled.
+   * 1 = assert the INT pin if GPI_INT is set.
+   */
   uint8_t GPI_IEN : 1;
+
+  /**
+   * 0 = event interrupt is disabled.
+   * 1 = assert the INT pin if EVENT_INT is set.
+   */
   uint8_t EVENT_IEN : 1;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }

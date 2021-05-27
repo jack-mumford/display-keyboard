@@ -27,21 +27,40 @@ Keyboard::Keyboard(i2c::Master i2c_master)
 
 Keyboard::~Keyboard() = default;
 
-// static
 esp_err_t Keyboard::Reset() {
+  ESP_LOGD(TAG, "Resetting keyboard");
+
+  Register_ID reg_id;
+  esp_err_t err = ReadByte(Register::GENERAL_CFG_B, &reg_id);
+  if (err != ESP_OK)
+    return err;
+  ESP_LOGI(TAG, "Keyboard mfr: %u, rev: %u", reg_id.MAN, reg_id.REV);
+
   return ESP_OK;
 }
 
 esp_err_t Keyboard::Initialize() {
   ESP_LOGD(TAG, "Initializing keyboard");
 
+  esp_err_t err;
+
   Register_GENERAL_CFG_B general_config;
-  esp_err_t err = ReadByte(Register::GENERAL_CFG_B, &general_config);
+  err = ReadByte(Register::GENERAL_CFG_B, &general_config);
   if (err != ESP_OK)
     return err;
   general_config.LCK_TRK_LOGIC = false;
   general_config.LCK_TRK_GPI = false;
   err = WriteByte(Register::GENERAL_CFG_B, general_config);
+  if (err != ESP_OK)
+    return err;
+
+  Register_INT_EN int_en;
+  int_en.LOGIC2_IEN = 0;
+  int_en.LOGIC1_IEN = 0;
+  int_en.EVENT_IEN = 1;
+  int_en.GPI_IEN = 0;
+  int_en.OVRFLOW_IEN = 0;
+  err = WriteByte(Register::INT_EN, int_en);
   if (err != ESP_OK)
     return err;
 

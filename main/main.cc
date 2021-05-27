@@ -8,6 +8,7 @@
 #include <sdkconfig.h>
 
 #include "gpio_pins.h"
+#include "keyboard.h"
 #include "main_task.h"
 
 namespace {
@@ -53,5 +54,14 @@ extern "C" void app_main(void) {
   ESP_LOGI(TAG, "Keyboard app!");
   LogHardwareInfo();
 
+#if 1
+  MainTask::InitializeI2C();
+  Keyboard keyboard{i2c::Master(kKeyboardPort)};
+  while (true) {
+    ESP_ERROR_CHECK_WITHOUT_ABORT(keyboard.Initialize());
+    vTaskDelay(pdMS_TO_TICKS(40));
+  }
+#else
   ESP_ERROR_CHECK(MainTask::Start());
+#endif
 }

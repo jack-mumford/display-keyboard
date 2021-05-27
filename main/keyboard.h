@@ -11,12 +11,11 @@ enum class Register : uint8_t;
 
 class Keyboard {
  public:
-  static esp_err_t Reset();
-
   Keyboard(i2c::Master i2c_master);
   ~Keyboard();
 
   esp_err_t Initialize();
+  esp_err_t Reset();
 
   /**
    * Handle any keyboard events.

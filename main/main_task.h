@@ -25,8 +25,11 @@ class MainTask {
 
  private:
   static void IRAM_ATTR TaskFunc(void* arg);
+
+ public:
   static esp_err_t InitializeI2C();
 
+ private:
   MainTask();
   ~MainTask();
 
