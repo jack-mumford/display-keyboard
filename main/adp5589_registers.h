@@ -96,8 +96,8 @@ enum class Register : uint8_t {
 // clang-format on
 
 struct Register_ID {
-  uint8_t MAN : 4;
-  uint8_t REV : 4;
+  uint8_t MAN : 4; // Manufacturer.
+  uint8_t REV : 4; // Hardware revision.
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
@@ -169,16 +169,59 @@ struct Register_INT_STATUS {
 };
 
 struct Register_Status {
+  /**
+   * 0 = output from Logic Block 2. (LY2) is low.
+   * 1 = output from Logic Block 2. (LY2) is high.
+   */
   uint8_t LOGIC2_STAT : 1;
+
+  /**
+   * 0 = output from Logic Block 1 (LY1) is low.
+   * 1 = output from Logic Block 1 (LY1) is high.
+   */
   uint8_t LOGIC1_STAT : 1;
+
+  /**
+   * 0 = unlocked.
+   * 1 = locked.
+   */
   uint8_t LOCK_STAT : 1;
+
+  /**
+   * Event count value. Indicates how many events are currently stored on the
+   * FIFO.
+   */
   uint8_t EC : 5;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
 
+/**
+ * FIFO1 - FIFO16.
+ */
 struct Register_FIFO {
-  uint8_t EventState : 1;
+  /**
+   * The seven lower bits of each FIFO location contain the event identifier,
+   * which can be decoded to reveal the event recorded. Table 11 outlines each
+   * event number, what it represents, and the I/O pins associated with it. Bit
+   * 7 is the Event 1 state.
+   */
+  uint8_t Event_State : 1;
+
+  /**
+   * This bit represents the state of the event that is recorded in
+   * EVENT1_IDENTIFIER[6:0].
+   *
+   * For key events (Event 1 to Event 96).
+   * 1 = key is pressed.
+   * 0 = key is released.
+   *
+   * For GPI and logic events (Event 97 to Event 117).
+   * 1 = GPI/logic is active.
+   * 0 = GPI/logic is inactive.
+   *
+   * Active and inactive states are programmable.
+   */
   uint8_t IDENTIFIER : 7;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
@@ -242,7 +285,23 @@ using Register_GPIO_DIRECTION_B = Register_UINT8;
 using Register_GPIO_DIRECTION_C = Register_UINT8_5_3;
 
 struct Register_UNLOCK {
+  /**
+   * Defines which state the first unlock event should be.
+   *
+   * For key events:
+   * 0 = not applicable; releases not used for unlock.
+   * 1 = press is used as unlock event.
+   *
+   * For GPIs and logic outputs configured for FIFO updates:
+   * 0 = inactive event used as reset condition.
+   * 1 = active event used as reset condition.
+   */
   uint8_t UNLOCK_STATE : 1;
+
+  /**
+   * Defines the first event that must be detected to unlock the keypad after
+   * LOCK_EN has been set.
+   */
   uint8_t UNLOCK : 7;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
@@ -252,14 +311,60 @@ using Register_UNLOCK1 = Register_UNLOCK;
 using Register_UNLOCK2 = Register_UNLOCK;
 
 struct Register_EXT_LOCK_EVENT {
+  /**
+   * Defines which state the lock event should be.
+   *
+   * For key events:
+   * 0 = not applicable; releases not used for unlock.
+   * 1 = press is used as unlock event.
+   *
+   * For GPIs and logic outputs configured for FIFO updates:
+   * 0 = inactive event used as reset condition.
+   * 1 = active event used as reset condition.
+   */
   uint8_t EXT_LOCK_STATE : 1;
+
+  /**
+   * Defines an event that can lock the keypad.
+   *
+   * When this event is detected, LOCK_INT is set.
+   */
   uint8_t EXT_LOCK_EVENT : 7;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
 
 struct Register_UNLOCK_TIMERS {
+  /**
+   * If the keypad is locked and this timer is set, any key event (or GPI/logic
+   * event programmed to FIFO update) is allowed to generate an EVENT_INT
+   * interrupt. This timer then begins counting, and no further events generate
+   * an interrupt until this timer has expired (or both unlock events have
+   * occurred).
+   *
+   * 0b00000 = disabled.
+   * 0b00001 = 1 sec.
+   * 0b00010 = 2 sec.
+   * 0b11110 = 30 sec.
+   * 0b11111 = 31 sec.
+   */
   uint8_t INT_MASK_TIMER : 5;
+
+  /**
+   * Defines the time in which the second unlock event must occur after the
+   * first unlock event has occurred. If the second unlock event does not occur
+   * within this time (or any other event occurs), the keypad goes back to full
+   * lock mode.
+   *
+   * 0b000 = disabled.
+   * 0b001 = 1 sec.
+   * 0b010 = 2 sec.
+   * 0b011 = 3 sec.
+   * 0b100 = 4 sec.
+   * 0b101 = 5 sec.
+   * 0b110 = 6 sec.
+   * 0b111 = 7 sec.
+   */
   uint8_t UNLOCK_TIMER : 3;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
@@ -267,13 +372,36 @@ struct Register_UNLOCK_TIMERS {
 
 struct Register_LOCK_CFG {
   uint8_t Reserved : 7;
+  /**
+   * Enable the lock function.
+   */
   uint8_t LOCK_EN : 1;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
 
 struct Register_RESET_EVENT {
+  /**
+   * Defines which level the first reset event should be.
+   *
+   * For key events:
+   * 0 = not applicable; releases not used for reset generation.
+   * 1 = press is used as reset event.
+   *
+   * For GPIs and logic outputs configured for FIFO updates:
+   * 0 = inactive event used as reset condition.
+   * 1 = active event used as reset condition.
+   */
   uint8_t RESET_EVENT_Level : 1;
+
+  /**
+   * Defines an event that can be used to generate the RESET1 signal.
+   * Up to three events can be defined for generating the RESET1 signal, using
+   * RESET1_EVENT_A[6:0], RESET1_EVENT_B[6:0], and RESET1_EVENT_C[6:0].
+   * If one of the registers is 0, that register is not used for reset
+   * generation. All reset events must be detected at the same time to trigger
+   * the reset.
+   */
   uint8_t RESET_EVENT : 7;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
@@ -286,10 +414,55 @@ using Register_RESET2_EVENT_A = Register_RESET_EVENT;
 using Register_RESET2_EVENT_B = Register_RESET_EVENT;
 
 struct Register_RESET2_EVENT_C {
+  /**
+   * Sets the polarity of RESET2.
+   *
+   * 0 = RESET2 is active low.
+   * 1 = RESET2 is active high.
+   */
   uint8_t RESET2_POL : 1;
+
+  /**
+   * Sets the polarity of RESET1.
+   *
+   * 0 = RESET2 is active low.
+   * 1 = RESET2 is active high.
+   */
   uint8_t RESET1_POL : 1;
+
+  /**
+   * Allows the RST pin to override (OR with) the RESET1 signal.
+   * Function not applicable to RESET2.
+   */
   uint8_t RST_PASSTHRU_EN : 1;
+
+  /**
+   * Defines the length of time that the reset events must be active before a
+   * reset signal is generated.
+   *
+   * All events must be active at the same time for the same duration. Parameter
+   * common to both RESET1 and RESET2.
+   *
+   * 0b000 = immediate.
+   * 0b001 = 1.0 sec.
+   * 0b010 = 1.5 sec.
+   * 0b011 = 2.0 sec.
+   * 0b100 = 2.5 sec.
+   * 0b101 = 3.0 sec.
+   * 0b110 = 3.5 sec.
+   * 0b111 = 4.0 sec.
+   */
   uint8_t RESET_TRIGGER_TIME : 3;
+
+  /**
+   * Defines the pulse width of the reset signals.
+   * Parameter common to both RESET1 and RESET2.
+   *
+   * 0b00 = 500 µs.
+   * 0b01 = 1 ms.
+   * 0b10 = 2 ms.
+   * 0b11 = 10 ms.
+   */
   uint8_t RESET_PULSE_WIDTH : 2;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
@@ -302,8 +475,27 @@ using Register_PWM_ONT_HIGH = Register_UINT8;
 
 struct Register_PWM_CFG {
   uint8_t Reserved : 5;
+
+  /**
+   * AND the internally generated PWM signal with an externally supplied PWM
+   * signal (C6).
+   */
   uint8_t PWM_IN_AND : 1;
+
+  /**
+   * Defines PWM mode.
+   *
+   * 0 = continuous.
+   * 1 = one shot.
+   *
+   * If a one-shot is performed, the PWM_EN bit is automatically cleared.
+   * If a second one-shot must be performed, the user must set PWM_EN again
+   **/
   uint8_t PWM_MODE : 1;
+
+  /**
+   * Enable PWM generator.
+   */
   uint8_t PWM_EN : 3;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
@@ -311,8 +503,27 @@ struct Register_PWM_CFG {
 
 struct Register_CLOCK_DIV_CFG {
   uint8_t Reserved : 1;
+
+  /**
+   * Inverts the divided down clock signal.
+   */
   uint8_t CLK_INV : 1;
+
+  /**
+   * Defines the divide down scale of the externally supplied clock.
+   *
+   * 0b00000 = divide by 1 (pass-through).
+   * 0b00001 = divide by 2.
+   * 0b00010 = divide by 3.
+   * 0b00011 = divide by 4.
+   * 0b11111 = divide by 32.
+   */
   uint8_t CLK_DIV : 5;
+
+  /**
+   * Enables the clock divider circuit to divide down the externally supplied
+   * clock signal.
+   */
   uint8_t CLK_DIV_EN : 1;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
@@ -320,10 +531,42 @@ struct Register_CLOCK_DIV_CFG {
 
 struct Register_LOGIC_CFG {
   uint8_t Reserved : 1;
+  /**
+   * 0 = LYn output not inverted before passing into Logic Block n.
+   * 1 = inverts output LYn from Logic Block n.
+   */
   uint8_t LY_INV : 1;
+
+  /**
+   * 0 = LCn input not inverted before passing into Logic Block n.
+   * 1 = inverts input LCn before passing it into Logic Block n.
+   */
   uint8_t LC_INV : 1;
+
+  /**
+   * 0 = LBn input not inverted before passing into Logic Block n.
+   * 1 = inverts input LBn before passing it into Logic Block n.
+   */
   uint8_t LB_INV : 1;
+
+  /**
+   * 0 = LAn input not inverted before passing into Logic Block n.
+   * 1 = inverts input LAn before passing it into Logic Block n.
+   */
   uint8_t LA_INV : 1;
+
+  /**
+   * Configures the digital mux for Logic Block 1.
+   *
+   * 0b000 = off/disable.
+   * 0b001 = AND1.
+   * 0b010 = OR1.
+   * 0b011 = XOR1.
+   * 0b100 = FF1.
+   * 0b101 = IN_LA1.
+   * 0b110 = IN_LB1.
+   * 0b111 = IN_LC1.
+   */
   uint8_t LOGIC_SEL : 3;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
@@ -334,9 +577,29 @@ using Register_LOGIC_2_CFG = Register_LOGIC_CFG;
 
 struct Register_LOGIC_FF_CFG {
   uint8_t Reserved : 4;
+
+  /**
+   * 0 = FF2 not set in Logic Block 2.
+   * 1 = set FF2 in Logic Block 2.
+   */
   uint8_t FF2_SET : 1;
+
+  /**
+   * 0 = FF2 not cleared in Logic Block 2.
+   * 1 = clear FF2 in Logic Block 2.
+   */
   uint8_t FF2_CLR : 1;
+
+  /**
+   * 0 = FF1 not set in Logic Block 1.
+   * 1 = set FF1 in Logic Block 1.
+   */
   uint8_t FF1_SET : 1;
+
+  /**
+   * 0 = FF1 not cleared in Logic Block 1.
+   * 1 = clear FF1 in Logic Block 1.
+   */
   uint8_t FF1_CLR : 1;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
@@ -344,11 +607,53 @@ struct Register_LOGIC_FF_CFG {
 
 struct Register_LOGIC_INT_EVENT_EN {
   uint8_t Reserved : 2;
+
+  /**
+   * 0 = output of Logic Block 2 is debounced before entering the
+   * event/interrupt block.
+   *
+   * 1 = output of Logic Block 2 is not debounced before entering the
+   * event/interrupt block. Use with caution because glitches may generate
+   * interrupts prematurely.
+   */
   uint8_t LY2_DBNC_DIS : 1;
+
+  /**
+   * 0 = LY2 cannot generate interrupt.
+   * 1 = allow LY2 activity to generate events on the FIFO.
+   */
   uint8_t LOGIC2_EVENT_EN : 1;
+
+  /**
+   * Configure the logic level of LY2 that generates an interrupt.
+   *
+   * 0 = LY2 is active low.
+   * 1 = LY2 is active high.
+   */
   uint8_t LOGIC2_INT_LEVEL : 1;
+
+  /**
+   * 0 = output of Logic Block 1 is debounced before entering the
+   * event/interrupt block.
+   *
+   * 1 = output of Logic Block 1 is not debounced before entering the
+   * event/interrupt block. Use with caution because glitches may generate
+   * interrupts prematurely.
+   */
   uint8_t LY1_DBNC_DIS : 1;
+
+  /**
+   * 0 = LY1 cannot generate interrupt.
+   * 1 = allow LY1 activity to generate events on the FIFO.
+   */
   uint8_t LOGIC1_EVENT_EN : 1;
+
+  /**
+   * Configure the logic level of LY1 that generates an interrupt.
+   *
+   * 0 = LY1 is active low.
+   * 1 = LY1 is active high.
+   */
   uint8_t LOGIC1_INT_LEVEL : 1;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
@@ -366,12 +671,49 @@ using Register_PIN_CONFIG_B = Register_UINT8;
 using Register_PIN_CONFIG_C = Register_UINT8_5_3;
 
 struct Register_PIN_CONFIG_D {
+  /**
+   * 0 = 300 kΩ used for row pull-up during key scanning.
+   * 1 = 100 kΩ used for row pull-up during key scanning.
+   */
   uint8_t PULL_SELECT : 1;
+
+  /**
+   * 0 = C4 remains configured as GPIO 13.
+   * 1 = C4 reconfigured as RESET2 output.
+   */
   uint8_t C4_EXTEND_CFG : 1;
+
+  /**
+   * 0 = R4 remains configured as GPIO 5.
+   * 1 = R4 reconfigured as RESET1 output.
+   */
   uint8_t R4_EXTEND_CFG : 1;
+
+  /**
+   * 0 = C6 remains configured as GPIO 15.
+   * 1 = C6 reconfigured as LC2 input for Logic Block 2.
+   */
   uint8_t C6_EXTEND_CFG : 1;
+
+  /**
+   * 0b00 = R3 remains configured as GPIO 4.
+   * 0b01 = R3 reconfigured as LC1 input for Logic Block 1.
+   * 0b10 = R3 reconfigured as PWM_OUT/CLK_OUT outputs from PWM
+   *        and clock divider blocks.
+   * 0b11 = unused.
+   */
   uint8_t R3_EXTEND_CFG : 2;
+
+  /**
+   * 0 = C9 remains configured as GPIO 18.
+   * 1 = C9 reconfigured as LY2 output from Logic Block 2.
+   */
   uint8_t C9_EXTEND_CFG : 1;
+
+  /**
+   * 0 = R0 remains configured as GPIO 1.
+   * 1 = R0 reconfigured as LY1 output from Logic Block 1.
+   */
   uint8_t R0_EXTEND_CFG : 1;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
