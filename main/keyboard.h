@@ -26,6 +26,7 @@ class Keyboard {
    * @return ESP_OK when successful.
    */
   esp_err_t HandleEvents();
+  void LogEvents();
 
  private:
   /**

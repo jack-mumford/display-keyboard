@@ -166,6 +166,45 @@ esp_err_t Keyboard::ReportHIDEvents() {
   return usb::HID::KeyboardReport(usb::REPORT_ID_KEYBOARD, modifier, keycodes);
 }
 
+void Keyboard::LogEvents() {
+  Register_Status status;
+  esp_err_t err = ReadByte(Register::Status, &status);
+  if (err != ESP_OK) {
+    ESP_LOGW(TAG, "Can't read keyboard status.");
+    return;
+  }
+
+  if (!status.EC) {
+    ESP_LOGI(TAG, "No keyboard events.");
+    return;
+  }
+
+  i2c::Operation fifo_op = i2c_master_.CreateReadOp(
+      kSlaveAddress, kI2CAddressSize, static_cast<uint8_t>(Register::FIFO_1),
+      "FIFO-read");
+  if (!fifo_op.ready()) {
+    ESP_LOGW(TAG, "Can't create I2C op.");
+    return;
+  }
+
+  for (uint8_t i = 0; i < status.EC; i++) {
+    Register_FIFO reg_fifo;
+    if (i > 0 && !fifo_op.Restart(i2c::Address::Mode::READ)) {
+      ESP_LOGW(TAG, "Can't restart read from I2C op.");
+      return;
+    }
+    if (!fifo_op.Read(reinterpret_cast<uint8_t*>(&reg_fifo),
+                      sizeof(reg_fifo))) {
+      ESP_LOGW(TAG, "Can't read from I2C op.");
+      return;
+    }
+
+    ESP_LOGI(TAG, "Got keyboard event id %u:%c",
+             static_cast<uint8_t>(reg_fifo.IDENTIFIER),
+             reg_fifo.Event_State ? 'U' : 'D');
+  }
+}
+
 esp_err_t Keyboard::HandleEvents() {
   esp_err_t err;
   event_number_++;

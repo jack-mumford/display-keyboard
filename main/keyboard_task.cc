@@ -22,11 +22,46 @@ constexpr EventBits_t EVENT_ALL = BIT0;
 
 KeyboardTask::KeyboardTask()
     : event_group_(xEventGroupCreate()),
-      keyboard_(i2c::Master(kKeyboardPort, /*mutex=*/nullptr)) {}
+      keyboard_(i2c::Master(kKeyboardPort, /*mutex=*/nullptr)),
+      mutex_(xSemaphoreCreateMutex()) {}
 
 KeyboardTask::~KeyboardTask() {
   if (event_group_)
     vEventGroupDelete(event_group_);
+}
+
+void KeyboardTask::LogKeys() {
+  if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
+    keyboard_.LogEvents();
+    xSemaphoreGive(mutex_);
+  }
+}
+
+// static
+void IRAM_ATTR KeyboardTask::LogKeysCb(void* arg) {
+  static_cast<KeyboardTask*>(arg)->LogKeys();
+}
+
+esp_err_t KeyboardTask::CreateKeyLogTimer() {
+  const esp_timer_create_args_t timer_args = {
+    .callback = LogKeysCb,
+    .arg = this,
+    .dispatch_method = ESP_TIMER_TASK,
+    .name = "KeyboardTask::LogKeysCb",
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
+    .skip_unhandled_events = true,
+#endif
+  };
+  esp_err_t err = esp_timer_create(&timer_args, &time_update_timer_);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "Unable to create keyboard event timer");
+    return err;
+  }
+  constexpr uint64_t kUpdateTimePeriodUsec = 1000000;  // every second.
+  err = esp_timer_start_periodic(time_update_timer_, kUpdateTimePeriodUsec);
+  if (err != ESP_OK)
+    ESP_LOGE(TAG, "Unable to start the keyboard event timer");
+  return err;
 }
 
 // static
@@ -60,6 +95,10 @@ esp_err_t KeyboardTask::Initialize() {
   if (err != ESP_OK)
     return err;
 
+  err = CreateKeyLogTimer();
+  if (err != ESP_OK)
+    return err;
+
   return xTaskCreate(TaskFunc, TAG, kStackDepthWords, this,
                      tskIDLE_PRIORITY + 1, &task_) == pdPASS
              ? ESP_OK
@@ -73,7 +112,8 @@ void IRAM_ATTR KeyboardTask::Run() {
         xEventGroupWaitBits(event_group_, EVENT_ALL, /*xClearOnExit=*/pdTRUE,
                             /*xWaitForAllBits=*/pdFALSE, portMAX_DELAY);
     if (bits & EVENT_KEYBOARD_EVENT) {
-      keyboard_.HandleEvents();
+      keyboard_.LogEvents();
+      // keyboard_.HandleEvents();
     }
   }
 }
