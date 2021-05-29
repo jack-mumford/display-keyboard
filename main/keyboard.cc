@@ -83,10 +83,8 @@ esp_err_t Keyboard::Reset() {
 }
 
 esp_err_t Keyboard::Initialize() {
-  ESP_LOGD(TAG, "Initializing keyboard");
-
   esp_err_t err;
-
+  ESP_LOGD(TAG, "Initializing keyboard");
   Register_GENERAL_CFG_B general_config;
   err = ReadByte(Register::GENERAL_CFG_B, &general_config);
   if (err != ESP_OK)
@@ -102,7 +100,7 @@ esp_err_t Keyboard::Initialize() {
   int_en.LOGIC1_IEN = 0;
   int_en.EVENT_IEN = 1;
   int_en.GPI_IEN = 0;
-  int_en.OVRFLOW_IEN = 0;
+  int_en.OVRFLOW_IEN = 1;
   err = WriteByte(Register::INT_EN, int_en);
   if (err != ESP_OK)
     return err;
