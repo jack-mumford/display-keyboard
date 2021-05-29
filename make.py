@@ -72,10 +72,28 @@ class PortManager(object):
         return ports
 
     @staticmethod
-    def __GetCOMPorts():
+    def __GetDevicePorts():
+        """Return any port with "USB Serial Device in the description.
+
+        The ESP32 port is one of these.
+        """
         ports = []
         for port in serial.tools.list_ports.comports():
-            ports.append(port.device)
+            if (port.hwid and 'SER=0' in port.hwid):
+                ports.append(port.device)
+            # pprint(vars(port))
+        return ports
+
+    @staticmethod
+    def __GetCOMPorts():
+        """Return any port with "USB Serial Port" in the description.
+
+        The serial debugger shows up as one of these.
+        """
+        ports = []
+        for port in serial.tools.list_ports.comports():
+            if (port.hwid and 'SER=0' not in port.hwid):
+                ports.append(port.device)
             # pprint(vars(port))
         return ports
 
@@ -87,6 +105,8 @@ class PortManager(object):
 
     @staticmethod
     def GetModemPorts():
+        if platform.system() == 'Windows':
+            return PortManager.__GetDevicePorts()
         return PortManager.__GetMatchingPorts(PortManager.__GetModemWildcard())
 
     @staticmethod
