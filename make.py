@@ -11,7 +11,6 @@ from pprint import pprint
 
 
 class SdkConfigManager(object):
-
     @staticmethod
     def GetConsoleTarget(sdkconfig):
         if 'CONFIG_ESP_CONSOLE_UART' in sdkconfig and \
@@ -101,7 +100,8 @@ class PortManager(object):
     def GetSerialPorts():
         if platform.system() == 'Windows':
             return PortManager.__GetCOMPorts()
-        return PortManager.__GetMatchingPorts(PortManager.__GetSerialWildcard())
+        return PortManager.__GetMatchingPorts(
+            PortManager.__GetSerialWildcard())
 
     @staticmethod
     def GetModemPorts():
@@ -145,11 +145,15 @@ def MakeTargets(targets, port_manager):
     monitor_port = port_manager.GetMonitorPort()
     for target in targets:
         if TargetNeedsMonitorPort(target) and not monitor_port:
-            print("Target \"%s\" needs a monitor port, but can't find one." % target, file=sys.stderr)
+            print("Target \"%s\" needs a monitor port, but can't find one." %
+                  target,
+                  file=sys.stderr)
             port_manager.PrintPorts(sys.stderr)
             sys.exit(errno.ENODEV)
         if TargetNeedsFlashPort(target) and not flash_port:
-            print("Target \"%s\" needs a flash port, but can't find one." % target, file=sys.stderr)
+            print("Target \"%s\" needs a flash port, but can't find one." %
+                  target,
+                  file=sys.stderr)
             port_manager.PrintPorts(sys.stderr)
             sys.exit(errno.ENODEV)
     if flash_port:
