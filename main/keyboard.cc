@@ -186,7 +186,7 @@ esp_err_t Keyboard::HandleEvents() {
   if (err != ESP_OK)
     return err;
 
-  if (status.EC)
+  if (!status.EC)
     return ESP_OK;
 
   i2c::Operation fifo_op = i2c_master_.CreateReadOp(
