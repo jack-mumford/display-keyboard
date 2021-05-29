@@ -9,6 +9,8 @@
 #include <esp_err.h>
 #include <esp_log.h>
 #include <esp_task_wdt.h>
+#include <i2clib/address.h>
+#include <i2clib/master.h>
 #include <i2clib/operation.h>
 
 #include "adp5589_registers.h"
@@ -77,6 +79,30 @@ esp_err_t Keyboard::ReportHIDEvents() {
 
 esp_err_t Keyboard::HandleEvents() {
   event_number_++;
+
+  Register_Status status;
+  esp_err_t err = ReadByte(Register::Status, &status);
+  if (err != ESP_OK)
+    return err;
+
+  if (status.EC)
+    return ESP_OK;
+
+  i2c::Operation fifo_op = i2c_master_.CreateReadOp(
+      kSlaveAddress, kI2CAddressSize, static_cast<uint8_t>(Register::FIFO_1),
+      "FIFO-read");
+  if (!fifo_op.ready())
+    return ESP_FAIL;
+
+  for (uint8_t i = 0; i < status.EC; i++) {
+    Register_FIFO reg_fifo;
+    if (i > 0 && !fifo_op.Restart(i2c::Address::Mode::READ))
+      return ESP_FAIL;
+    if (!fifo_op.Read(reinterpret_cast<uint8_t*>(&reg_fifo),
+                      sizeof(reg_fifo))) {
+      return ESP_FAIL;
+    }
+  }
   return ESP_OK;
 }
 
