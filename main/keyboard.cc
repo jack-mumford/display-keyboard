@@ -15,6 +15,7 @@
 
 #include "adp5589_registers.h"
 #include "gpio_pins.h"
+#include "usb_hid.h"
 
 using namespace adp5589;
 
@@ -24,6 +25,43 @@ constexpr uint8_t kSlaveAddress = 0x34;  // I2C address of ADP5589 IC.
 constexpr i2c::Address::Size kI2CAddressSize = i2c::Address::Size::bit7;
 
 static_assert(sizeof(Register_FIFO) == sizeof(uint8_t));
+
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+
+/**
+ * @brief Convert an ADP5589 Keyboard event ID to a TinyUSB HID keycode.
+ *
+ * See ADP5589 datasheet table 11 for description of EventID values.
+ *
+ * @param event_id The code returned by the keyboard IC.
+ *
+ * @return The TinyUSB HID keycode. HID_KEY_NONE if no mapping.
+ */
+uint8_t KeyboardKeyIDToHIDKeyCode(EventID event_id) {
+  // Hard-coded. Will replace with a configuration which comes from
+  // a config file at some point.
+  switch (event_id) {
+    case EventID::R0_C0:
+      return HID_KEY_SHIFT_LEFT;
+    case EventID::R0_C1:
+      return HID_KEY_Q;
+    case EventID::R0_C2:
+      return HID_KEY_W;
+    case EventID::R0_C3:
+      return HID_KEY_E;
+    case EventID::R1_C0:
+      return HID_KEY_CONTROL_LEFT;
+    case EventID::R1_C1:
+      return HID_KEY_A;
+    case EventID::R1_C2:
+      return HID_KEY_S;
+    case EventID::R1_C3:
+      return HID_KEY_D;
+    default:
+      break;
+  }
+  return HID_KEY_NONE;
+}
 
 }  // namespace
 
@@ -74,14 +112,61 @@ esp_err_t Keyboard::Initialize() {
 }
 
 esp_err_t Keyboard::ReportHIDEvents() {
-  return ESP_OK;
+  uint8_t next_key_idx = 0;
+  uint8_t keycodes[6] = {HID_KEY_NONE};
+  uint8_t modifier = 0;
+  uint8_t num_pressed_keys = 0;  // non-modifier keys.
+
+  for (uint8_t keycode = 0; keycode < key_states_.size(); keycode++) {
+    if (key_states_[keycode]) {
+      if (keycode == HID_KEY_SHIFT_LEFT) {
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+      } else if (keycode == HID_KEY_SHIFT_RIGHT) {
+        modifier |= KEYBOARD_MODIFIER_RIGHTSHIFT;
+      } else if (keycode == HID_KEY_CONTROL_LEFT) {
+        modifier |= KEYBOARD_MODIFIER_LEFTCTRL;
+      } else if (keycode == HID_KEY_CONTROL_RIGHT) {
+        modifier |= KEYBOARD_MODIFIER_RIGHTCTRL;
+      } else if (keycode == HID_KEY_ALT_LEFT) {
+        modifier |= KEYBOARD_MODIFIER_LEFTALT;
+      } else if (keycode == HID_KEY_ALT_RIGHT) {
+        modifier |= KEYBOARD_MODIFIER_RIGHTALT;
+      } else if (keycode == HID_KEY_GUI_LEFT) {
+        modifier |= KEYBOARD_MODIFIER_LEFTGUI;
+      } else if (keycode == HID_KEY_GUI_RIGHT) {
+        modifier |= KEYBOARD_MODIFIER_RIGHTGUI;
+      } else {
+        num_pressed_keys++;
+        if (next_key_idx < ARRAY_SIZE(keycodes))
+          keycodes[next_key_idx++] = keycode;
+      }
+    }
+  }
+
+  if (num_pressed_keys > ARRAY_SIZE(keycodes)) {
+    ESP_LOGW(TAG, "Unable to report all keys. %u pressed, max %u",
+             num_pressed_keys, ARRAY_SIZE(keycodes));
+  }
+  return usb::HID::KeyboardReport(usb::REPORT_ID_KEYBOARD, modifier, keycodes);
 }
 
 esp_err_t Keyboard::HandleEvents() {
+  esp_err_t err;
   event_number_++;
 
+  Register_INT_STATUS interrupt_status;
+  err = ReadByte(Register::INT_STATUS, &interrupt_status);
+  if (err != ESP_OK)
+    return err;
+  // Write back INT status register to clear.
+  WriteByte(Register::INT_STATUS, interrupt_status);
+  if (interrupt_status.OVRFLOW_INT) {
+    ESP_LOGE(TAG, "Keyboard FIFO overflow.");
+    return ESP_FAIL;
+  }
+
   Register_Status status;
-  esp_err_t err = ReadByte(Register::Status, &status);
+  err = ReadByte(Register::Status, &status);
   if (err != ESP_OK)
     return err;
 
@@ -102,8 +187,15 @@ esp_err_t Keyboard::HandleEvents() {
                       sizeof(reg_fifo))) {
       return ESP_FAIL;
     }
+
+    const uint8_t hid_keycode = KeyboardKeyIDToHIDKeyCode(reg_fifo.IDENTIFIER);
+    if (hid_keycode < key_states_.size()) {
+      const bool key_pressed = reg_fifo.Event_State & 0b10000000;
+      key_states_[hid_keycode] = key_pressed;
+    }
   }
-  return ESP_OK;
+
+  return ReportHIDEvents();
 }
 
 esp_err_t Keyboard::ReadByte(Register reg, void* value) {

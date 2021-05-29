@@ -29,7 +29,7 @@ class Keyboard {
 
  private:
   /**
-   * Report all HID events to the host via TinyUSB.
+   * Report all HID events to the USB host.
    *
    * @return esp_err_t
    */
