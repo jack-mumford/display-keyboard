@@ -910,7 +910,7 @@ struct Register_INT_EN {
    * 0 = Disabled.
    * 1 = Assert the INT pin if LOGIC2_INT is set.
    */
-  uint8_t LOGIC2_IEN : 1;
+  bool LOGIC2_IEN : 1;
 
   /**
    * Logic 1 interrupt.
@@ -918,31 +918,31 @@ struct Register_INT_EN {
    * 0 = Disabled.
    * 1 = Assert the INT pin if LOGIC1_INT is set.
    */
-  uint8_t LOGIC1_IEN : 1;
+  bool LOGIC1_IEN : 1;
 
   /**
    * 0 = lock interrupt is disabled.
    * 1 = assert the INT pin if LOCK_INT is set.
    */
-  uint8_t LOCK_IEN : 1;
+  bool LOCK_IEN : 1;
 
   /**
    * 0 = overflow interrupt is disabled.
    * 1 = assert the INT pin if OVRFLOW_INT is set.
    */
-  uint8_t OVRFLOW_IEN : 1;
+  bool OVRFLOW_IEN : 1;
 
   /**
    * 0 = GPI interrupt is disabled.
    * 1 = assert the INT pin if GPI_INT is set.
    */
-  uint8_t GPI_IEN : 1;
+  bool GPI_IEN : 1;
 
   /**
    * 0 = event interrupt is disabled.
    * 1 = assert the INT pin if EVENT_INT is set.
    */
-  uint8_t EVENT_IEN : 1;
+  bool EVENT_IEN : 1;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };

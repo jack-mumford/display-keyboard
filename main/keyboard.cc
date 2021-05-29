@@ -25,6 +25,7 @@ constexpr uint8_t kSlaveAddress = 0x34;  // I2C address of ADP5589 IC.
 constexpr i2c::Address::Size kI2CAddressSize = i2c::Address::Size::bit7;
 
 static_assert(sizeof(Register_FIFO) == sizeof(uint8_t));
+static_assert(sizeof(Register_INT_EN) == sizeof(uint8_t));
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -82,6 +83,17 @@ esp_err_t Keyboard::Reset() {
   return ESP_OK;
 }
 
+esp_err_t Keyboard::InitializeInterrupts() {
+  Register_INT_EN int_en;
+  int_en.Reserved = 0;
+  int_en.LOGIC2_IEN = false;
+  int_en.LOGIC1_IEN = false;
+  int_en.EVENT_IEN = true;
+  int_en.GPI_IEN = false;
+  int_en.OVRFLOW_IEN = true;
+  return WriteByte(Register::INT_EN, int_en);
+}
+
 esp_err_t Keyboard::Initialize() {
   esp_err_t err;
   ESP_LOGD(TAG, "Initializing keyboard");
@@ -95,13 +107,7 @@ esp_err_t Keyboard::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  Register_INT_EN int_en;
-  int_en.LOGIC2_IEN = 0;
-  int_en.LOGIC1_IEN = 0;
-  int_en.EVENT_IEN = 1;
-  int_en.GPI_IEN = 0;
-  int_en.OVRFLOW_IEN = 1;
-  err = WriteByte(Register::INT_EN, int_en);
+  err = InitializeInterrupts();
   if (err != ESP_OK)
     return err;
 
