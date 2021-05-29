@@ -197,12 +197,144 @@ struct Register_Status {
 };
 
 /**
+ * FIFO event ID from datasheet table 11.
+ */
+enum class EventID : uint8_t {
+  NONE = 0,
+  R0_C0 = 1,
+  R1_C0 = 2,
+  R2_C0 = 3,
+  R3_C0 = 4,
+  R4_C0 = 5,
+  R5_C0 = 6,
+  R6_C0 = 7,
+  R7_C0 = 8,
+  R0_C1 = 9,
+  R1_C1 = 10,
+  R2_C1 = 11,
+  R3_C1 = 12,
+  R4_C1 = 13,
+  R5_C1 = 14,
+  R6_C1 = 15,
+  R7_C1 = 16,
+  R0_C2 = 17,
+  R1_C2 = 18,
+  R2_C2 = 19,
+  R3_C2 = 20,
+  R4_C2 = 21,
+  R5_C2 = 22,
+  R6_C2 = 23,
+  R7_C2 = 24,
+  R0_C3 = 25,
+  R1_C3 = 26,
+  R2_C3 = 27,
+  R3_C3 = 28,
+  R4_C3 = 29,
+  R5_C3 = 30,
+  R6_C3 = 31,
+  R7_C3 = 32,
+  R0_C4 = 33,
+  R1_C4 = 34,
+  R2_C4 = 35,
+  R3_C4 = 36,
+  R4_C4 = 37,
+  R5_C4 = 38,
+  R6_C4 = 39,
+  R7_C4 = 40,
+  R0_C5 = 41,
+  R1_C5 = 42,
+  R2_C5 = 43,
+  R3_C5 = 44,
+  R4_C5 = 45,
+  R5_C5 = 46,
+  R6_C5 = 47,
+  R7_C5 = 48,
+  R0_C6 = 49,
+  R1_C6 = 50,
+  R2_C6 = 51,
+  R3_C6 = 52,
+  R4_C6 = 53,
+  R5_C6 = 54,
+  R6_C6 = 55,
+  R7_C6 = 56,
+  R0_C7 = 57,
+  R1_C7 = 58,
+  R2_C7 = 59,
+  R3_C7 = 60,
+  R4_C7 = 61,
+  R5_C7 = 62,
+  R6_C7 = 63,
+  R7_C7 = 64,
+  R0_C8 = 65,
+  R1_C8 = 66,
+  R2_C8 = 67,
+  R3_C8 = 68,
+  R4_C8 = 69,
+  R5_C8 = 70,
+  R6_C8 = 71,
+  R7_C8 = 72,
+  R0_C9 = 73,
+  R1_C9 = 74,
+  R2_C9 = 75,
+  R3_C9 = 76,
+  R4_C9 = 77,
+  R5_C9 = 78,
+  R6_C9 = 79,
+  R7_C9 = 80,
+  R0_C10 = 81,
+  R1_C10 = 82,
+  R2_C10 = 83,
+  R3_C10 = 84,
+  R4_C10 = 85,
+  R5_C10 = 86,
+  R6_C10 = 87,
+  R7_C10 = 88,
+  R0_GND = 89,
+  R1_GND = 90,
+  R2_GND = 91,
+  R3_GND = 92,
+  R4_GND = 93,
+  R5_GND = 94,
+  R6_GND = 95,
+  R7_GND = 96,
+  GPI1 = 97,    // (ROW 0)
+  GPI2 = 98,    // (ROW 1)
+  GPI3 = 99,    // (ROW 2)
+  GPI4 = 100,   // (ROW 3)
+  GPI5 = 101,   // (ROW 4)
+  GPI6 = 102,   // (ROW 5)
+  GPI7 = 103,   // (ROW 6)
+  GPI8 = 104,   // (ROW 7)
+  GPI9 = 105,   // (COL 0)
+  GPI10 = 106,  // (COL 1)
+  GPI11 = 107,  // (COL 2)
+  GPI12 = 108,  // (COL 3)
+  GPI13 = 109,  // (COL 4)
+  GPI14 = 110,  // (COL 5)
+  GPI15 = 111,  // (COL 6)
+  GPI16 = 112,  // (COL 7)
+  GPI17 = 113,  // (COL 8)
+  GPI18 = 114,  // (COL 9)
+  GPI19 = 115,  // (COL 10)
+  LOGIC_1 = 116,
+  LOGIC_2 = 117,
+  UNUSED_0 = 118,
+  UNUSED_1 = 119,
+  UNUSED_2 = 120,
+  UNUSED_3 = 121,
+  UNUSED_4 = 122,
+  UNUSED_5 = 123,
+  UNUSED_6 = 124,
+  UNUSED_7 = 125,
+  UNUSED_8 = 126,
+  UNLOCK_WILDCARD = 127,
+};
+
+/**
  * FIFO1 - FIFO16.
  */
 struct Register_FIFO {
   /**
-   * Event state.
-   *
    * This bit represents the state of the event that is recorded in
    * IDENTIFIER.
    *
@@ -219,10 +351,9 @@ struct Register_FIFO {
   uint8_t Event_State : 1;
 
   /**
-   * Table 11 outlines each event number, what it represents, and the I/O pins
-   * associated with it.
+   * The event identifier \see EventID.
    */
-  uint8_t IDENTIFIER : 7;
+  EventID IDENTIFIER : 7;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };

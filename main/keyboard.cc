@@ -20,6 +20,9 @@ namespace {
 constexpr char TAG[] = "Keyboard";
 constexpr uint8_t kSlaveAddress = 0x34;  // I2C address of ADP5589 IC.
 constexpr i2c::Address::Size kI2CAddressSize = i2c::Address::Size::bit7;
+
+static_assert(sizeof(Register_FIFO) == sizeof(uint8_t));
+
 }  // namespace
 
 Keyboard::Keyboard(i2c::Master i2c_master)
