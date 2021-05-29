@@ -42,21 +42,21 @@ uint8_t KeyboardKeyIDToHIDKeyCode(EventID event_id) {
   // Hard-coded. Will replace with a configuration which comes from
   // a config file at some point.
   switch (event_id) {
-    case EventID::R0_C0:
-      return HID_KEY_SHIFT_LEFT;
-    case EventID::R0_C1:
-      return HID_KEY_Q;
-    case EventID::R0_C2:
-      return HID_KEY_W;
     case EventID::R0_C3:
+      return HID_KEY_SHIFT_LEFT;
+    case EventID::R0_C2:
+      return HID_KEY_Q;
+    case EventID::R0_C1:
+      return HID_KEY_W;
+    case EventID::R0_C0:
       return HID_KEY_E;
-    case EventID::R1_C0:
-      return HID_KEY_CONTROL_LEFT;
-    case EventID::R1_C1:
-      return HID_KEY_A;
-    case EventID::R1_C2:
-      return HID_KEY_S;
     case EventID::R1_C3:
+      return HID_KEY_CONTROL_LEFT;
+    case EventID::R1_C2:
+      return HID_KEY_A;
+    case EventID::R1_C1:
+      return HID_KEY_S;
+    case EventID::R1_C0:
       return HID_KEY_D;
     default:
       break;
