@@ -96,8 +96,8 @@ enum class Register : uint8_t {
 // clang-format on
 
 struct Register_ID {
-  uint8_t MAN : 4; // Manufacturer.
-  uint8_t REV : 4; // Hardware revision.
+  uint8_t MAN : 4;  // Manufacturer.
+  uint8_t REV : 4;  // Hardware revision.
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
@@ -201,16 +201,10 @@ struct Register_Status {
  */
 struct Register_FIFO {
   /**
-   * The seven lower bits of each FIFO location contain the event identifier,
-   * which can be decoded to reveal the event recorded. Table 11 outlines each
-   * event number, what it represents, and the I/O pins associated with it. Bit
-   * 7 is the Event 1 state.
-   */
-  uint8_t Event_State : 1;
-
-  /**
+   * Event state.
+   *
    * This bit represents the state of the event that is recorded in
-   * EVENT1_IDENTIFIER[6:0].
+   * IDENTIFIER.
    *
    * For key events (Event 1 to Event 96).
    * 1 = key is pressed.
@@ -221,6 +215,12 @@ struct Register_FIFO {
    * 0 = GPI/logic is inactive.
    *
    * Active and inactive states are programmable.
+   */
+  uint8_t Event_State : 1;
+
+  /**
+   * Table 11 outlines each event number, what it represents, and the I/O pins
+   * associated with it.
    */
   uint8_t IDENTIFIER : 7;
 
