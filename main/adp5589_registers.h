@@ -858,6 +858,13 @@ struct Register_PIN_CONFIG_D {
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
 
+enum class CoreFrequency : uint8_t {
+  MHz50 = 0,
+  MHz100 = 1,
+  MHz200 = 2,
+  MHz500 = 3,
+};
+
 struct Register_GENERAL_CFG_B {
   /**
    * Enable internal 1 MHz oscillator.
@@ -877,7 +884,7 @@ struct Register_GENERAL_CFG_B {
    * 0b10 = 200 kHz.
    * 0b11 = 500 kHz
    */
-  uint8_t CORE_FREQ : 2;
+  CoreFrequency CORE_FREQ : 2;
 
   // 0 = allow logic outputs (programmed for FIFO updates) to be tracked on
   // the FIFO if the keypad is locked.

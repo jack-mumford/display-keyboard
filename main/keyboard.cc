@@ -94,8 +94,8 @@ esp_err_t Keyboard::Initialize() {
 
   {
     Register_GENERAL_CFG_B reg;
-    reg.OSC_EN = true;      // Enable oscillator.
-    reg.CORE_FREQ = 0b01;   // 100MHz.
+    reg.OSC_EN = true;  // Enable oscillator.
+    reg.CORE_FREQ = CoreFrequency::MHz100;
     reg.LCK_TRK_LOGIC = 1;  // do not track.
     reg.LCK_TRK_GPI = 1;    // do not track.
     reg.Unused = 0;         // Clear unused.
