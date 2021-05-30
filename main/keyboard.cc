@@ -168,40 +168,34 @@ esp_err_t Keyboard::ReportHIDEvents() {
 
 void Keyboard::LogEvents() {
   Register_Status status;
-  esp_err_t err = ReadByte(Register::Status, &status);
-  if (err != ESP_OK) {
-    ESP_LOGW(TAG, "Can't read keyboard status.");
+  i2c::Operation op = i2c_master_.CreateReadOp(
+      kSlaveAddress, kI2CAddressSize, static_cast<uint8_t>(Register::Status),
+      "evt-log");
+  if (!op.ready())
     return;
-  }
-
+  if (!op.Read(&status, sizeof(status)))
+    return;
+  if (!op.Execute(i2c::Operation::ExecuteEnd::NoStop))
+    return;
   if (!status.EC) {
     ESP_LOGI(TAG, "No keyboard events.");
     return;
   }
 
-  i2c::Operation fifo_op = i2c_master_.CreateReadOp(
-      kSlaveAddress, kI2CAddressSize, static_cast<uint8_t>(Register::FIFO_1),
-      "FIFO-read");
-  if (!fifo_op.ready()) {
-    ESP_LOGW(TAG, "Can't create I2C op.");
+  const size_t kMaxFIFOSize = 16;
+  Register_FIFO fifo[kMaxFIFOSize];
+  if (!op.RestartReg(static_cast<uint8_t>(Register::FIFO_1),
+                     i2c::Address::Mode::READ)) {
     return;
   }
-
+  if (!op.Read(&fifo, status.EC * sizeof(Register_FIFO)))
+    return;
+  if (!op.Execute())
+    return;
   for (uint8_t i = 0; i < status.EC; i++) {
-    Register_FIFO reg_fifo;
-    if (i > 0 && !fifo_op.Restart(i2c::Address::Mode::READ)) {
-      ESP_LOGW(TAG, "Can't restart read from I2C op.");
-      return;
-    }
-    if (!fifo_op.Read(reinterpret_cast<uint8_t*>(&reg_fifo),
-                      sizeof(reg_fifo))) {
-      ESP_LOGW(TAG, "Can't read from I2C op.");
-      return;
-    }
-
     ESP_LOGI(TAG, "Got keyboard event id %u:%c",
-             static_cast<uint8_t>(reg_fifo.IDENTIFIER),
-             reg_fifo.Event_State ? 'U' : 'D');
+             static_cast<uint8_t>(fifo[i].IDENTIFIER),
+             fifo[i].Event_State ? 'U' : 'D');
   }
 }
 
