@@ -792,6 +792,14 @@ struct Register_LOGIC_INT_EVENT_EN {
 
 struct Register_POLL_TIME_CFG {
   uint8_t Reserved : 6;
+  /**
+   * Configure time between consecutive scan cycles.
+   *
+   * 0b00 = 10 ms.
+   * 0b01 = 20 ms.
+   * 0b10 = 30 ms.
+   * 0b11 = 40 ms.
+   */
   uint8_t KEY_POLL_TIME : 2;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
