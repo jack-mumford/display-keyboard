@@ -865,7 +865,7 @@ struct Register_GENERAL_CFG_B {
    * 0 = disabled
    * 1 = enabled.
    */
-  uint8_t OSC_EN : 1;
+  bool OSC_EN : 1;
 
   /**
    * Sets the input clock frequency fed from the base 1 MHz oscillator
@@ -873,9 +873,9 @@ struct Register_GENERAL_CFG_B {
    * key and GPI scan times increase.
    *
    * 0b00 = 50 kHz.
-   * 0b00 = 100 kHz.
-   * 0b00 = 200 kHz.
-   * 0b00 = 500 kHz
+   * 0b01 = 100 kHz.
+   * 0b10 = 200 kHz.
+   * 0b11 = 500 kHz
    */
   uint8_t CORE_FREQ : 2;
 

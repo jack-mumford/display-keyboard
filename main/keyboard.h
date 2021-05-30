@@ -36,7 +36,6 @@ class Keyboard {
   esp_err_t ReportHIDEvents();
   esp_err_t WriteByte(adp5589::Register reg, uint8_t value);
   esp_err_t ReadByte(adp5589::Register reg, void* value);
-  esp_err_t InitializeInterrupts();
 
   i2c::Master i2c_master_;
 

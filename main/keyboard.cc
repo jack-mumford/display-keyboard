@@ -75,7 +75,7 @@ esp_err_t Keyboard::Reset() {
   ESP_LOGD(TAG, "Resetting keyboard");
 
   Register_ID reg_id;
-  esp_err_t err = ReadByte(Register::GENERAL_CFG_B, &reg_id);
+  esp_err_t err = ReadByte(Register::ID, &reg_id);
   if (err != ESP_OK)
     return err;
   ESP_LOGI(TAG, "Keyboard mfr: %u, rev: %u", reg_id.MAN, reg_id.REV);
@@ -83,33 +83,45 @@ esp_err_t Keyboard::Reset() {
   return ESP_OK;
 }
 
-esp_err_t Keyboard::InitializeInterrupts() {
-  Register_INT_EN int_en;
-  int_en.Reserved = 0;
-  int_en.LOGIC2_IEN = false;
-  int_en.LOGIC1_IEN = false;
-  int_en.EVENT_IEN = true;
-  int_en.GPI_IEN = false;
-  int_en.OVRFLOW_IEN = true;
-  return WriteByte(Register::INT_EN, int_en);
-}
-
 esp_err_t Keyboard::Initialize() {
-  esp_err_t err;
   ESP_LOGD(TAG, "Initializing keyboard");
-  Register_GENERAL_CFG_B general_config;
-  err = ReadByte(Register::GENERAL_CFG_B, &general_config);
-  if (err != ESP_OK)
-    return err;
-  general_config.LCK_TRK_LOGIC = false;
-  general_config.LCK_TRK_GPI = false;
-  err = WriteByte(Register::GENERAL_CFG_B, general_config);
-  if (err != ESP_OK)
-    return err;
 
-  err = InitializeInterrupts();
-  if (err != ESP_OK)
-    return err;
+  i2c::Operation op = i2c_master_.CreateWriteOp(
+      kSlaveAddress, kI2CAddressSize,
+      static_cast<uint8_t>(Register::GENERAL_CFG_B), "kbd-init");
+  if (!op.ready())
+    return ESP_FAIL;
+
+  {
+    Register_GENERAL_CFG_B reg;
+    reg.OSC_EN = true;      // Enable oscillator.
+    reg.CORE_FREQ = 0b01;   // 100MHz.
+    reg.LCK_TRK_LOGIC = 1;  // do not track.
+    reg.LCK_TRK_GPI = 1;    // do not track.
+    reg.Unused = 0;         // Clear unused.
+    reg.INT_CFG = 0;  // INT pin remains asserted if an interrupt is pending.
+    reg.RST_CFG = 1;  // ADP5589 does not reset if RST is low.
+    if (!op.WriteByte(reg))
+      return ESP_FAIL;
+  }
+
+  {
+    if (!op.RestartReg(static_cast<uint8_t>(Register::INT_EN),
+                       i2c::Address::Mode::WRITE))
+      return ESP_FAIL;
+    Register_INT_EN reg;
+    reg.Reserved = 0;
+    reg.LOGIC2_IEN = false;
+    reg.LOGIC1_IEN = false;
+    reg.EVENT_IEN = true;
+    reg.GPI_IEN = false;
+    reg.OVRFLOW_IEN = true;
+    if (!op.WriteByte(reg))
+      return ESP_FAIL;
+  }
+
+  if (!op.Execute())
+    return ESP_FAIL;
 
   ESP_LOGI(TAG, "Keyboard initialized.");
   return ESP_OK;
