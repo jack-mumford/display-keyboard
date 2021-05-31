@@ -107,8 +107,9 @@ esp_err_t Keyboard::Initialize() {
 
   {
     if (!op.RestartReg(static_cast<uint8_t>(Register::INT_EN),
-                       i2c::Address::Mode::WRITE))
+                       i2c::Address::Mode::WRITE)) {
       return ESP_FAIL;
+    }
     Register_INT_EN reg;
     reg.Reserved = 0;
     reg.LOGIC2_IEN = false;
@@ -118,6 +119,32 @@ esp_err_t Keyboard::Initialize() {
     reg.OVRFLOW_IEN = true;
     if (!op.WriteByte(reg))
       return ESP_FAIL;
+  }
+
+  // Enable all keyboard pins.
+  {
+    Register_PIN_CONFIG_A reg;
+    reg.val = 0xff;
+
+    if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_A),
+                       i2c::Address::Mode::WRITE) ||
+        !op.WriteByte(reg)) {
+      return ESP_FAIL;
+    }
+    if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_B),
+                       i2c::Address::Mode::WRITE) ||
+        !op.WriteByte(reg)) {
+      return ESP_FAIL;
+    }
+
+    Register_PIN_CONFIG_C reg_c;
+    reg_c.Reserved = 0;
+    reg_c.val = 0b111;
+    if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_C),
+                       i2c::Address::Mode::WRITE) ||
+        !op.WriteByte(reg_c)) {
+      return ESP_FAIL;
+    }
   }
 
   if (!op.Execute())
@@ -166,82 +193,75 @@ esp_err_t Keyboard::ReportHIDEvents() {
   return usb::HID::KeyboardReport(usb::REPORT_ID_KEYBOARD, modifier, keycodes);
 }
 
-void Keyboard::LogEvents() {
-  Register_Status status;
-  i2c::Operation op = i2c_master_.CreateReadOp(
-      kSlaveAddress, kI2CAddressSize, static_cast<uint8_t>(Register::Status),
-      "evt-log");
-  if (!op.ready())
-    return;
-  if (!op.Read(&status, sizeof(status)))
-    return;
-  if (!op.Execute(i2c::Operation::ExecuteEnd::NoStop))
-    return;
-  if (!status.EC) {
-    ESP_LOGI(TAG, "No keyboard events.");
-    return;
-  }
-
-  const size_t kMaxFIFOSize = 16;
-  Register_FIFO fifo[kMaxFIFOSize];
-  if (!op.RestartReg(static_cast<uint8_t>(Register::FIFO_1),
-                     i2c::Address::Mode::READ)) {
-    return;
-  }
-  if (!op.Read(&fifo, status.EC * sizeof(Register_FIFO)))
-    return;
-  if (!op.Execute())
-    return;
-  for (uint8_t i = 0; i < status.EC; i++) {
-    ESP_LOGI(TAG, "Got keyboard event id %u:%c",
-             static_cast<uint8_t>(fifo[i].IDENTIFIER),
-             fifo[i].Event_State ? 'U' : 'D');
-  }
-}
-
 esp_err_t Keyboard::HandleEvents() {
-  esp_err_t err;
   event_number_++;
 
+// For debugging purposes.
+#define ONLY_LOG_EVENTS
+
+  i2c::Operation op = i2c_master_.CreateReadOp(
+      kSlaveAddress, kI2CAddressSize,
+      static_cast<uint8_t>(Register::INT_STATUS), "kbd-event");
   Register_INT_STATUS interrupt_status;
-  err = ReadByte(Register::INT_STATUS, &interrupt_status);
-  if (err != ESP_OK)
-    return err;
-  // Write back INT status register to clear.
-  WriteByte(Register::INT_STATUS, interrupt_status);
+  if (!op.ready() || !op.Read(&interrupt_status, sizeof(interrupt_status)) ||
+      !op.Execute(i2c::Operation::ExecuteEnd::NoStop))
+    return ESP_FAIL;
+
   if (interrupt_status.OVRFLOW_INT) {
     ESP_LOGE(TAG, "Keyboard FIFO overflow.");
     return ESP_FAIL;
   }
 
   Register_Status status;
-  err = ReadByte(Register::Status, &status);
-  if (err != ESP_OK)
-    return err;
-
-  if (!status.EC)
-    return ESP_OK;
-
-  i2c::Operation fifo_op = i2c_master_.CreateReadOp(
-      kSlaveAddress, kI2CAddressSize, static_cast<uint8_t>(Register::FIFO_1),
-      "FIFO-read");
-  if (!fifo_op.ready())
+  if (!op.RestartReg(static_cast<uint8_t>(Register::Status),
+                     i2c::Address::Mode::READ) ||
+      !op.Read(&status, sizeof(status)) ||
+      !op.Execute(i2c::Operation::ExecuteEnd::NoStop)) {
     return ESP_FAIL;
+  }
+
+  if (!status.EC) {
+    ESP_LOGW(TAG, "No keyboard events.");
+    return ESP_OK;
+  }
+
+  if (!op.RestartReg(static_cast<uint8_t>(Register::FIFO_1),
+                     i2c::Address::Mode::READ)) {
+    return ESP_FAIL;
+  }
+
+#ifdef ONLY_LOG_EVENTS
+  ESP_LOGD(TAG, "Got %u keyboard events", status.EC);
+#endif
 
   for (uint8_t i = 0; i < status.EC; i++) {
     Register_FIFO reg_fifo;
-    if (i > 0 && !fifo_op.Restart(i2c::Address::Mode::READ))
+    if (i > 0 && !op.Restart(i2c::Address::Mode::READ))
       return ESP_FAIL;
-    if (!fifo_op.Read(reinterpret_cast<uint8_t*>(&reg_fifo),
-                      sizeof(reg_fifo))) {
+    if (!op.Read(reinterpret_cast<uint8_t*>(&reg_fifo), sizeof(reg_fifo))) {
       return ESP_FAIL;
     }
-
+    if (!op.Execute(i2c::Operation::ExecuteEnd::NoStop))
+      return ESP_FAIL;
+#ifdef ONLY_LOG_EVENTS
+    ESP_LOGI(TAG, "Got keyboard event (0x%02x) id %u:%c",
+             static_cast<uint8_t>(reg_fifo),
+             static_cast<uint8_t>(reg_fifo.IDENTIFIER),
+             reg_fifo.Event_State ? 'U' : 'D');
+#else
     const uint8_t hid_keycode = KeyboardKeyIDToHIDKeyCode(reg_fifo.IDENTIFIER);
     if (hid_keycode < key_states_.size()) {
       const bool key_pressed = reg_fifo.Event_State & 0b10000000;
       key_states_[hid_keycode] = key_pressed;
     }
+#endif
+  }
+
+  // Write back INT status register to clear bits.
+  if (!op.RestartReg(static_cast<uint8_t>(Register::INT_STATUS),
+                     i2c::Address::Mode::WRITE) ||
+      !op.WriteByte(interrupt_status) || !op.Execute()) {
+    return ESP_FAIL;
   }
 
   return ReportHIDEvents();

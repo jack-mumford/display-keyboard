@@ -32,7 +32,7 @@ KeyboardTask::~KeyboardTask() {
 
 void KeyboardTask::LogKeys() {
   if (xSemaphoreTake(mutex_, portMAX_DELAY) == pdTRUE) {
-    keyboard_.LogEvents();
+    keyboard_.HandleEvents();
     xSemaphoreGive(mutex_);
   }
 }
@@ -95,9 +95,11 @@ esp_err_t KeyboardTask::Initialize() {
   if (err != ESP_OK)
     return err;
 
+#if 1
   err = CreateKeyLogTimer();
   if (err != ESP_OK)
     return err;
+#endif
 
   return xTaskCreate(TaskFunc, TAG, kStackDepthWords, this,
                      tskIDLE_PRIORITY + 1, &task_) == pdPASS
@@ -112,8 +114,7 @@ void IRAM_ATTR KeyboardTask::Run() {
         xEventGroupWaitBits(event_group_, EVENT_ALL, /*xClearOnExit=*/pdTRUE,
                             /*xWaitForAllBits=*/pdFALSE, portMAX_DELAY);
     if (bits & EVENT_KEYBOARD_EVENT) {
-      keyboard_.LogEvents();
-      // keyboard_.HandleEvents();
+      keyboard_.HandleEvents();
     }
   }
 }
