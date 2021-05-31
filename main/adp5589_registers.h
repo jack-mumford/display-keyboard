@@ -335,8 +335,7 @@ enum class EventID : uint8_t {
  */
 struct Register_FIFO {
   /**
-   * This bit represents the state of the event that is recorded in
-   * IDENTIFIER.
+   * Represents the state of the event that is recorded in IDENTIFIER.
    *
    * For key events (Event 1 to Event 96).
    * 1 = key is pressed.
