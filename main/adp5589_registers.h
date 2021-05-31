@@ -351,7 +351,7 @@ struct Register_FIFO {
   uint8_t Event_State : 1;
 
   /**
-   * The event identifier \see EventID.
+   * The event identifier.
    */
   EventID IDENTIFIER : 7;
 
@@ -473,11 +473,7 @@ struct Register_UNLOCK_TIMERS {
    * an interrupt until this timer has expired (or both unlock events have
    * occurred).
    *
-   * 0b00000 = disabled.
-   * 0b00001 = 1 sec.
-   * 0b00010 = 2 sec.
-   * 0b11110 = 30 sec.
-   * 0b11111 = 31 sec.
+   * Value = number of seconds with 0 = disabled. [0..31].
    */
   uint8_t INT_MASK_TIMER : 5;
 
@@ -487,14 +483,7 @@ struct Register_UNLOCK_TIMERS {
    * within this time (or any other event occurs), the keypad goes back to full
    * lock mode.
    *
-   * 0b000 = disabled.
-   * 0b001 = 1 sec.
-   * 0b010 = 2 sec.
-   * 0b011 = 3 sec.
-   * 0b100 = 4 sec.
-   * 0b101 = 5 sec.
-   * 0b110 = 6 sec.
-   * 0b111 = 7 sec.
+   * Range: [0..7] seconds where 0=disabled.
    */
   uint8_t UNLOCK_TIMER : 3;
 
@@ -544,6 +533,24 @@ using Register_RESET1_EVENT_C = Register_RESET_EVENT;
 using Register_RESET2_EVENT_A = Register_RESET_EVENT;
 using Register_RESET2_EVENT_B = Register_RESET_EVENT;
 
+enum class PulseWidth : uint8_t {
+  k500us = 0b00,
+  k1ms = 0b01,
+  k2ms = 0b10,
+  k10ms = 0b11,
+};
+
+enum class ResetTime : uint8_t {
+  kImmediate = 0b000,
+  k1_0s = 0b001,  // 1.0 sec.
+  k1_5s = 0b010,  // 1.5 sec.
+  k2_0s = 0b011,  // 2.0 sec.
+  k2_5s = 0b100,  // 2.5 sec.
+  k3_0s = 0b101,  // 3.0 sec.
+  k3_5s = 0b110,  // 3.5 sec.
+  k4_0s = 0b111,  // 4.0 sec.
+};
+
 struct Register_RESET2_EVENT_C {
   /**
    * Sets the polarity of RESET2.
@@ -573,28 +580,15 @@ struct Register_RESET2_EVENT_C {
    *
    * All events must be active at the same time for the same duration. Parameter
    * common to both RESET1 and RESET2.
-   *
-   * 0b000 = immediate.
-   * 0b001 = 1.0 sec.
-   * 0b010 = 1.5 sec.
-   * 0b011 = 2.0 sec.
-   * 0b100 = 2.5 sec.
-   * 0b101 = 3.0 sec.
-   * 0b110 = 3.5 sec.
-   * 0b111 = 4.0 sec.
    */
-  uint8_t RESET_TRIGGER_TIME : 3;
+  ResetTime RESET_TRIGGER_TIME : 3;
 
   /**
    * Defines the pulse width of the reset signals.
-   * Parameter common to both RESET1 and RESET2.
    *
-   * 0b00 = 500 µs.
-   * 0b01 = 1 ms.
-   * 0b10 = 2 ms.
-   * 0b11 = 10 ms.
+   * Parameter common to both RESET1 and RESET2.
    */
-  uint8_t RESET_PULSE_WIDTH : 2;
+  PulseWidth RESET_PULSE_WIDTH : 2;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
@@ -638,7 +632,7 @@ struct Register_CLOCK_DIV_CFG {
   /**
    * Inverts the divided down clock signal.
    */
-  uint8_t CLK_INV : 1;
+  bool CLK_INV : 1;
 
   /**
    * Defines the divide down scale of the externally supplied clock.
@@ -647,6 +641,7 @@ struct Register_CLOCK_DIV_CFG {
    * 0b00001 = divide by 2.
    * 0b00010 = divide by 3.
    * 0b00011 = divide by 4.
+   * ...
    * 0b11111 = divide by 32.
    */
   uint8_t CLK_DIV : 5;
@@ -655,10 +650,23 @@ struct Register_CLOCK_DIV_CFG {
    * Enables the clock divider circuit to divide down the externally supplied
    * clock signal.
    */
-  uint8_t CLK_DIV_EN : 1;
+  bool CLK_DIV_EN : 1;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
+
+// clang-format off
+enum class MuxState : uint8_t {
+  kOff   = 0b000,  // Off/disable.
+  kAND   = 0b001,
+  kOR    = 0b010,
+  kXOR   = 0b011,
+  kFF    = 0b100,
+  kIN_LA = 0b101,
+  kIN_LB = 0b110,
+  kIN_LC = 0b111,
+};
+// clang-format on
 
 struct Register_LOGIC_CFG {
   uint8_t Reserved : 1;
@@ -666,39 +674,30 @@ struct Register_LOGIC_CFG {
    * 0 = LYn output not inverted before passing into Logic Block n.
    * 1 = inverts output LYn from Logic Block n.
    */
-  uint8_t LY_INV : 1;
+  bool LY_INV : 1;
 
   /**
    * 0 = LCn input not inverted before passing into Logic Block n.
    * 1 = inverts input LCn before passing it into Logic Block n.
    */
-  uint8_t LC_INV : 1;
+  bool LC_INV : 1;
 
   /**
    * 0 = LBn input not inverted before passing into Logic Block n.
    * 1 = inverts input LBn before passing it into Logic Block n.
    */
-  uint8_t LB_INV : 1;
+  bool LB_INV : 1;
 
   /**
    * 0 = LAn input not inverted before passing into Logic Block n.
    * 1 = inverts input LAn before passing it into Logic Block n.
    */
-  uint8_t LA_INV : 1;
+  bool LA_INV : 1;
 
   /**
-   * Configures the digital mux for Logic Block 1.
-   *
-   * 0b000 = off/disable.
-   * 0b001 = AND1.
-   * 0b010 = OR1.
-   * 0b011 = XOR1.
-   * 0b100 = FF1.
-   * 0b101 = IN_LA1.
-   * 0b110 = IN_LB1.
-   * 0b111 = IN_LC1.
+   * Configures the digital mux for Logic Block n.
    */
-  uint8_t LOGIC_SEL : 3;
+  MuxState LOGIC_SEL : 3;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
@@ -713,25 +712,25 @@ struct Register_LOGIC_FF_CFG {
    * 0 = FF2 not set in Logic Block 2.
    * 1 = set FF2 in Logic Block 2.
    */
-  uint8_t FF2_SET : 1;
+  bool FF2_SET : 1;
 
   /**
    * 0 = FF2 not cleared in Logic Block 2.
    * 1 = clear FF2 in Logic Block 2.
    */
-  uint8_t FF2_CLR : 1;
+  bool FF2_CLR : 1;
 
   /**
    * 0 = FF1 not set in Logic Block 1.
    * 1 = set FF1 in Logic Block 1.
    */
-  uint8_t FF1_SET : 1;
+  bool FF1_SET : 1;
 
   /**
    * 0 = FF1 not cleared in Logic Block 1.
    * 1 = clear FF1 in Logic Block 1.
    */
-  uint8_t FF1_CLR : 1;
+  bool FF1_CLR : 1;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
@@ -740,6 +739,8 @@ struct Register_LOGIC_INT_EVENT_EN {
   uint8_t Reserved : 2;
 
   /**
+   * Logic Block 2 output debounce disable.
+   *
    * 0 = output of Logic Block 2 is debounced before entering the
    * event/interrupt block.
    *
@@ -747,16 +748,18 @@ struct Register_LOGIC_INT_EVENT_EN {
    * event/interrupt block. Use with caution because glitches may generate
    * interrupts prematurely.
    */
-  uint8_t LY2_DBNC_DIS : 1;
+  bool LY2_DBNC_DIS : 1;
 
   /**
+   * LY2 activity interrupt generation.
+   *
    * 0 = LY2 cannot generate interrupt.
    * 1 = allow LY2 activity to generate events on the FIFO.
    */
-  uint8_t LOGIC2_EVENT_EN : 1;
+  bool LOGIC2_EVENT_EN : 1;
 
   /**
-   * Configure the logic level of LY2 that generates an interrupt.
+   * LY2 logic level interrupt generation type.
    *
    * 0 = LY2 is active low.
    * 1 = LY2 is active high.
@@ -764,6 +767,8 @@ struct Register_LOGIC_INT_EVENT_EN {
   uint8_t LOGIC2_INT_LEVEL : 1;
 
   /**
+   * Logic Block 1 output debounce disable.
+   *
    * 0 = output of Logic Block 1 is debounced before entering the
    * event/interrupt block.
    *
@@ -771,13 +776,15 @@ struct Register_LOGIC_INT_EVENT_EN {
    * event/interrupt block. Use with caution because glitches may generate
    * interrupts prematurely.
    */
-  uint8_t LY1_DBNC_DIS : 1;
+  bool LY1_DBNC_DIS : 1;
 
   /**
+   * LY1 activity interrupt generation.
+   *
    * 0 = LY1 cannot generate interrupt.
    * 1 = allow LY1 activity to generate events on the FIFO.
    */
-  uint8_t LOGIC1_EVENT_EN : 1;
+  bool LOGIC1_EVENT_EN : 1;
 
   /**
    * Configure the logic level of LY1 that generates an interrupt.
@@ -790,17 +797,19 @@ struct Register_LOGIC_INT_EVENT_EN {
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
 
+enum class PollTime : uint8_t {
+  k10ms = 0b00,
+  k20ms = 0b01,
+  k30ms = 0b10,
+  k40ms = 0b11,
+};
+
 struct Register_POLL_TIME_CFG {
   uint8_t Reserved : 6;
   /**
    * Configure time between consecutive scan cycles.
-   *
-   * 0b00 = 10 ms.
-   * 0b01 = 20 ms.
-   * 0b10 = 30 ms.
-   * 0b11 = 40 ms.
    */
-  uint8_t KEY_POLL_TIME : 2;
+  PollTime KEY_POLL_TIME : 2;
 
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
@@ -859,10 +868,10 @@ struct Register_PIN_CONFIG_D {
 };
 
 enum class CoreFrequency : uint8_t {
-  MHz50 = 0,
-  MHz100 = 1,
-  MHz200 = 2,
-  MHz500 = 3,
+  MHz50 = 0b00,
+  MHz100 = 0b01,
+  MHz200 = 0b10,
+  MHz500 = 0b11,
 };
 
 struct Register_GENERAL_CFG_B {
@@ -878,11 +887,6 @@ struct Register_GENERAL_CFG_B {
    * Sets the input clock frequency fed from the base 1 MHz oscillator
    * to the digital core. Slower frequencies result in less IDD. However,
    * key and GPI scan times increase.
-   *
-   * 0b00 = 50 kHz.
-   * 0b01 = 100 kHz.
-   * 0b10 = 200 kHz.
-   * 0b11 = 500 kHz
    */
   CoreFrequency CORE_FREQ : 2;
 
