@@ -4,6 +4,7 @@
 
 #include <esp_err.h>
 #include <i2clib/master.h>
+#include <i2clib/operation.h>
 
 namespace adp5589 {
 enum class Register : uint8_t;
@@ -36,6 +37,8 @@ class Keyboard {
   esp_err_t ReportHIDEvents();
   esp_err_t WriteByte(adp5589::Register reg, uint8_t value);
   esp_err_t ReadByte(adp5589::Register reg, void* value);
+  esp_err_t InitializeKeys(i2c::Operation& op);
+  esp_err_t InitializeInterrupts(i2c::Operation& op);
 
   i2c::Master i2c_master_;
 

@@ -83,7 +83,52 @@ esp_err_t Keyboard::Reset() {
   return ESP_OK;
 }
 
+esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
+  Register_PIN_CONFIG_A reg;
+  reg.val = 0xff;
+
+  if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_A),
+                     i2c::Address::Mode::WRITE) ||
+      !op.WriteByte(reg)) {
+    return ESP_FAIL;
+  }
+  if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_B),
+                     i2c::Address::Mode::WRITE) ||
+      !op.WriteByte(reg)) {
+    return ESP_FAIL;
+  }
+
+  Register_PIN_CONFIG_C reg_c;
+  reg_c.Reserved = 0;
+  reg_c.val = 0b111;
+  if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_C),
+                     i2c::Address::Mode::WRITE) ||
+      !op.WriteByte(reg_c)) {
+    return ESP_FAIL;
+  }
+  return ESP_OK;
+}
+
+esp_err_t Keyboard::InitializeInterrupts(i2c::Operation& op) {
+  if (!op.RestartReg(static_cast<uint8_t>(Register::INT_EN),
+                     i2c::Address::Mode::WRITE)) {
+    return ESP_FAIL;
+  }
+  Register_INT_EN reg;
+  reg.Reserved = 0;
+  reg.LOGIC2_IEN = false;
+  reg.LOGIC1_IEN = false;
+  reg.EVENT_IEN = true;
+  reg.GPI_IEN = false;
+  reg.OVRFLOW_IEN = true;
+  if (!op.WriteByte(reg))
+    return ESP_FAIL;
+  return ESP_OK;
+}
+
 esp_err_t Keyboard::Initialize() {
+  esp_err_t err;
+
   ESP_LOGD(TAG, "Initializing keyboard");
 
   i2c::Operation op = i2c_master_.CreateWriteOp(
@@ -98,54 +143,19 @@ esp_err_t Keyboard::Initialize() {
     reg.CORE_FREQ = CoreFrequency::MHz100;
     reg.LCK_TRK_LOGIC = 1;  // do not track.
     reg.LCK_TRK_GPI = 1;    // do not track.
-    reg.Unused = 0;         // Clear unused.
+    reg.Unused = 0;
     reg.INT_CFG = 0;  // INT pin remains asserted if an interrupt is pending.
     reg.RST_CFG = 1;  // ADP5589 does not reset if RST is low.
     if (!op.WriteByte(reg))
       return ESP_FAIL;
   }
 
-  {
-    if (!op.RestartReg(static_cast<uint8_t>(Register::INT_EN),
-                       i2c::Address::Mode::WRITE)) {
-      return ESP_FAIL;
-    }
-    Register_INT_EN reg;
-    reg.Reserved = 0;
-    reg.LOGIC2_IEN = false;
-    reg.LOGIC1_IEN = false;
-    reg.EVENT_IEN = true;
-    reg.GPI_IEN = false;
-    reg.OVRFLOW_IEN = true;
-    if (!op.WriteByte(reg))
-      return ESP_FAIL;
-  }
-
-  // Enable all keyboard pins.
-  {
-    Register_PIN_CONFIG_A reg;
-    reg.val = 0xff;
-
-    if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_A),
-                       i2c::Address::Mode::WRITE) ||
-        !op.WriteByte(reg)) {
-      return ESP_FAIL;
-    }
-    if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_B),
-                       i2c::Address::Mode::WRITE) ||
-        !op.WriteByte(reg)) {
-      return ESP_FAIL;
-    }
-
-    Register_PIN_CONFIG_C reg_c;
-    reg_c.Reserved = 0;
-    reg_c.val = 0b111;
-    if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_C),
-                       i2c::Address::Mode::WRITE) ||
-        !op.WriteByte(reg_c)) {
-      return ESP_FAIL;
-    }
-  }
+  err = InitializeInterrupts(op);
+  if (err != ESP_OK)
+    return err;
+  err = InitializeKeys(op);
+  if (err != ESP_OK)
+    return err;
 
   if (!op.Execute())
     return ESP_FAIL;

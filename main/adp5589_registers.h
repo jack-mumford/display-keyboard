@@ -188,8 +188,9 @@ struct Register_Status {
   uint8_t LOCK_STAT : 1;
 
   /**
-   * Event count value. Indicates how many events are currently stored on the
-   * FIFO.
+   * Event count value.
+   *
+   * Indicates how many events are currently stored on the FIFO.
    */
   uint8_t EC : 5;
 
