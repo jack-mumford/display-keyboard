@@ -814,9 +814,40 @@ struct Register_POLL_TIME_CFG {
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
 
-using Register_PIN_CONFIG_A = Register_UINT8;
-using Register_PIN_CONFIG_B = Register_UINT8;
-using Register_PIN_CONFIG_C = Register_UINT8_5_3;
+struct Register_PIN_CONFIG_A {
+  uint8_t R7_CONFIG : 1;
+  uint8_t R6_CONFIG : 1;
+  uint8_t R5_CONFIG : 1;
+  uint8_t R4_CONFIG : 1;
+  uint8_t R3_CONFIG : 1;
+  uint8_t R2_CONFIG : 1;
+  uint8_t R1_CONFIG : 1;
+  uint8_t R0_CONFIG : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_PIN_CONFIG_B {
+  uint8_t C7_CONFIG : 1;
+  uint8_t C6_CONFIG : 1;
+  uint8_t C5_CONFIG : 1;
+  uint8_t C4_CONFIG : 1;
+  uint8_t C3_CONFIG : 1;
+  uint8_t C2_CONFIG : 1;
+  uint8_t C1_CONFIG : 1;
+  uint8_t C0_CONFIG : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_PIN_CONFIG_C {
+  uint8_t Reserved : 5;
+  uint8_t C10_CONFIG : 1;
+  uint8_t C9_CONFIG : 1;
+  uint8_t C8_CONFIG : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
 
 struct Register_PIN_CONFIG_D {
   /**

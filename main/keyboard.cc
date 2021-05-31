@@ -84,28 +84,65 @@ esp_err_t Keyboard::Reset() {
 }
 
 esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
-  Register_PIN_CONFIG_A reg;
-  reg.val = 0xff;
-
+  constexpr Register_PIN_CONFIG_A reg_a = {
+      .R7_CONFIG = 1,
+      .R6_CONFIG = 1,
+      .R5_CONFIG = 1,
+      .R4_CONFIG = 1,
+      .R3_CONFIG = 1,
+      .R2_CONFIG = 1,
+      .R1_CONFIG = 1,
+      .R0_CONFIG = 1,
+  };
   if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_A),
                      i2c::Address::Mode::WRITE) ||
-      !op.WriteByte(reg)) {
-    return ESP_FAIL;
-  }
-  if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_B),
-                     i2c::Address::Mode::WRITE) ||
-      !op.WriteByte(reg)) {
+      !op.WriteByte(reg_a)) {
     return ESP_FAIL;
   }
 
-  Register_PIN_CONFIG_C reg_c;
-  reg_c.Reserved = 0;
-  reg_c.val = 0b111;
+  constexpr Register_PIN_CONFIG_B reg_b = {
+      .C7_CONFIG = 1,
+      .C6_CONFIG = 1,
+      .C5_CONFIG = 1,
+      .C4_CONFIG = 1,
+      .C3_CONFIG = 1,
+      .C2_CONFIG = 1,
+      .C1_CONFIG = 1,
+      .C0_CONFIG = 1,
+  };
+  if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_B),
+                     i2c::Address::Mode::WRITE) ||
+      !op.WriteByte(reg_b)) {
+    return ESP_FAIL;
+  }
+
+  constexpr Register_PIN_CONFIG_C reg_c = {
+      .Reserved = 0,
+      .C10_CONFIG = 1,
+      .C9_CONFIG = 1,
+      .C8_CONFIG = 1,
+  };
   if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_C),
                      i2c::Address::Mode::WRITE) ||
       !op.WriteByte(reg_c)) {
     return ESP_FAIL;
   }
+
+  constexpr Register_PIN_CONFIG_D reg_d = {
+      .PULL_SELECT = 0,    // 300 kΩ used for row pull-up during key scanning.
+      .C4_EXTEND_CFG = 0,  // C4 remains configured as GPIO 13.
+      .R4_EXTEND_CFG = 0,  // R4 remains configured as GPIO 5.
+      .C6_EXTEND_CFG = 0,  // C6 remains configured as GPIO 15.
+      .R3_EXTEND_CFG = 0,  // R3 remains configured as GPIO 4.
+      .C9_EXTEND_CFG = 0,  // C9 remains configured as GPIO 18.
+      .R0_EXTEND_CFG = 0,  // R0 remains configured as GPIO 1.
+  };
+  if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_D),
+                     i2c::Address::Mode::WRITE) ||
+      !op.WriteByte(reg_d)) {
+    return ESP_FAIL;
+  }
+
   return ESP_OK;
 }
 
@@ -114,13 +151,15 @@ esp_err_t Keyboard::InitializeInterrupts(i2c::Operation& op) {
                      i2c::Address::Mode::WRITE)) {
     return ESP_FAIL;
   }
-  Register_INT_EN reg;
-  reg.Reserved = 0;
-  reg.LOGIC2_IEN = false;
-  reg.LOGIC1_IEN = false;
-  reg.EVENT_IEN = true;
-  reg.GPI_IEN = false;
-  reg.OVRFLOW_IEN = true;
+  constexpr Register_INT_EN reg = {
+      .Reserved = 0,
+      .LOGIC2_IEN = false,
+      .LOGIC1_IEN = false,
+      .LOCK_IEN = false,
+      .OVRFLOW_IEN = true,
+      .GPI_IEN = false,
+      .EVENT_IEN = true,
+  };
   if (!op.WriteByte(reg))
     return ESP_FAIL;
   return ESP_OK;
@@ -138,14 +177,15 @@ esp_err_t Keyboard::Initialize() {
     return ESP_FAIL;
 
   {
-    Register_GENERAL_CFG_B reg;
-    reg.OSC_EN = true;  // Enable oscillator.
-    reg.CORE_FREQ = CoreFrequency::MHz100;
-    reg.LCK_TRK_LOGIC = 1;  // do not track.
-    reg.LCK_TRK_GPI = 1;    // do not track.
-    reg.Unused = 0;
-    reg.INT_CFG = 0;  // INT pin remains asserted if an interrupt is pending.
-    reg.RST_CFG = 1;  // ADP5589 does not reset if RST is low.
+    constexpr Register_GENERAL_CFG_B reg = {
+        .OSC_EN = true,  // Enable oscillator.
+        .CORE_FREQ = CoreFrequency::MHz100,
+        .LCK_TRK_LOGIC = 1,  // do not track.
+        .LCK_TRK_GPI = 1,    // do not track.
+        .Unused = 0,
+        .INT_CFG = 0,  // INT pin remains asserted if an interrupt is pending.
+        .RST_CFG = 1,  // ADP5589 does not reset if RST is low.
+    };
     if (!op.WriteByte(reg))
       return ESP_FAIL;
   }
@@ -156,6 +196,24 @@ esp_err_t Keyboard::Initialize() {
   err = InitializeKeys(op);
   if (err != ESP_OK)
     return err;
+
+  if (!op.RestartReg(static_cast<uint8_t>(Register::LOGIC_1_CFG),
+                     i2c::Address::Mode::WRITE) ||
+      !op.WriteByte(0x0)) {
+    return ESP_FAIL;
+  }
+
+  if (!op.RestartReg(static_cast<uint8_t>(Register::LOGIC_2_CFG),
+                     i2c::Address::Mode::WRITE) ||
+      !op.WriteByte(0x0)) {
+    return ESP_FAIL;
+  }
+
+  if (!op.RestartReg(static_cast<uint8_t>(Register::LOGIC_INT_EVENT_EN),
+                     i2c::Address::Mode::WRITE) ||
+      !op.WriteByte(0x0)) {
+    return ESP_FAIL;
+  }
 
   if (!op.Execute())
     return ESP_FAIL;
