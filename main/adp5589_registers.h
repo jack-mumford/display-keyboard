@@ -371,14 +371,129 @@ struct Register_UINT8_5_3 {
   operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
 };
 
-using Register_GPI_INT_STAT_A = Register_UINT8;
-using Register_GPI_INT_STAT_B = Register_UINT8;
-using Register_GPI_INT_STAT_C = Register_UINT8_5_3;
+struct Register_GPI_INT_STAT_A {
+  uint8_t GPI_8_INT : 1;
+  uint8_t GPI_7_INT : 1;
+  uint8_t GPI_6_INT : 1;
+  uint8_t GPI_5_INT : 1;
+  uint8_t GPI_4_INT : 1;
+  uint8_t GPI_3_INT : 1;
+  uint8_t GPI_2_INT : 1;
+  uint8_t GPI_1_INT : 1;
 
-using Register_RPULL_CONFIG_A = Register_UINT8;
-using Register_RPULL_CONFIG_B = Register_UINT8;
-using Register_RPULL_CONFIG_C = Register_UINT8;
-using Register_RPULL_CONFIG_D = Register_UINT8;
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_GPI_INT_STAT_B {
+  uint8_t GPI_16_INT : 1;
+  uint8_t GPI_15_INT : 1;
+  uint8_t GPI_14_INT : 1;
+  uint8_t GPI_13_INT : 1;
+  uint8_t GPI_12_INT : 1;
+  uint8_t GPI_11_INT : 1;
+  uint8_t GPI_10_INT : 1;
+  uint8_t GPI_9_INT : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_GPI_INT_STAT_C {
+  uint8_t Reserved : 5;
+  uint8_t GPI_19_INT : 1;
+  uint8_t GPI_18_INT : 1;
+  uint8_t GPI_17_INT : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_GPI_STATUS_A {
+  uint8_t GPI_8_STAT : 1;
+  uint8_t GPI_7_STAT : 1;
+  uint8_t GPI_6_STAT : 1;
+  uint8_t GPI_5_STAT : 1;
+  uint8_t GPI_4_STAT : 1;
+  uint8_t GPI_3_STAT : 1;
+  uint8_t GPI_2_STAT : 1;
+  uint8_t GPI_1_STAT : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_GPI_STATUS_B {
+  uint8_t GPI_16_STAT : 1;
+  uint8_t GPI_15_STAT : 1;
+  uint8_t GPI_14_STAT : 1;
+  uint8_t GPI_13_STAT : 1;
+  uint8_t GPI_12_STAT : 1;
+  uint8_t GPI_11_STAT : 1;
+  uint8_t GPI_10_STAT : 1;
+  uint8_t GPI_9_STAT : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_GPI_STATUS_C {
+  uint8_t Reserved : 5;
+  uint8_t GPI_19_STAT : 1;
+  uint8_t GPI_18_STAT : 1;
+  uint8_t GPI_17_STAT : 1;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+// clang-format off
+enum class PullupConfig : uint8_t {
+  k300Up    = 0b00,  // enable 300 kΩ pull-up.
+  k300Down  = 0b01,  // enable 300 kΩ pull-down.
+  k100Up    = 0b10,  // enable 100 kΩ pull-up.
+  kDisabled = 0b11,  // disable all pull-up/pull-down resistors
+};
+// clang-format on
+
+struct Register_RPULL_CONFIG_A {
+  PullupConfig R3_PULL_CFG : 2;
+  PullupConfig R2_PULL_CFG : 2;
+  PullupConfig R1_PULL_CFG : 2;
+  PullupConfig R0_PULL_CFG : 2;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_RPULL_CONFIG_B {
+  PullupConfig R7_PULL_CFG : 2;
+  PullupConfig R6_PULL_CFG : 2;
+  PullupConfig R5_PULL_CFG : 2;
+  PullupConfig R4_PULL_CFG : 2;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_RPULL_CONFIG_C {
+  PullupConfig C3_PULL_CFG : 2;
+  PullupConfig C2_PULL_CFG : 2;
+  PullupConfig C1_PULL_CFG : 2;
+  PullupConfig C0_PULL_CFG : 2;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_RPULL_CONFIG_D {
+  PullupConfig C7_PULL_CFG : 2;
+  PullupConfig C6_PULL_CFG : 2;
+  PullupConfig C5_PULL_CFG : 2;
+  PullupConfig C4_PULL_CFG : 2;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
+
+struct Register_RPULL_CONFIG_E {
+  uint8_t Reserved : 2;
+  PullupConfig C10_PULL_CFG : 2;
+  PullupConfig C9_PULL_CFG : 2;
+  PullupConfig C8_PULL_CFG : 2;
+
+  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+};
 
 struct Register_GPI_INT_STAT_E {
   uint8_t Reserved : 2;
