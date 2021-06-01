@@ -1,5 +1,6 @@
 #include "keyboard.h"
 
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <utility>
@@ -143,6 +144,19 @@ esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
     return ESP_FAIL;
   }
 
+  constexpr std::array<Register, 5> kRegistersToClear = {
+      Register::RPULL_CONFIG_A, Register::RPULL_CONFIG_B,
+      Register::RPULL_CONFIG_C, Register::RPULL_CONFIG_D,
+      Register::RPULL_CONFIG_E,
+  };
+
+  for (auto reg : kRegistersToClear) {
+    if (!op.RestartReg(static_cast<uint8_t>(reg), i2c::Address::Mode::WRITE) ||
+        !op.WriteByte(0x0)) {
+      return ESP_FAIL;
+    }
+  }
+
   return ESP_OK;
 }
 
@@ -197,22 +211,17 @@ esp_err_t Keyboard::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  if (!op.RestartReg(static_cast<uint8_t>(Register::LOGIC_1_CFG),
-                     i2c::Address::Mode::WRITE) ||
-      !op.WriteByte(0x0)) {
-    return ESP_FAIL;
-  }
+  constexpr std::array<Register, 5> kRegistersToClear = {
+      Register::LOGIC_1_CFG,        Register::LOGIC_2_CFG,
+      Register::LOGIC_INT_EVENT_EN, Register::CLOCK_DIV_CFG,
+      Register::LOGIC_FF_CFG,
+  };
 
-  if (!op.RestartReg(static_cast<uint8_t>(Register::LOGIC_2_CFG),
-                     i2c::Address::Mode::WRITE) ||
-      !op.WriteByte(0x0)) {
-    return ESP_FAIL;
-  }
-
-  if (!op.RestartReg(static_cast<uint8_t>(Register::LOGIC_INT_EVENT_EN),
-                     i2c::Address::Mode::WRITE) ||
-      !op.WriteByte(0x0)) {
-    return ESP_FAIL;
+  for (auto reg : kRegistersToClear) {
+    if (!op.RestartReg(static_cast<uint8_t>(reg), i2c::Address::Mode::WRITE) ||
+        !op.WriteByte(0x0)) {
+      return ESP_FAIL;
+    }
   }
 
   if (!op.Execute())
