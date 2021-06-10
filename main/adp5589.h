@@ -1014,10 +1014,10 @@ struct Register_PIN_CONFIG_D {
 };
 
 enum class CoreFrequency : uint8_t {
-  MHz50 = 0b00,
-  MHz100 = 0b01,
-  MHz200 = 0b10,
-  MHz500 = 0b11,
+  kHz50 = 0b00,
+  kHz100 = 0b01,
+  kHz200 = 0b10,
+  kHz500 = 0b11,
 };
 
 struct Register_GENERAL_CFG_B {

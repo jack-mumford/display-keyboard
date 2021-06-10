@@ -86,12 +86,12 @@ esp_err_t Keyboard::Reset() {
 
 esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
   constexpr Register_PIN_CONFIG_A reg_a = {
-      .R7_CONFIG = 1,
-      .R6_CONFIG = 1,
-      .R5_CONFIG = 1,
-      .R4_CONFIG = 1,
-      .R3_CONFIG = 1,
-      .R2_CONFIG = 1,
+      .R7_CONFIG = 0,
+      .R6_CONFIG = 0,
+      .R5_CONFIG = 0,
+      .R4_CONFIG = 0,
+      .R3_CONFIG = 0,
+      .R2_CONFIG = 0,
       .R1_CONFIG = 1,
       .R0_CONFIG = 1,
   };
@@ -102,10 +102,10 @@ esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
   }
 
   constexpr Register_PIN_CONFIG_B reg_b = {
-      .C7_CONFIG = 1,
-      .C6_CONFIG = 1,
-      .C5_CONFIG = 1,
-      .C4_CONFIG = 1,
+      .C7_CONFIG = 0,
+      .C6_CONFIG = 0,
+      .C5_CONFIG = 0,
+      .C4_CONFIG = 0,
       .C3_CONFIG = 1,
       .C2_CONFIG = 1,
       .C1_CONFIG = 1,
@@ -119,9 +119,9 @@ esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
 
   constexpr Register_PIN_CONFIG_C reg_c = {
       .Reserved = 0,
-      .C10_CONFIG = 1,
-      .C9_CONFIG = 1,
-      .C8_CONFIG = 1,
+      .C10_CONFIG = 0,
+      .C9_CONFIG = 0,
+      .C8_CONFIG = 0,
   };
   if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_C),
                      i2c::Address::Mode::WRITE) ||
@@ -193,7 +193,7 @@ esp_err_t Keyboard::Initialize() {
   {
     constexpr Register_GENERAL_CFG_B reg = {
         .OSC_EN = true,  // Enable oscillator.
-        .CORE_FREQ = CoreFrequency::MHz100,
+        .CORE_FREQ = CoreFrequency::kHz500,
         .LCK_TRK_LOGIC = 1,  // do not track.
         .LCK_TRK_GPI = 1,    // do not track.
         .Unused = 0,
