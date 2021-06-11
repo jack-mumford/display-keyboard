@@ -14,7 +14,7 @@
 #include <i2clib/master.h>
 #include <i2clib/operation.h>
 
-#include "adp5589_registers.h"
+#include "adp5589.h"
 #include "gpio_pins.h"
 #include "usb_hid.h"
 
