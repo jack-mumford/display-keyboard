@@ -133,7 +133,11 @@ void IRAM_ATTR KeyboardTask::KeyboardISR(void* arg) {
 
   if (xResult != pdFAIL) {
     // See https://www.freertos.org/xEventGroupSetBitsFromISR.html
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+#else
+    portYIELD_FROM_ISR();
+#endif
   }
 }
 
