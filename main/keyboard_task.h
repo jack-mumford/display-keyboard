@@ -20,15 +20,12 @@ class KeyboardTask {
  private:
   static void IRAM_ATTR TaskFunc(void* arg);
   static void IRAM_ATTR KeyboardISR(void* arg);
-  static void IRAM_ATTR LogKeysCb(void* arg);
 
   KeyboardTask();
   ~KeyboardTask();
 
   esp_err_t InstallKeyboardISR();
   esp_err_t Initialize();
-  esp_err_t CreateKeyLogTimer();
-  void LogKeys();
   void IRAM_ATTR Run();
 
   EventGroupHandle_t event_group_;  // Application events.
