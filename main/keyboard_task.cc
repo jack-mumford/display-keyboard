@@ -95,7 +95,7 @@ esp_err_t KeyboardTask::Initialize() {
   if (err != ESP_OK)
     return err;
 
-#if 1
+#if 0
   err = CreateKeyLogTimer();
   if (err != ESP_OK)
     return err;
