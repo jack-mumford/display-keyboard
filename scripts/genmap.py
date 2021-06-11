@@ -1,7 +1,7 @@
 
 vars = ['NONE']
-for c in range(11):
-    for r in range(8):
+for r in range(8):
+    for c in range(11):
         vars.append("R%d_C%d" % (r, c))
 
 for i in range(8):
