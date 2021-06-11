@@ -144,7 +144,7 @@ esp_err_t KeyboardTask::InstallKeyboardISR() {
       .mode = GPIO_MODE_INPUT,
       .pull_up_en = GPIO_PULLUP_ENABLE,
       .pull_down_en = GPIO_PULLDOWN_DISABLE,
-      .intr_type = GPIO_INTR_LOW_LEVEL,
+      .intr_type = GPIO_INTR_NEGEDGE,
   };
 
   esp_err_t err = gpio_config(&io_conf);
@@ -166,7 +166,7 @@ esp_err_t KeyboardTask::InstallKeyboardISR() {
     ESP_LOGE(TAG, "gpio_isr_handler_add failure: %s.", esp_err_to_name(err));
     return err;
   }
-  ESP_LOGD(TAG, "Keyboard interrupt handler installed on GPIO %u.",
+  ESP_LOGI(TAG, "Keyboard interrupt handler installed on GPIO %u.",
            kKeyboardINTGPIO);
   return ESP_OK;
 }

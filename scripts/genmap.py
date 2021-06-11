@@ -25,3 +25,11 @@ for var in vars:
     else:
         print("%s = %d," % (var, idx))
     idx += 1
+
+idx = 0
+for var in vars:
+    if type(var) is tuple:
+        print("    case %d: return \"%s\";" % (idx, var[0]))
+    else:
+        print("    case %d: return \"%s\";" % (idx, var))
+    idx += 1

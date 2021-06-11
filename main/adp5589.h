@@ -99,7 +99,7 @@ struct Register_ID {
   uint8_t MAN : 4;  // Manufacturer.
   uint8_t REV : 4;  // Hardware revision.
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_INT_STATUS {
@@ -165,7 +165,7 @@ struct Register_INT_STATUS {
    */
   uint8_t EVENT_INT : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_Status {
@@ -194,7 +194,7 @@ struct Register_Status {
    */
   uint8_t EC : 5;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 /**
@@ -355,20 +355,20 @@ struct Register_FIFO {
    */
   EventID IDENTIFIER : 7;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_UINT8 {
   uint8_t val;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_UINT8_5_3 {
   uint8_t Reserved : 5;
   uint8_t val : 3;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_GPI_INT_STAT_A {
@@ -381,7 +381,7 @@ struct Register_GPI_INT_STAT_A {
   uint8_t GPI_2_INT : 1;
   uint8_t GPI_1_INT : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_GPI_INT_STAT_B {
@@ -394,7 +394,7 @@ struct Register_GPI_INT_STAT_B {
   uint8_t GPI_10_INT : 1;
   uint8_t GPI_9_INT : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_GPI_INT_STAT_C {
@@ -403,7 +403,7 @@ struct Register_GPI_INT_STAT_C {
   uint8_t GPI_18_INT : 1;
   uint8_t GPI_17_INT : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_GPI_STATUS_A {
@@ -416,7 +416,7 @@ struct Register_GPI_STATUS_A {
   uint8_t GPI_2_STAT : 1;
   uint8_t GPI_1_STAT : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_GPI_STATUS_B {
@@ -429,7 +429,7 @@ struct Register_GPI_STATUS_B {
   uint8_t GPI_10_STAT : 1;
   uint8_t GPI_9_STAT : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_GPI_STATUS_C {
@@ -438,7 +438,7 @@ struct Register_GPI_STATUS_C {
   uint8_t GPI_18_STAT : 1;
   uint8_t GPI_17_STAT : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 // clang-format off
@@ -456,7 +456,7 @@ struct Register_RPULL_CONFIG_A {
   PullupConfig R1_PULL_CFG : 2;
   PullupConfig R0_PULL_CFG : 2;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_RPULL_CONFIG_B {
@@ -465,7 +465,7 @@ struct Register_RPULL_CONFIG_B {
   PullupConfig R5_PULL_CFG : 2;
   PullupConfig R4_PULL_CFG : 2;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_RPULL_CONFIG_C {
@@ -474,7 +474,7 @@ struct Register_RPULL_CONFIG_C {
   PullupConfig C1_PULL_CFG : 2;
   PullupConfig C0_PULL_CFG : 2;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_RPULL_CONFIG_D {
@@ -483,7 +483,7 @@ struct Register_RPULL_CONFIG_D {
   PullupConfig C5_PULL_CFG : 2;
   PullupConfig C4_PULL_CFG : 2;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_RPULL_CONFIG_E {
@@ -492,14 +492,14 @@ struct Register_RPULL_CONFIG_E {
   PullupConfig C9_PULL_CFG : 2;
   PullupConfig C8_PULL_CFG : 2;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_GPI_INT_STAT_E {
   uint8_t Reserved : 2;
   uint8_t val : 6;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 using Register_GPI_INT_LEVEL_A = Register_UINT8;
@@ -550,7 +550,7 @@ struct Register_UNLOCK {
    */
   uint8_t UNLOCK : 7;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 using Register_UNLOCK1 = Register_UNLOCK;
@@ -577,7 +577,7 @@ struct Register_EXT_LOCK_EVENT {
    */
   uint8_t EXT_LOCK_EVENT : 7;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_UNLOCK_TIMERS {
@@ -602,7 +602,7 @@ struct Register_UNLOCK_TIMERS {
    */
   uint8_t UNLOCK_TIMER : 3;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_LOCK_CFG {
@@ -612,7 +612,7 @@ struct Register_LOCK_CFG {
    */
   uint8_t LOCK_EN : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_RESET_EVENT {
@@ -639,7 +639,7 @@ struct Register_RESET_EVENT {
    */
   uint8_t RESET_EVENT : 7;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 using Register_RESET1_EVENT_A = Register_RESET_EVENT;
@@ -705,7 +705,7 @@ struct Register_RESET2_EVENT_C {
    */
   PulseWidth RESET_PULSE_WIDTH : 2;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 using Register_PWM_OFFT_LOW = Register_UINT8;
@@ -738,7 +738,7 @@ struct Register_PWM_CFG {
    */
   uint8_t PWM_EN : 3;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_CLOCK_DIV_CFG {
@@ -767,7 +767,7 @@ struct Register_CLOCK_DIV_CFG {
    */
   bool CLK_DIV_EN : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 // clang-format off
@@ -814,7 +814,7 @@ struct Register_LOGIC_CFG {
    */
   MuxState LOGIC_SEL : 3;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 using Register_LOGIC_1_CFG = Register_LOGIC_CFG;
@@ -847,7 +847,7 @@ struct Register_LOGIC_FF_CFG {
    */
   bool FF1_CLR : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_LOGIC_INT_EVENT_EN {
@@ -909,7 +909,7 @@ struct Register_LOGIC_INT_EVENT_EN {
    */
   uint8_t LOGIC1_INT_LEVEL : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 enum class PollTime : uint8_t {
@@ -926,7 +926,7 @@ struct Register_POLL_TIME_CFG {
    */
   PollTime KEY_POLL_TIME : 2;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_PIN_CONFIG_A {
@@ -939,7 +939,7 @@ struct Register_PIN_CONFIG_A {
   uint8_t R1_CONFIG : 1;
   uint8_t R0_CONFIG : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_PIN_CONFIG_B {
@@ -952,7 +952,7 @@ struct Register_PIN_CONFIG_B {
   uint8_t C1_CONFIG : 1;
   uint8_t C0_CONFIG : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_PIN_CONFIG_C {
@@ -961,7 +961,7 @@ struct Register_PIN_CONFIG_C {
   uint8_t C9_CONFIG : 1;
   uint8_t C8_CONFIG : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_PIN_CONFIG_D {
@@ -1010,7 +1010,7 @@ struct Register_PIN_CONFIG_D {
    */
   uint8_t R0_EXTEND_CFG : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 enum class CoreFrequency : uint8_t {
@@ -1064,7 +1064,7 @@ struct Register_GENERAL_CFG_B {
    */
   uint8_t RST_CFG : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
 
 struct Register_INT_EN {
@@ -1109,7 +1109,18 @@ struct Register_INT_EN {
    */
   bool EVENT_IEN : 1;
 
-  operator uint8_t() const { return *reinterpret_cast<const uint8_t*>(this); }
+  operator uint8_t() const;
 };
+
+/**
+ * @brief Return a string representing the event ID.
+ *
+ * For debug purposes.
+ *
+ * @param The event ID.
+ *
+ * @return The string
+ */
+const char* EventToName(EventID event);
 
 }  // namespace adp5589
