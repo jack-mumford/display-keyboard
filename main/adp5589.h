@@ -12,7 +12,7 @@ namespace adp5589 {
  */
 
 // clang-format off
-enum class Register : uint8_t {
+enum class RegNum : uint8_t {
   ID                 = 0x00,
   INT_STATUS         = 0x01,
   Status             = 0x02,
@@ -94,108 +94,6 @@ enum class Register : uint8_t {
   INT_EN             = 0x4E,
 };
 // clang-format on
-
-struct Register_ID {
-  uint8_t MAN : 4;  // Manufacturer.
-  uint8_t REV : 4;  // Hardware revision.
-
-  operator uint8_t() const;
-};
-
-struct Register_INT_STATUS {
-  uint8_t Reserved : 2;
-  /**
-   * Logic 2 interrupt condition.
-   *
-   * 0 = no interrupt.
-   * 1 = interrupt due to a general Logic 2 condition. Write a 1 to this bit to
-   * clear it.
-   */
-  uint8_t LOGIC2_INT : 1;
-  /**
-   * Logic 1 interrupt condition..
-   *
-   * 0 = no interrupt.
-   * 1 = interrupt due to a general Logic 1 condition. Write a 1 to this bit to
-   * clear it.
-   */
-  uint8_t LOGIC1_INT : 1;
-  /**
-   * 0 = no interrupt.
-   * 1 = interrupt due to a lock/unlock condition.
-   *
-   * The user can read LOCK_STAT (0x02[5]) to determine if LOCK_INT is due to a
-   * lock or unlock event. If LOCK_STAT = 1, LOCK_INT is due to a lock event. If
-   * LOCK_STAT = 0, LOCK_INT is due to an unlock event. Write a 1 to this bit to
-   * clear it. If lock mode is enabled via the software bit LOCK_EN (0x37[0]), a
-   * LOCK_INT is not generated because the processor knows it just enabled lock
-   * mode. If lock mode is disabled (while locked) via the software bit LOCK_EN,
-   * a LOCK_INT is not generated because the processor knows it just disabled
-   * lock mode
-   */
-  uint8_t LOCK_INT : 1;
-
-  /**
-   *
-   * Overflow interrupt condition.
-   *
-   * 0 = no interrupt.
-   * 1 = interrupt due to an overflow condition.
-   *
-   * Write a 1 to this bit to clear it.
-   */
-  uint8_t OVRFLOW_INT : 1;
-
-  /**
-   *
-   * 0 = no interrupt.
-   * 1 = interrupt due to a general GPI condition.
-   *
-   * This bit is not set by a GPI that has been configured to update the FIFO
-   * and event count. Write a 1 to this bit to clear it. This bit cannot be
-   * cleared until all GPI_x_INT bits are cleared.
-   */
-  uint8_t GPI_INT : 1;
-
-  /**
-   * 0 = no interrupt.
-   * 1 = interrupt due to key event (press/release), GPI event (GPI programmed
-   * for FIFO updates), or Logic 1/Logic 2 event (programmed for FIFO
-   * updates). Write a 1 to this bit to clear it.
-   */
-  uint8_t EVENT_INT : 1;
-
-  operator uint8_t() const;
-};
-
-struct Register_Status {
-  /**
-   * 0 = output from Logic Block 2. (LY2) is low.
-   * 1 = output from Logic Block 2. (LY2) is high.
-   */
-  uint8_t LOGIC2_STAT : 1;
-
-  /**
-   * 0 = output from Logic Block 1 (LY1) is low.
-   * 1 = output from Logic Block 1 (LY1) is high.
-   */
-  uint8_t LOGIC1_STAT : 1;
-
-  /**
-   * 0 = unlocked.
-   * 1 = locked.
-   */
-  uint8_t LOCK_STAT : 1;
-
-  /**
-   * Event count value.
-   *
-   * Indicates how many events are currently stored on the FIFO.
-   */
-  uint8_t EC : 5;
-
-  operator uint8_t() const;
-};
 
 /**
  * FIFO event ID from datasheet table 11.
@@ -331,10 +229,168 @@ enum class EventID : uint8_t {
   UNLOCK_WILDCARD = 127,
 };
 
+// clang-format off
+enum class PullupConfig : uint8_t {
+  k300Up    = 0b00,  // enable 300 kΩ pull-up.
+  k300Down  = 0b01,  // enable 300 kΩ pull-down.
+  k100Up    = 0b10,  // enable 100 kΩ pull-up.
+  kDisabled = 0b11,  // disable all pull-up/pull-down resistors
+};
+// clang-format on
+
+enum class PulseWidth : uint8_t {
+  k500us = 0b00,
+  k1ms = 0b01,
+  k2ms = 0b10,
+  k10ms = 0b11,
+};
+
+enum class ResetTime : uint8_t {
+  kImmediate = 0b000,
+  k1_0s = 0b001,  // 1.0 sec.
+  k1_5s = 0b010,  // 1.5 sec.
+  k2_0s = 0b011,  // 2.0 sec.
+  k2_5s = 0b100,  // 2.5 sec.
+  k3_0s = 0b101,  // 3.0 sec.
+  k3_5s = 0b110,  // 3.5 sec.
+  k4_0s = 0b111,  // 4.0 sec.
+};
+
+// clang-format off
+enum class MuxState : uint8_t {
+  kOff   = 0b000,  // Off/disable.
+  kAND   = 0b001,
+  kOR    = 0b010,
+  kXOR   = 0b011,
+  kFF    = 0b100,
+  kIN_LA = 0b101,
+  kIN_LB = 0b110,
+  kIN_LC = 0b111,
+};
+// clang-format on
+
+enum class PollTime : uint8_t {
+  k10ms = 0b00,
+  k20ms = 0b01,
+  k30ms = 0b10,
+  k40ms = 0b11,
+};
+
+enum class CoreFrequency : uint8_t {
+  kHz50 = 0b00,
+  kHz100 = 0b01,
+  kHz200 = 0b10,
+  kHz500 = 0b11,
+};
+
+namespace Register {
+
+struct ID {
+  uint8_t MAN : 4;  // Manufacturer.
+  uint8_t REV : 4;  // Hardware revision.
+
+  operator uint8_t() const;
+};
+
+struct INT_STATUS {
+  uint8_t Reserved : 2;
+  /**
+   * Logic 2 interrupt condition.
+   *
+   * 0 = no interrupt.
+   * 1 = interrupt due to a general Logic 2 condition. Write a 1 to this bit to
+   * clear it.
+   */
+  uint8_t LOGIC2_INT : 1;
+  /**
+   * Logic 1 interrupt condition..
+   *
+   * 0 = no interrupt.
+   * 1 = interrupt due to a general Logic 1 condition. Write a 1 to this bit to
+   * clear it.
+   */
+  uint8_t LOGIC1_INT : 1;
+  /**
+   * 0 = no interrupt.
+   * 1 = interrupt due to a lock/unlock condition.
+   *
+   * The user can read LOCK_STAT (0x02[5]) to determine if LOCK_INT is due to a
+   * lock or unlock event. If LOCK_STAT = 1, LOCK_INT is due to a lock event. If
+   * LOCK_STAT = 0, LOCK_INT is due to an unlock event. Write a 1 to this bit to
+   * clear it. If lock mode is enabled via the software bit LOCK_EN (0x37[0]), a
+   * LOCK_INT is not generated because the processor knows it just enabled lock
+   * mode. If lock mode is disabled (while locked) via the software bit LOCK_EN,
+   * a LOCK_INT is not generated because the processor knows it just disabled
+   * lock mode
+   */
+  uint8_t LOCK_INT : 1;
+
+  /**
+   *
+   * Overflow interrupt condition.
+   *
+   * 0 = no interrupt.
+   * 1 = interrupt due to an overflow condition.
+   *
+   * Write a 1 to this bit to clear it.
+   */
+  uint8_t OVRFLOW_INT : 1;
+
+  /**
+   *
+   * 0 = no interrupt.
+   * 1 = interrupt due to a general GPI condition.
+   *
+   * This bit is not set by a GPI that has been configured to update the FIFO
+   * and event count. Write a 1 to this bit to clear it. This bit cannot be
+   * cleared until all GPI_x_INT bits are cleared.
+   */
+  uint8_t GPI_INT : 1;
+
+  /**
+   * 0 = no interrupt.
+   * 1 = interrupt due to key event (press/release), GPI event (GPI programmed
+   * for FIFO updates), or Logic 1/Logic 2 event (programmed for FIFO
+   * updates). Write a 1 to this bit to clear it.
+   */
+  uint8_t EVENT_INT : 1;
+
+  operator uint8_t() const;
+};
+
+struct Status {
+  /**
+   * 0 = output from Logic Block 2. (LY2) is low.
+   * 1 = output from Logic Block 2. (LY2) is high.
+   */
+  uint8_t LOGIC2_STAT : 1;
+
+  /**
+   * 0 = output from Logic Block 1 (LY1) is low.
+   * 1 = output from Logic Block 1 (LY1) is high.
+   */
+  uint8_t LOGIC1_STAT : 1;
+
+  /**
+   * 0 = unlocked.
+   * 1 = locked.
+   */
+  uint8_t LOCK_STAT : 1;
+
+  /**
+   * Event count value.
+   *
+   * Indicates how many events are currently stored on the FIFO.
+   */
+  uint8_t EC : 5;
+
+  operator uint8_t() const;
+};
+
 /**
  * FIFO1 - FIFO16.
  */
-struct Register_FIFO {
+struct FIFO {
   /**
    * Represents the state of the event that is recorded in IDENTIFIER.
    *
@@ -371,7 +427,7 @@ struct Register_UINT8_5_3 {
   operator uint8_t() const;
 };
 
-struct Register_GPI_INT_STAT_A {
+struct GPI_INT_STAT_A {
   uint8_t GPI_8_INT : 1;
   uint8_t GPI_7_INT : 1;
   uint8_t GPI_6_INT : 1;
@@ -384,7 +440,7 @@ struct Register_GPI_INT_STAT_A {
   operator uint8_t() const;
 };
 
-struct Register_GPI_INT_STAT_B {
+struct GPI_INT_STAT_B {
   uint8_t GPI_16_INT : 1;
   uint8_t GPI_15_INT : 1;
   uint8_t GPI_14_INT : 1;
@@ -397,7 +453,7 @@ struct Register_GPI_INT_STAT_B {
   operator uint8_t() const;
 };
 
-struct Register_GPI_INT_STAT_C {
+struct GPI_INT_STAT_C {
   uint8_t Reserved : 5;
   uint8_t GPI_19_INT : 1;
   uint8_t GPI_18_INT : 1;
@@ -406,7 +462,7 @@ struct Register_GPI_INT_STAT_C {
   operator uint8_t() const;
 };
 
-struct Register_GPI_STATUS_A {
+struct GPI_STATUS_A {
   uint8_t GPI_8_STAT : 1;
   uint8_t GPI_7_STAT : 1;
   uint8_t GPI_6_STAT : 1;
@@ -419,7 +475,7 @@ struct Register_GPI_STATUS_A {
   operator uint8_t() const;
 };
 
-struct Register_GPI_STATUS_B {
+struct GPI_STATUS_B {
   uint8_t GPI_16_STAT : 1;
   uint8_t GPI_15_STAT : 1;
   uint8_t GPI_14_STAT : 1;
@@ -432,7 +488,7 @@ struct Register_GPI_STATUS_B {
   operator uint8_t() const;
 };
 
-struct Register_GPI_STATUS_C {
+struct GPI_STATUS_C {
   uint8_t Reserved : 5;
   uint8_t GPI_19_STAT : 1;
   uint8_t GPI_18_STAT : 1;
@@ -441,16 +497,7 @@ struct Register_GPI_STATUS_C {
   operator uint8_t() const;
 };
 
-// clang-format off
-enum class PullupConfig : uint8_t {
-  k300Up    = 0b00,  // enable 300 kΩ pull-up.
-  k300Down  = 0b01,  // enable 300 kΩ pull-down.
-  k100Up    = 0b10,  // enable 100 kΩ pull-up.
-  kDisabled = 0b11,  // disable all pull-up/pull-down resistors
-};
-// clang-format on
-
-struct Register_RPULL_CONFIG_A {
+struct RPULL_CONFIG_A {
   PullupConfig R3_PULL_CFG : 2;
   PullupConfig R2_PULL_CFG : 2;
   PullupConfig R1_PULL_CFG : 2;
@@ -459,7 +506,7 @@ struct Register_RPULL_CONFIG_A {
   operator uint8_t() const;
 };
 
-struct Register_RPULL_CONFIG_B {
+struct RPULL_CONFIG_B {
   PullupConfig R7_PULL_CFG : 2;
   PullupConfig R6_PULL_CFG : 2;
   PullupConfig R5_PULL_CFG : 2;
@@ -468,7 +515,7 @@ struct Register_RPULL_CONFIG_B {
   operator uint8_t() const;
 };
 
-struct Register_RPULL_CONFIG_C {
+struct RPULL_CONFIG_C {
   PullupConfig C3_PULL_CFG : 2;
   PullupConfig C2_PULL_CFG : 2;
   PullupConfig C1_PULL_CFG : 2;
@@ -477,7 +524,7 @@ struct Register_RPULL_CONFIG_C {
   operator uint8_t() const;
 };
 
-struct Register_RPULL_CONFIG_D {
+struct RPULL_CONFIG_D {
   PullupConfig C7_PULL_CFG : 2;
   PullupConfig C6_PULL_CFG : 2;
   PullupConfig C5_PULL_CFG : 2;
@@ -486,7 +533,7 @@ struct Register_RPULL_CONFIG_D {
   operator uint8_t() const;
 };
 
-struct Register_RPULL_CONFIG_E {
+struct RPULL_CONFIG_E {
   uint8_t Reserved : 2;
   PullupConfig C10_PULL_CFG : 2;
   PullupConfig C9_PULL_CFG : 2;
@@ -495,42 +542,42 @@ struct Register_RPULL_CONFIG_E {
   operator uint8_t() const;
 };
 
-struct Register_GPI_INT_STAT_E {
+struct GPI_INT_STAT_E {
   uint8_t Reserved : 2;
   uint8_t val : 6;
 
   operator uint8_t() const;
 };
 
-using Register_GPI_INT_LEVEL_A = Register_UINT8;
-using Register_GPI_INT_LEVEL_B = Register_UINT8;
-using Register_GPI_INT_LEVEL_C = Register_UINT8_5_3;
+using GPI_INT_LEVEL_A = Register_UINT8;
+using GPI_INT_LEVEL_B = Register_UINT8;
+using GPI_INT_LEVEL_C = Register_UINT8_5_3;
 
-using Register_GPI_EVENT_EN_A = Register_UINT8;
-using Register_GPI_EVENT_EN_B = Register_UINT8;
-using Register_GPI_EVENT_EN_C = Register_UINT8_5_3;
+using GPI_EVENT_EN_A = Register_UINT8;
+using GPI_EVENT_EN_B = Register_UINT8;
+using GPI_EVENT_EN_C = Register_UINT8_5_3;
 
-using Register_GPI_INTERRUPT_EN_A = Register_UINT8;
-using Register_GPI_INTERRUPT_EN_B = Register_UINT8;
-using Register_GPI_INTERRUPT_EN_C = Register_UINT8_5_3;
+using GPI_INTERRUPT_EN_A = Register_UINT8;
+using GPI_INTERRUPT_EN_B = Register_UINT8;
+using GPI_INTERRUPT_EN_C = Register_UINT8_5_3;
 
-using Register_DEBOUNCE_DIS_A = Register_UINT8;
-using Register_DEBOUNCE_DIS_B = Register_UINT8;
-using Register_DEBOUNCE_DIS_C = Register_UINT8_5_3;
+using DEBOUNCE_DIS_A = Register_UINT8;
+using DEBOUNCE_DIS_B = Register_UINT8;
+using DEBOUNCE_DIS_C = Register_UINT8_5_3;
 
-using Register_GPO_DATA_OUT_A = Register_UINT8;
-using Register_GPO_DATA_OUT_B = Register_UINT8;
-using Register_GPO_DATA_OUT_C = Register_UINT8_5_3;
+using GPO_DATA_OUT_A = Register_UINT8;
+using GPO_DATA_OUT_B = Register_UINT8;
+using GPO_DATA_OUT_C = Register_UINT8_5_3;
 
-using Register_GPO_OUT_MODE_A = Register_UINT8;
-using Register_GPO_OUT_MODE_B = Register_UINT8;
-using Register_GPO_OUT_MODE_C = Register_UINT8_5_3;
+using GPO_OUT_MODE_A = Register_UINT8;
+using GPO_OUT_MODE_B = Register_UINT8;
+using GPO_OUT_MODE_C = Register_UINT8_5_3;
 
-using Register_GPIO_DIRECTION_A = Register_UINT8;
-using Register_GPIO_DIRECTION_B = Register_UINT8;
-using Register_GPIO_DIRECTION_C = Register_UINT8_5_3;
+using GPIO_DIRECTION_A = Register_UINT8;
+using GPIO_DIRECTION_B = Register_UINT8;
+using GPIO_DIRECTION_C = Register_UINT8_5_3;
 
-struct Register_UNLOCK {
+struct UNLOCK {
   /**
    * Defines which state the first unlock event should be.
    *
@@ -553,10 +600,10 @@ struct Register_UNLOCK {
   operator uint8_t() const;
 };
 
-using Register_UNLOCK1 = Register_UNLOCK;
-using Register_UNLOCK2 = Register_UNLOCK;
+using UNLOCK1 = UNLOCK;
+using UNLOCK2 = UNLOCK;
 
-struct Register_EXT_LOCK_EVENT {
+struct EXT_LOCK_EVENT {
   /**
    * Defines which state the lock event should be.
    *
@@ -580,7 +627,7 @@ struct Register_EXT_LOCK_EVENT {
   operator uint8_t() const;
 };
 
-struct Register_UNLOCK_TIMERS {
+struct UNLOCK_TIMERS {
   /**
    * If the keypad is locked and this timer is set, any key event (or GPI/logic
    * event programmed to FIFO update) is allowed to generate an EVENT_INT
@@ -605,7 +652,7 @@ struct Register_UNLOCK_TIMERS {
   operator uint8_t() const;
 };
 
-struct Register_LOCK_CFG {
+struct LOCK_CFG {
   uint8_t Reserved : 7;
   /**
    * Enable the lock function.
@@ -615,7 +662,7 @@ struct Register_LOCK_CFG {
   operator uint8_t() const;
 };
 
-struct Register_RESET_EVENT {
+struct RESET_EVENT {
   /**
    * Defines which level the first reset event should be.
    *
@@ -642,31 +689,13 @@ struct Register_RESET_EVENT {
   operator uint8_t() const;
 };
 
-using Register_RESET1_EVENT_A = Register_RESET_EVENT;
-using Register_RESET1_EVENT_B = Register_RESET_EVENT;
-using Register_RESET1_EVENT_C = Register_RESET_EVENT;
-using Register_RESET2_EVENT_A = Register_RESET_EVENT;
-using Register_RESET2_EVENT_B = Register_RESET_EVENT;
+using RESET1_EVENT_A = RESET_EVENT;
+using RESET1_EVENT_B = RESET_EVENT;
+using RESET1_EVENT_C = RESET_EVENT;
+using RESET2_EVENT_A = RESET_EVENT;
+using RESET2_EVENT_B = RESET_EVENT;
 
-enum class PulseWidth : uint8_t {
-  k500us = 0b00,
-  k1ms = 0b01,
-  k2ms = 0b10,
-  k10ms = 0b11,
-};
-
-enum class ResetTime : uint8_t {
-  kImmediate = 0b000,
-  k1_0s = 0b001,  // 1.0 sec.
-  k1_5s = 0b010,  // 1.5 sec.
-  k2_0s = 0b011,  // 2.0 sec.
-  k2_5s = 0b100,  // 2.5 sec.
-  k3_0s = 0b101,  // 3.0 sec.
-  k3_5s = 0b110,  // 3.5 sec.
-  k4_0s = 0b111,  // 4.0 sec.
-};
-
-struct Register_RESET2_EVENT_C {
+struct RESET2_EVENT_C {
   /**
    * Sets the polarity of RESET2.
    *
@@ -708,12 +737,12 @@ struct Register_RESET2_EVENT_C {
   operator uint8_t() const;
 };
 
-using Register_PWM_OFFT_LOW = Register_UINT8;
-using Register_PWM_OFFT_HIGH = Register_UINT8;
-using Register_PWM_ONT_LOW = Register_UINT8;
-using Register_PWM_ONT_HIGH = Register_UINT8;
+using PWM_OFFT_LOW = Register_UINT8;
+using PWM_OFFT_HIGH = Register_UINT8;
+using PWM_ONT_LOW = Register_UINT8;
+using PWM_ONT_HIGH = Register_UINT8;
 
-struct Register_PWM_CFG {
+struct PWM_CFG {
   uint8_t Reserved : 5;
 
   /**
@@ -741,7 +770,7 @@ struct Register_PWM_CFG {
   operator uint8_t() const;
 };
 
-struct Register_CLOCK_DIV_CFG {
+struct CLOCK_DIV_CFG {
   uint8_t Reserved : 1;
 
   /**
@@ -770,20 +799,7 @@ struct Register_CLOCK_DIV_CFG {
   operator uint8_t() const;
 };
 
-// clang-format off
-enum class MuxState : uint8_t {
-  kOff   = 0b000,  // Off/disable.
-  kAND   = 0b001,
-  kOR    = 0b010,
-  kXOR   = 0b011,
-  kFF    = 0b100,
-  kIN_LA = 0b101,
-  kIN_LB = 0b110,
-  kIN_LC = 0b111,
-};
-// clang-format on
-
-struct Register_LOGIC_CFG {
+struct LOGIC_CFG {
   uint8_t Reserved : 1;
   /**
    * 0 = LYn output not inverted before passing into Logic Block n.
@@ -817,10 +833,10 @@ struct Register_LOGIC_CFG {
   operator uint8_t() const;
 };
 
-using Register_LOGIC_1_CFG = Register_LOGIC_CFG;
-using Register_LOGIC_2_CFG = Register_LOGIC_CFG;
+using LOGIC_1_CFG = LOGIC_CFG;
+using LOGIC_2_CFG = LOGIC_CFG;
 
-struct Register_LOGIC_FF_CFG {
+struct LOGIC_FF_CFG {
   uint8_t Reserved : 4;
 
   /**
@@ -850,7 +866,7 @@ struct Register_LOGIC_FF_CFG {
   operator uint8_t() const;
 };
 
-struct Register_LOGIC_INT_EVENT_EN {
+struct LOGIC_INT_EVENT_EN {
   uint8_t Reserved : 2;
 
   /**
@@ -912,14 +928,7 @@ struct Register_LOGIC_INT_EVENT_EN {
   operator uint8_t() const;
 };
 
-enum class PollTime : uint8_t {
-  k10ms = 0b00,
-  k20ms = 0b01,
-  k30ms = 0b10,
-  k40ms = 0b11,
-};
-
-struct Register_POLL_TIME_CFG {
+struct POLL_TIME_CFG {
   uint8_t Reserved : 6;
   /**
    * Configure time between consecutive scan cycles.
@@ -929,7 +938,7 @@ struct Register_POLL_TIME_CFG {
   operator uint8_t() const;
 };
 
-struct Register_PIN_CONFIG_A {
+struct PIN_CONFIG_A {
   uint8_t R7_CONFIG : 1;
   uint8_t R6_CONFIG : 1;
   uint8_t R5_CONFIG : 1;
@@ -942,7 +951,7 @@ struct Register_PIN_CONFIG_A {
   operator uint8_t() const;
 };
 
-struct Register_PIN_CONFIG_B {
+struct PIN_CONFIG_B {
   uint8_t C7_CONFIG : 1;
   uint8_t C6_CONFIG : 1;
   uint8_t C5_CONFIG : 1;
@@ -955,7 +964,7 @@ struct Register_PIN_CONFIG_B {
   operator uint8_t() const;
 };
 
-struct Register_PIN_CONFIG_C {
+struct PIN_CONFIG_C {
   uint8_t Reserved : 5;
   uint8_t C10_CONFIG : 1;
   uint8_t C9_CONFIG : 1;
@@ -964,7 +973,7 @@ struct Register_PIN_CONFIG_C {
   operator uint8_t() const;
 };
 
-struct Register_PIN_CONFIG_D {
+struct PIN_CONFIG_D {
   /**
    * 0 = 300 kΩ used for row pull-up during key scanning.
    * 1 = 100 kΩ used for row pull-up during key scanning.
@@ -1013,14 +1022,7 @@ struct Register_PIN_CONFIG_D {
   operator uint8_t() const;
 };
 
-enum class CoreFrequency : uint8_t {
-  kHz50 = 0b00,
-  kHz100 = 0b01,
-  kHz200 = 0b10,
-  kHz500 = 0b11,
-};
-
-struct Register_GENERAL_CFG_B {
+struct GENERAL_CFG_B {
   /**
    * Enable internal 1 MHz oscillator.
    *
@@ -1067,7 +1069,7 @@ struct Register_GENERAL_CFG_B {
   operator uint8_t() const;
 };
 
-struct Register_INT_EN {
+struct INT_EN {
   uint8_t Reserved : 2;
   /**
    * Logic 2 interrupt.
@@ -1111,6 +1113,8 @@ struct Register_INT_EN {
 
   operator uint8_t() const;
 };
+
+}  // namespace Register
 
 /**
  * @brief Return a string representing the event ID.

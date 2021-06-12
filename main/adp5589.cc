@@ -1,6 +1,7 @@
 #include "adp5589.h"
 
 namespace adp5589 {
+namespace Register {
 
 const char* EventToName(EventID event) {
   switch (static_cast<uint8_t>(event)) {
@@ -264,11 +265,11 @@ const char* EventToName(EventID event) {
   return "???";
 }
 
-Register_FIFO::operator uint8_t() const {
+FIFO::operator uint8_t() const {
   return (Event_State << 7) | static_cast<uint8_t>(IDENTIFIER);
 }
 
-Register_PIN_CONFIG_A::operator uint8_t() const {
+PIN_CONFIG_A::operator uint8_t() const {
   return (static_cast<uint8_t>(R7_CONFIG) << 7) |
          (static_cast<uint8_t>(R6_CONFIG) << 6) |
          (static_cast<uint8_t>(R5_CONFIG) << 5) |
@@ -279,7 +280,7 @@ Register_PIN_CONFIG_A::operator uint8_t() const {
          (static_cast<uint8_t>(R0_CONFIG) << 0);
 }
 
-Register_PIN_CONFIG_B::operator uint8_t() const {
+PIN_CONFIG_B::operator uint8_t() const {
   return (static_cast<uint8_t>(C7_CONFIG) << 7) |
          (static_cast<uint8_t>(C6_CONFIG) << 6) |
          (static_cast<uint8_t>(C5_CONFIG) << 5) |
@@ -290,13 +291,13 @@ Register_PIN_CONFIG_B::operator uint8_t() const {
          (static_cast<uint8_t>(C0_CONFIG) << 0);
 }
 
-Register_PIN_CONFIG_C::operator uint8_t() const {
+PIN_CONFIG_C::operator uint8_t() const {
   return (static_cast<uint8_t>(C10_CONFIG) << 2) |
          (static_cast<uint8_t>(C9_CONFIG) << 1) |
          (static_cast<uint8_t>(C8_CONFIG) << 0);
 }
 
-Register_PIN_CONFIG_D::operator uint8_t() const {
+PIN_CONFIG_D::operator uint8_t() const {
   return (static_cast<uint8_t>(PULL_SELECT) << 7) |
          (static_cast<uint8_t>(C4_EXTEND_CFG) << 6) |
          (static_cast<uint8_t>(R4_EXTEND_CFG) << 5) |
@@ -306,7 +307,7 @@ Register_PIN_CONFIG_D::operator uint8_t() const {
          (static_cast<uint8_t>(R0_EXTEND_CFG) << 0);
 }
 
-Register_GENERAL_CFG_B::operator uint8_t() const {
+GENERAL_CFG_B::operator uint8_t() const {
   return (static_cast<uint8_t>(OSC_EN) << 7) |
          (static_cast<uint8_t>(CORE_FREQ) << 5) |
          (static_cast<uint8_t>(LCK_TRK_LOGIC) << 4) |
@@ -315,7 +316,7 @@ Register_GENERAL_CFG_B::operator uint8_t() const {
          (static_cast<uint8_t>(RST_CFG) << 0);
 }
 
-Register_INT_EN::operator uint8_t() const {
+INT_EN::operator uint8_t() const {
   return (static_cast<uint8_t>(LOGIC2_IEN) << 5) |
          (static_cast<uint8_t>(LOGIC1_IEN) << 4) |
          (static_cast<uint8_t>(LOCK_IEN) << 3) |
@@ -324,7 +325,7 @@ Register_INT_EN::operator uint8_t() const {
          (static_cast<uint8_t>(EVENT_IEN) << 0);
 }
 
-Register_INT_STATUS::operator uint8_t() const {
+INT_STATUS::operator uint8_t() const {
   return (static_cast<uint8_t>(LOGIC2_INT) << 5) |
          (static_cast<uint8_t>(LOGIC1_INT) << 4) |
          (static_cast<uint8_t>(LOCK_INT) << 3) |
@@ -333,4 +334,5 @@ Register_INT_STATUS::operator uint8_t() const {
          (static_cast<uint8_t>(EVENT_INT) << 0);
 }
 
+}  // namespace Register
 }  // namespace adp5589

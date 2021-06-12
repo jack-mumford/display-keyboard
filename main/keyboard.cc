@@ -20,25 +20,12 @@
 
 using adp5589::CoreFrequency;
 using adp5589::EventID;
-using adp5589::Register;
-using adp5589::Register_FIFO;
-using adp5589::Register_GENERAL_CFG_B;
-using adp5589::Register_ID;
-using adp5589::Register_INT_EN;
-using adp5589::Register_INT_STATUS;
-using adp5589::Register_PIN_CONFIG_A;
-using adp5589::Register_PIN_CONFIG_B;
-using adp5589::Register_PIN_CONFIG_C;
-using adp5589::Register_PIN_CONFIG_D;
-using adp5589::Register_Status;
+using adp5589::RegNum;
 
 namespace {
 constexpr char TAG[] = "Keyboard";
 constexpr uint8_t kSlaveAddress = 0x34;  // I2C address of ADP5589 IC.
 constexpr i2c::Address::Size kI2CAddressSize = i2c::Address::Size::bit7;
-
-static_assert(sizeof(Register_FIFO) == sizeof(uint8_t));
-static_assert(sizeof(Register_INT_EN) == sizeof(uint8_t));
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -115,7 +102,7 @@ esp_err_t Keyboard::Reset() {
   if (err != ESP_OK)
     return err;
 
-  Register_ID reg_id;
+  adp5589::Register::ID reg_id;
   err = Read(&reg_id);
   if (err != ESP_OK)
     return err;
@@ -125,7 +112,7 @@ esp_err_t Keyboard::Reset() {
 }
 
 esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
-  constexpr Register_PIN_CONFIG_A reg_a = {
+  constexpr adp5589::Register::PIN_CONFIG_A reg_a = {
       .R7_CONFIG = 0,
       .R6_CONFIG = 0,
       .R5_CONFIG = 0,
@@ -135,13 +122,13 @@ esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
       .R1_CONFIG = 1,
       .R0_CONFIG = 1,
   };
-  if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_A),
+  if (!op.RestartReg(static_cast<uint8_t>(RegNum::PIN_CONFIG_A),
                      i2c::Address::Mode::WRITE) ||
       !op.WriteByte(reg_a)) {
     return ESP_FAIL;
   }
 
-  constexpr Register_PIN_CONFIG_B reg_b = {
+  constexpr adp5589::Register::PIN_CONFIG_B reg_b = {
       .C7_CONFIG = 0,
       .C6_CONFIG = 0,
       .C5_CONFIG = 0,
@@ -151,25 +138,25 @@ esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
       .C1_CONFIG = 1,
       .C0_CONFIG = 1,
   };
-  if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_B),
+  if (!op.RestartReg(static_cast<uint8_t>(RegNum::PIN_CONFIG_B),
                      i2c::Address::Mode::WRITE) ||
       !op.WriteByte(reg_b)) {
     return ESP_FAIL;
   }
 
-  constexpr Register_PIN_CONFIG_C reg_c = {
+  constexpr adp5589::Register::PIN_CONFIG_C reg_c = {
       .Reserved = 0,
       .C10_CONFIG = 0,
       .C9_CONFIG = 0,
       .C8_CONFIG = 0,
   };
-  if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_C),
+  if (!op.RestartReg(static_cast<uint8_t>(RegNum::PIN_CONFIG_C),
                      i2c::Address::Mode::WRITE) ||
       !op.WriteByte(reg_c)) {
     return ESP_FAIL;
   }
 
-  constexpr Register_PIN_CONFIG_D reg_d = {
+  constexpr adp5589::Register::PIN_CONFIG_D reg_d = {
       .PULL_SELECT = 0,    // 300 kΩ used for row pull-up during key scanning.
       .C4_EXTEND_CFG = 0,  // C4 remains configured as GPIO 13.
       .R4_EXTEND_CFG = 0,  // R4 remains configured as GPIO 5.
@@ -178,16 +165,15 @@ esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
       .C9_EXTEND_CFG = 0,  // C9 remains configured as GPIO 18.
       .R0_EXTEND_CFG = 0,  // R0 remains configured as GPIO 1.
   };
-  if (!op.RestartReg(static_cast<uint8_t>(Register::PIN_CONFIG_D),
+  if (!op.RestartReg(static_cast<uint8_t>(RegNum::PIN_CONFIG_D),
                      i2c::Address::Mode::WRITE) ||
       !op.WriteByte(reg_d)) {
     return ESP_FAIL;
   }
 
-  constexpr std::array<Register, 5> kRegistersToClear = {
-      Register::RPULL_CONFIG_A, Register::RPULL_CONFIG_B,
-      Register::RPULL_CONFIG_C, Register::RPULL_CONFIG_D,
-      Register::RPULL_CONFIG_E,
+  constexpr std::array<RegNum, 5> kRegistersToClear = {
+      RegNum::RPULL_CONFIG_A, RegNum::RPULL_CONFIG_B, RegNum::RPULL_CONFIG_C,
+      RegNum::RPULL_CONFIG_D, RegNum::RPULL_CONFIG_E,
   };
 
   for (auto reg : kRegistersToClear) {
@@ -201,11 +187,11 @@ esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
 }
 
 esp_err_t Keyboard::InitializeInterrupts(i2c::Operation& op) {
-  if (!op.RestartReg(static_cast<uint8_t>(Register::INT_EN),
+  if (!op.RestartReg(static_cast<uint8_t>(RegNum::INT_EN),
                      i2c::Address::Mode::WRITE)) {
     return ESP_FAIL;
   }
-  constexpr Register_INT_EN reg = {
+  constexpr adp5589::Register::INT_EN reg = {
       .Reserved = 0,
       .LOGIC2_IEN = false,
       .LOGIC1_IEN = false,
@@ -226,12 +212,12 @@ esp_err_t Keyboard::Initialize() {
 
   i2c::Operation op = i2c_master_.CreateWriteOp(
       kSlaveAddress, kI2CAddressSize,
-      static_cast<uint8_t>(Register::GENERAL_CFG_B), "kbd-init");
+      static_cast<uint8_t>(RegNum::GENERAL_CFG_B), "kbd-init");
   if (!op.ready())
     return ESP_FAIL;
 
   {
-    constexpr Register_GENERAL_CFG_B reg = {
+    constexpr adp5589::Register::GENERAL_CFG_B reg = {
         .OSC_EN = true,  // Enable oscillator.
         .CORE_FREQ = CoreFrequency::kHz500,
         .LCK_TRK_LOGIC = 1,  // do not track.
@@ -251,10 +237,9 @@ esp_err_t Keyboard::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  constexpr std::array<Register, 5> kRegistersToClear = {
-      Register::LOGIC_1_CFG,        Register::LOGIC_2_CFG,
-      Register::LOGIC_INT_EVENT_EN, Register::CLOCK_DIV_CFG,
-      Register::LOGIC_FF_CFG,
+  constexpr std::array<RegNum, 5> kRegistersToClear = {
+      RegNum::LOGIC_1_CFG,   RegNum::LOGIC_2_CFG,  RegNum::LOGIC_INT_EVENT_EN,
+      RegNum::CLOCK_DIV_CFG, RegNum::LOGIC_FF_CFG,
   };
 
   for (auto reg : kRegistersToClear) {
@@ -317,14 +302,14 @@ esp_err_t Keyboard::HandleEvents() {
 
   ESP_LOGV(TAG, "Reading keyboard events.");
 
-  Register_INT_STATUS interrupt_status;
+  adp5589::Register::INT_STATUS interrupt_status;
   err = Read(&interrupt_status);
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "Failure reading INT_STATUS");
     return err;
   }
   // Write back the INT_STATUS register to clear the INT flags.
-  err = WriteByte(Register::INT_STATUS, interrupt_status);
+  err = WriteByte(RegNum::INT_STATUS, interrupt_status);
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "Failure writing INT_STATUS");
   }
@@ -333,7 +318,7 @@ esp_err_t Keyboard::HandleEvents() {
     return ESP_FAIL;
   }
 
-  Register_Status status_reg;
+  adp5589::Register::Status status_reg;
   err = Read(&status_reg);
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "Failure reading status register");
@@ -346,7 +331,7 @@ esp_err_t Keyboard::HandleEvents() {
   }
 
   constexpr uint8_t kMaxFIFOEntries = 16;
-  Register_FIFO fifo[kMaxFIFOEntries];
+  adp5589::Register::FIFO fifo[kMaxFIFOEntries];
 
   for (uint8_t i = 0; i < status_reg.EC; i++) {
     err = Read(&fifo[i]);
@@ -376,9 +361,9 @@ esp_err_t Keyboard::HandleEvents() {
   return ReportHIDEvents();
 }
 
-esp_err_t Keyboard::Read(Register_Status* reg) {
+esp_err_t Keyboard::Read(adp5589::Register::Status* reg) {
   uint8_t b;
-  esp_err_t err = ReadByte(Register::Status, &b);
+  esp_err_t err = ReadByte(RegNum::Status, &b);
   if (err != ESP_OK)
     return err;
 
@@ -390,9 +375,9 @@ esp_err_t Keyboard::Read(Register_Status* reg) {
   return ESP_OK;
 }
 
-esp_err_t Keyboard::Read(Register_INT_STATUS* reg) {
+esp_err_t Keyboard::Read(adp5589::Register::INT_STATUS* reg) {
   uint8_t b;
-  esp_err_t err = ReadByte(Register::Status, &b);
+  esp_err_t err = ReadByte(RegNum::Status, &b);
   if (err != ESP_OK)
     return err;
 
@@ -406,9 +391,9 @@ esp_err_t Keyboard::Read(Register_INT_STATUS* reg) {
   return ESP_OK;
 }
 
-esp_err_t Keyboard::Read(Register_FIFO* reg) {
+esp_err_t Keyboard::Read(adp5589::Register::FIFO* reg) {
   uint8_t b;
-  esp_err_t err = ReadByte(Register::FIFO_1, &b);
+  esp_err_t err = ReadByte(RegNum::FIFO_1, &b);
   if (err != ESP_OK)
     return err;
 
@@ -418,9 +403,9 @@ esp_err_t Keyboard::Read(Register_FIFO* reg) {
   return ESP_OK;
 }
 
-esp_err_t Keyboard::Read(Register_ID* reg) {
+esp_err_t Keyboard::Read(adp5589::Register::ID* reg) {
   uint8_t b;
-  esp_err_t err = ReadByte(Register::ID, &b);
+  esp_err_t err = ReadByte(RegNum::ID, &b);
   if (err != ESP_OK)
     return err;
 
@@ -430,14 +415,14 @@ esp_err_t Keyboard::Read(Register_ID* reg) {
   return ESP_OK;
 }
 
-esp_err_t Keyboard::ReadByte(Register reg, uint8_t* value) {
+esp_err_t Keyboard::ReadByte(RegNum reg, uint8_t* value) {
   return i2c_master_.ReadRegister(kSlaveAddress, kI2CAddressSize,
                                   static_cast<uint8_t>(reg), value)
              ? ESP_OK
              : ESP_FAIL;
 }
 
-esp_err_t Keyboard::WriteByte(Register reg, uint8_t value) {
+esp_err_t Keyboard::WriteByte(RegNum reg, uint8_t value) {
   return i2c_master_.WriteRegister(kSlaveAddress, kI2CAddressSize,
                                    static_cast<uint8_t>(reg), value)
              ? ESP_OK

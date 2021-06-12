@@ -7,15 +7,17 @@
 #include <i2clib/operation.h>
 
 namespace adp5589 {
-enum class Register : uint8_t;
+enum class RegNum : uint8_t;
 
-struct Register_FIFO;
-struct Register_ID;
-struct Register_Status;
-struct Register_INT_STATUS;
+namespace Register {
+struct FIFO;
+struct ID;
+struct Status;
+struct INT_STATUS;
 struct PIN_CONFIG_A;
 struct PIN_CONFIG_B;
 struct PIN_CONFIG_C;
+}  // namespace Register
 }  // namespace adp5589
 
 class Keyboard {
@@ -43,12 +45,12 @@ class Keyboard {
    * @return esp_err_t
    */
   esp_err_t ReportHIDEvents();
-  esp_err_t WriteByte(adp5589::Register reg, uint8_t value);
-  esp_err_t ReadByte(adp5589::Register reg, uint8_t* value);
-  esp_err_t Read(adp5589::Register_FIFO* reg);
-  esp_err_t Read(adp5589::Register_ID* reg);
-  esp_err_t Read(adp5589::Register_INT_STATUS* reg);
-  esp_err_t Read(adp5589::Register_Status* reg);
+  esp_err_t WriteByte(adp5589::RegNum reg, uint8_t value);
+  esp_err_t ReadByte(adp5589::RegNum reg, uint8_t* value);
+  esp_err_t Read(adp5589::Register::FIFO* reg);
+  esp_err_t Read(adp5589::Register::ID* reg);
+  esp_err_t Read(adp5589::Register::INT_STATUS* reg);
+  esp_err_t Read(adp5589::Register::Status* reg);
   esp_err_t InitializeKeys(i2c::Operation& op);
   esp_err_t InitializeInterrupts(i2c::Operation& op);
 
