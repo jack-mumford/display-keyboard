@@ -367,26 +367,30 @@ esp_err_t Keyboard::Read(adp5589::Register::Status* reg) {
   if (err != ESP_OK)
     return err;
 
+  // clang-format off
   reg->LOGIC2_STAT = b & 0b10000000 ? 1 : 0;
   reg->LOGIC1_STAT = b & 0b01000000 ? 1 : 0;
-  reg->LOCK_STAT = b & 0b00100000 ? 1 : 0;
-  reg->EC = b & 0b00011111;
+  reg->LOCK_STAT   = b & 0b00100000 ? 1 : 0;
+  reg->EC          = b & 0b00011111;
+  // clang-format on
 
   return ESP_OK;
 }
 
 esp_err_t Keyboard::Read(adp5589::Register::INT_STATUS* reg) {
   uint8_t b;
-  esp_err_t err = ReadByte(RegNum::Status, &b);
+  esp_err_t err = ReadByte(RegNum::INT_STATUS, &b);
   if (err != ESP_OK)
     return err;
 
-  reg->LOGIC2_INT = b & 0b00100000 ? 1 : 0;
-  reg->LOGIC1_INT = b & 0b00010000 ? 1 : 0;
-  reg->LOCK_INT = b & 0b00001000 ? 1 : 0;
+  // clang-format off
+  reg->LOGIC2_INT  = b & 0b00100000 ? 1 : 0;
+  reg->LOGIC1_INT  = b & 0b00010000 ? 1 : 0;
+  reg->LOCK_INT    = b & 0b00001000 ? 1 : 0;
   reg->OVRFLOW_INT = b & 0b00000100 ? 1 : 0;
-  reg->GPI_INT = b & 0b00000010 ? 1 : 0;
-  reg->EVENT_INT = b & 0b00000001;
+  reg->GPI_INT     = b & 0b00000010 ? 1 : 0;
+  reg->EVENT_INT   = b & 0b00000001;
+  // clang-format on
 
   return ESP_OK;
 }
