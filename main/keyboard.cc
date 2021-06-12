@@ -18,7 +18,19 @@
 #include "gpio_pins.h"
 #include "usb_hid.h"
 
-using namespace adp5589;
+using adp5589::CoreFrequency;
+using adp5589::EventID;
+using adp5589::Register;
+using adp5589::Register_FIFO;
+using adp5589::Register_GENERAL_CFG_B;
+using adp5589::Register_ID;
+using adp5589::Register_INT_EN;
+using adp5589::Register_INT_STATUS;
+using adp5589::Register_PIN_CONFIG_A;
+using adp5589::Register_PIN_CONFIG_B;
+using adp5589::Register_PIN_CONFIG_C;
+using adp5589::Register_PIN_CONFIG_D;
+using adp5589::Register_Status;
 
 namespace {
 constexpr char TAG[] = "Keyboard";
