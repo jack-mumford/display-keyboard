@@ -187,6 +187,27 @@ esp_err_t ResetKeyboard(gpio_num_t reset_pin) {
   return ESP_OK;
 }
 
+uint8_t GetModifierFlag(uint8_t keycode) {
+  switch (keycode) {
+    case HID_KEY_SHIFT_LEFT:
+      return KEYBOARD_MODIFIER_LEFTSHIFT;
+    case HID_KEY_SHIFT_RIGHT:
+      return KEYBOARD_MODIFIER_RIGHTSHIFT;
+    case HID_KEY_CONTROL_LEFT:
+      return KEYBOARD_MODIFIER_LEFTCTRL;
+    case HID_KEY_CONTROL_RIGHT:
+      return KEYBOARD_MODIFIER_RIGHTCTRL;
+    case HID_KEY_ALT_LEFT:
+      return KEYBOARD_MODIFIER_LEFTALT;
+    case HID_KEY_ALT_RIGHT:
+      return KEYBOARD_MODIFIER_RIGHTALT;
+    case HID_KEY_GUI_LEFT:
+      return KEYBOARD_MODIFIER_LEFTGUI;
+    case HID_KEY_GUI_RIGHT:
+      return KEYBOARD_MODIFIER_RIGHTGUI;
+  }
+  return 0x0;
+}
 }  // namespace
 
 Keyboard::Keyboard(i2c::Master i2c_master)
@@ -377,28 +398,15 @@ esp_err_t Keyboard::ReportHIDEvents() {
   uint8_t num_pressed_keys = 0;  // non-modifier keys.
 
   for (uint8_t keycode = 0; keycode < key_states_.size(); keycode++) {
-    if (key_states_[keycode]) {
-      if (keycode == HID_KEY_SHIFT_LEFT) {
-        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      } else if (keycode == HID_KEY_SHIFT_RIGHT) {
-        modifier |= KEYBOARD_MODIFIER_RIGHTSHIFT;
-      } else if (keycode == HID_KEY_CONTROL_LEFT) {
-        modifier |= KEYBOARD_MODIFIER_LEFTCTRL;
-      } else if (keycode == HID_KEY_CONTROL_RIGHT) {
-        modifier |= KEYBOARD_MODIFIER_RIGHTCTRL;
-      } else if (keycode == HID_KEY_ALT_LEFT) {
-        modifier |= KEYBOARD_MODIFIER_LEFTALT;
-      } else if (keycode == HID_KEY_ALT_RIGHT) {
-        modifier |= KEYBOARD_MODIFIER_RIGHTALT;
-      } else if (keycode == HID_KEY_GUI_LEFT) {
-        modifier |= KEYBOARD_MODIFIER_LEFTGUI;
-      } else if (keycode == HID_KEY_GUI_RIGHT) {
-        modifier |= KEYBOARD_MODIFIER_RIGHTGUI;
-      } else {
-        num_pressed_keys++;
-        if (next_key_idx < ARRAY_SIZE(keycodes))
-          keycodes[next_key_idx++] = keycode;
-      }
+    if (!key_states_[keycode])
+      continue;
+    uint8_t modifier_bit = GetModifierFlag(keycode);
+    if (modifier_bit) {
+      modifier |= modifier_bit;
+    } else {
+      num_pressed_keys++;
+      if (next_key_idx < ARRAY_SIZE(keycodes))
+        keycodes[next_key_idx++] = keycode;
     }
   }
 
