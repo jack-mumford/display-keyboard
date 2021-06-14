@@ -32,5 +32,4 @@ class KeyboardTask {
   TaskHandle_t task_ = nullptr;     // This task.
   Keyboard keyboard_;               // All interaction with keyboard.
   SemaphoreHandle_t mutex_;
-  esp_timer_handle_t time_update_timer_ = nullptr;
 };
