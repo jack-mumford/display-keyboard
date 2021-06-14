@@ -407,8 +407,6 @@ esp_err_t Keyboard::ReportHIDEvents() {
 esp_err_t Keyboard::HandleEvents() {
   esp_err_t err;
 
-  event_number_++;
-
   ESP_LOGV(TAG, "Reading keyboard events.");
 
   adp5589::Register::INT_STATUS interrupt_status;
@@ -443,6 +441,7 @@ esp_err_t Keyboard::HandleEvents() {
   adp5589::Register::FIFO fifo[kMaxFIFOEntries];
 
   for (uint8_t i = 0; i < status_reg.EC; i++) {
+    event_number_++;
     err = Read(&fifo[i]);
     if (err != ESP_OK) {
       ESP_LOGE(TAG, "Error reading FIFO entry %u", i);

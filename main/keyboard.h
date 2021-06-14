@@ -25,8 +25,17 @@ class Keyboard {
   Keyboard(i2c::Master i2c_master);
   ~Keyboard();
 
-  esp_err_t Initialize();
+  /**
+   * Reset the keyboard IC to manufacturer default values.
+   */
   esp_err_t Reset();
+
+  /**
+   * Initialize the keyboard.
+   *
+   * Call after reset to configure the keyboard IC.
+   */
+  esp_err_t Initialize();
 
   /**
    * Handle any keyboard events.
