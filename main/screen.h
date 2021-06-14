@@ -4,7 +4,7 @@ class MainDisplay;
 
 class Screen {
  public:
-  Screen(MainDisplay& display) : display_(display) {}
+  explicit Screen(MainDisplay& display) : display_(display) {}
 
   MainDisplay& disp() const { return display_; }
 

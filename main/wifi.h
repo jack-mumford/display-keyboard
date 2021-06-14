@@ -9,7 +9,7 @@
 
 class WiFi {
  public:
-  WiFi(EventGroupHandle_t wifi_event_group);
+  explicit WiFi(EventGroupHandle_t wifi_event_group);
   ~WiFi();
 
   esp_err_t Inititialize();

@@ -16,7 +16,7 @@ constexpr lv_coord_t kAlbumArtworkHeight = 130;
 
 class MainScreen : public Screen {
  public:
-  MainScreen(MainDisplay& display);
+  explicit MainScreen(MainDisplay& display);
   ~MainScreen();
 
   esp_err_t Initialize();

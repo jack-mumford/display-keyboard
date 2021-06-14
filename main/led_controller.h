@@ -22,7 +22,7 @@
 
 class LEDController {
  public:
-  LEDController(gpio_num_t activity_gpio);
+  explicit LEDController(gpio_num_t activity_gpio);
   ~LEDController();
 
   static LEDController* GetForTesting();
