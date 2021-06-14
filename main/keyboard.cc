@@ -236,6 +236,7 @@ esp_err_t Keyboard::Reset() {
   err = Read(&reg_id);
   if (err != ESP_OK)
     return err;
+  key_states_.fill(false);
   ESP_LOGI(TAG, "Keyboard reset, mfr: %u, rev: %u", reg_id.MAN, reg_id.REV);
 
   return ESP_OK;
