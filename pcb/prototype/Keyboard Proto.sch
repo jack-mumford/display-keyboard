@@ -422,9 +422,9 @@ I2C1_SCL
 Text GLabel 5650 5450 2    50   Input ~ 0
 I2C1_SDA
 Text GLabel 5650 5550 2    50   Input ~ 0
-KBDINT
+KBD_INT
 Text GLabel 8300 2650 0    50   Input ~ 0
-KBDINT
+KBD_INT
 Text GLabel 8300 2050 0    50   Input ~ 0
 KBD_RST
 Text GLabel 7850 2350 0    50   Input ~ 0
@@ -552,7 +552,7 @@ Wire Wire Line
 	7950 2450 8300 2450
 Connection ~ 7950 2450
 Text GLabel 2000 5600 2    50   Input ~ 0
-KBDINT
+KBD_INT
 Text GLabel 1450 5350 1    50   Input ~ 0
 3V3
 $Comp
