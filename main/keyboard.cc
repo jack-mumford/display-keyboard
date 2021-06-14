@@ -211,7 +211,7 @@ uint8_t GetModifierFlag(uint8_t keycode) {
 }  // namespace
 
 Keyboard::Keyboard(i2c::Master i2c_master)
-    : i2c_master_(std::move(i2c_master)), key_states_(0xFF, false) {}
+    : i2c_master_(std::move(i2c_master)), key_states_({false}) {}
 
 Keyboard::~Keyboard() = default;
 

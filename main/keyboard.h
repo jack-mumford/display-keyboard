@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <array>
 
 #include <esp_err.h>
 #include <i2clib/master.h>
@@ -19,6 +19,9 @@ struct PIN_CONFIG_C;
 struct Status;
 }  // namespace Register
 }  // namespace adp5589
+
+// Maximum number of HID_KEY_* key codes.
+constexpr size_t kNumHIDKeyCodes = 0xff;
 
 class Keyboard {
  public:
@@ -63,8 +66,8 @@ class Keyboard {
 
   /**
    * Array used to map TinyUSB's HID KEYCODE value to the button
-   * pressed/depressed state. true=pressed.
+   * pressed/depressed state.
    */
-  std::vector<bool> key_states_;
+  std::array<bool, kNumHIDKeyCodes> key_states_;  // true if depressed.
   uint32_t event_number_ = 0;
 };
