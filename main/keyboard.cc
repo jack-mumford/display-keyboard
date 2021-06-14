@@ -218,7 +218,7 @@ Keyboard::~Keyboard() = default;
 esp_err_t Keyboard::Reset() {
   ESP_LOGD(TAG, "Resetting keyboard");
 
-  const gpio_config_t config = {
+  constexpr gpio_config_t config = {
       .pin_bit_mask = (1ULL << kKeyboardResetGPIO),
       .mode = GPIO_MODE_OUTPUT,
       .pull_up_en = GPIO_PULLUP_ENABLE,

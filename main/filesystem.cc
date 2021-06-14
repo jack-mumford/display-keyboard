@@ -13,7 +13,7 @@ Filesystem::Filesystem() = default;
 Filesystem::~Filesystem() = default;
 
 esp_err_t Filesystem::Initialize() {
-  const esp_vfs_spiffs_conf_t conf = {
+  constexpr esp_vfs_spiffs_conf_t conf = {
       .base_path = "/spiffs",
       .partition_label = nullptr,
       .max_files = 5,  // Max number open at a time.

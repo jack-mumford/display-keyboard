@@ -74,7 +74,7 @@ esp_err_t APA102::Initialize() {
   if (err != ESP_OK)
     return err;
 
-  const spi_device_interface_config_t devcfg = {
+  constexpr spi_device_interface_config_t devcfg = {
       .command_bits = 0,
       .address_bits = 0,
       .dummy_bits = 0,
