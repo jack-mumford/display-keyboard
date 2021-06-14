@@ -22,7 +22,7 @@ struct PIN_CONFIG_C;
 
 class Keyboard {
  public:
-  Keyboard(i2c::Master i2c_master);
+  explicit Keyboard(i2c::Master i2c_master);
   ~Keyboard();
 
   /**
@@ -42,16 +42,12 @@ class Keyboard {
    *
    * Call this function, either polled or when interrupt pin indicates, to
    * handle any queued keyboard events.
-   *
-   * @return ESP_OK when successful.
    */
   esp_err_t HandleEvents();
 
  private:
   /**
    * Report all HID events to the USB host.
-   *
-   * @return esp_err_t
    */
   esp_err_t ReportHIDEvents();
   esp_err_t WriteByte(adp5589::RegNum reg, uint8_t value);

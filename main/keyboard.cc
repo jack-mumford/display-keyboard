@@ -395,7 +395,7 @@ esp_err_t Keyboard::ReportHIDEvents() {
   uint8_t next_key_idx = 0;
   uint8_t keycodes[6] = {HID_KEY_NONE};
   uint8_t modifier = 0;
-  uint8_t num_pressed_keys = 0;  // non-modifier keys.
+  uint8_t num_pressed_keys = 0;  // number of non-modifier keys.
 
   for (uint8_t keycode = 0; keycode < key_states_.size(); keycode++) {
     if (!key_states_[keycode])
