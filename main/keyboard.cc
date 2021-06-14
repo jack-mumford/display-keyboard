@@ -329,8 +329,8 @@ esp_err_t Keyboard::Initialize() {
     constexpr adp5589::Register::GENERAL_CFG_B reg = {
         .OSC_EN = true,  // Enable oscillator.
         .CORE_FREQ = CoreFrequency::kHz500,
-        .LCK_TRK_LOGIC = 1,  // do not track.
-        .LCK_TRK_GPI = 1,    // do not track.
+        .LCK_TRK_LOGIC = 1,  // 1 = do not track.
+        .LCK_TRK_GPI = 1,    // 1 = do not track.
         .Unused = 0,
         .INT_CFG = 1,  // deassert for 50 µs, reassert if interrupt is pending.
         .RST_CFG = 0,  // ADP5589 reset if RST is low.
@@ -346,10 +346,15 @@ esp_err_t Keyboard::Initialize() {
   if (err != ESP_OK)
     return err;
 
+  // clang-format off
   constexpr std::array<RegNum, 5> kRegistersToClear = {
-      RegNum::LOGIC_1_CFG,   RegNum::LOGIC_2_CFG,  RegNum::LOGIC_INT_EVENT_EN,
-      RegNum::CLOCK_DIV_CFG, RegNum::LOGIC_FF_CFG,
+      RegNum::LOGIC_1_CFG,
+      RegNum::LOGIC_2_CFG,
+      RegNum::LOGIC_INT_EVENT_EN,
+      RegNum::CLOCK_DIV_CFG,
+      RegNum::LOGIC_FF_CFG,
   };
+  // clang-format on
 
   for (auto reg : kRegistersToClear) {
     if (!op.RestartReg(static_cast<uint8_t>(reg), i2c::Address::Mode::WRITE) ||
