@@ -423,11 +423,10 @@ Text GLabel 5650 5450 2    50   Input ~ 0
 I2C1_SDA
 Text GLabel 5650 5550 2    50   Input ~ 0
 KBDINT
-NoConn ~ 5650 5650
 Text GLabel 8300 2650 0    50   Input ~ 0
 KBDINT
 Text GLabel 8300 2050 0    50   Input ~ 0
-RST
+KBD_RST
 Text GLabel 7850 2350 0    50   Input ~ 0
 I2C0_SDA
 Text GLabel 7850 2450 0    50   Input ~ 0
@@ -575,4 +574,6 @@ Wire Wire Line
 	1750 5600 1450 5600
 Text Notes 1800 5350 0    87   ~ 0
 Keyboard INT
+Text GLabel 5650 5650 2    50   Input ~ 0
+KBD_RST
 $EndSCHEMATC
