@@ -12,11 +12,11 @@ enum class RegNum : uint8_t;
 namespace Register {
 struct FIFO;
 struct ID;
-struct Status;
 struct INT_STATUS;
 struct PIN_CONFIG_A;
 struct PIN_CONFIG_B;
 struct PIN_CONFIG_C;
+struct Status;
 }  // namespace Register
 }  // namespace adp5589
 
