@@ -15,7 +15,7 @@ LibDir=
 [pcbnew]
 version=1
 PageLayoutDescrFile=
-LastNetListRead=Keyboard Proto.net
+LastNetListRead=DisplayKeyboard.net
 CopperLayerCount=2
 BoardThickness=1.6
 AllowMicroVias=0

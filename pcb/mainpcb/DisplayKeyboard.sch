@@ -4,10 +4,10 @@ EELAYER END
 $Descr A 11000 8500
 encoding utf-8
 Sheet 1 1
-Title "Keyboard Prototype Board"
+Title "Display Keyboard"
 Date "2020-12-27"
 Rev "4"
-Comp "Prototype Schematic"
+Comp "Display Keyboard Schematic"
 Comment1 "Based on FeatherS2 and ADP5589 keyboard IC"
 Comment2 ""
 Comment3 "License: MIT"
