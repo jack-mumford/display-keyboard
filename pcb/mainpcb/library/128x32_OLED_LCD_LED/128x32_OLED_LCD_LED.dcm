@@ -1,0 +1,7 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP 128x32_OLED_LCD_LED
+D SSD1306 based 128x32 pixel display
+$ENDCMP
+#
+#End Doc Library
