@@ -10,7 +10,7 @@ namespace kbd {
 namespace adp5589 {
 enum class RegNum : uint8_t;
 
-namespace Register {
+namespace reg {
 struct FIFO;
 struct ID;
 struct INT_STATUS;
@@ -18,7 +18,7 @@ struct PIN_CONFIG_A;
 struct PIN_CONFIG_B;
 struct PIN_CONFIG_C;
 struct Status;
-}  // namespace Register
+}  // namespace reg
 }  // namespace adp5589
 }  // namespace kbd
 
@@ -57,10 +57,10 @@ class Keyboard {
   esp_err_t ReportHIDEvents();
   esp_err_t WriteByte(kbd::adp5589::RegNum reg, uint8_t value);
   esp_err_t ReadByte(kbd::adp5589::RegNum reg, uint8_t* value);
-  esp_err_t Read(kbd::adp5589::Register::FIFO* reg);
-  esp_err_t Read(kbd::adp5589::Register::ID* reg);
-  esp_err_t Read(kbd::adp5589::Register::INT_STATUS* reg);
-  esp_err_t Read(kbd::adp5589::Register::Status* reg);
+  esp_err_t Read(kbd::adp5589::reg::FIFO* reg);
+  esp_err_t Read(kbd::adp5589::reg::ID* reg);
+  esp_err_t Read(kbd::adp5589::reg::INT_STATUS* reg);
+  esp_err_t Read(kbd::adp5589::reg::Status* reg);
   esp_err_t InitializeKeys(i2c::Operation& op);
   esp_err_t InitializeInterrupts(i2c::Operation& op);
 
