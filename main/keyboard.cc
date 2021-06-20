@@ -13,14 +13,14 @@
 #include <i2clib/address.h>
 #include <i2clib/master.h>
 #include <i2clib/operation.h>
+#include <kbdlib/adp5589.h>
 
-#include "adp5589.h"
 #include "gpio_pins.h"
 #include "usb_hid.h"
 
-using adp5589::CoreFrequency;
-using adp5589::EventID;
-using adp5589::RegNum;
+using kbd::adp5589::CoreFrequency;
+using kbd::adp5589::EventID;
+using kbd::adp5589::RegNum;
 
 namespace {
 constexpr char TAG[] = "Keyboard";
@@ -232,7 +232,7 @@ esp_err_t Keyboard::Reset() {
   if (err != ESP_OK)
     return err;
 
-  adp5589::Register::ID reg_id;
+  kbd::adp5589::Register::ID reg_id;
   err = Read(&reg_id);
   if (err != ESP_OK)
     return err;
@@ -243,7 +243,7 @@ esp_err_t Keyboard::Reset() {
 }
 
 esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
-  constexpr adp5589::Register::PIN_CONFIG_A reg_a = {
+  constexpr kbd::adp5589::Register::PIN_CONFIG_A reg_a = {
       .R7_CONFIG = 0,
       .R6_CONFIG = 0,
       .R5_CONFIG = 0,
@@ -259,7 +259,7 @@ esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
     return ESP_FAIL;
   }
 
-  constexpr adp5589::Register::PIN_CONFIG_B reg_b = {
+  constexpr kbd::adp5589::Register::PIN_CONFIG_B reg_b = {
       .C7_CONFIG = 0,
       .C6_CONFIG = 0,
       .C5_CONFIG = 0,
@@ -275,7 +275,7 @@ esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
     return ESP_FAIL;
   }
 
-  constexpr adp5589::Register::PIN_CONFIG_C reg_c = {
+  constexpr kbd::adp5589::Register::PIN_CONFIG_C reg_c = {
       .Reserved = 0,
       .C10_CONFIG = 0,
       .C9_CONFIG = 0,
@@ -287,7 +287,7 @@ esp_err_t Keyboard::InitializeKeys(i2c::Operation& op) {
     return ESP_FAIL;
   }
 
-  constexpr adp5589::Register::PIN_CONFIG_D reg_d = {
+  constexpr kbd::adp5589::Register::PIN_CONFIG_D reg_d = {
       .PULL_SELECT = 0,    // 300 kΩ used for row pull-up during key scanning.
       .C4_EXTEND_CFG = 0,  // C4 remains configured as GPIO 13.
       .R4_EXTEND_CFG = 0,  // R4 remains configured as GPIO 5.
@@ -322,7 +322,7 @@ esp_err_t Keyboard::InitializeInterrupts(i2c::Operation& op) {
                      i2c::Address::Mode::WRITE)) {
     return ESP_FAIL;
   }
-  constexpr adp5589::Register::INT_EN reg = {
+  constexpr kbd::adp5589::Register::INT_EN reg = {
       .Reserved = 0,
       .LOGIC2_IEN = false,
       .LOGIC1_IEN = false,
@@ -348,7 +348,7 @@ esp_err_t Keyboard::Initialize() {
     return ESP_FAIL;
 
   {
-    constexpr adp5589::Register::GENERAL_CFG_B reg = {
+    constexpr kbd::adp5589::Register::GENERAL_CFG_B reg = {
         .OSC_EN = true,  // Enable oscillator.
         .CORE_FREQ = CoreFrequency::kHz500,
         .LCK_TRK_LOGIC = 1,  // 1 = do not track.
@@ -423,7 +423,7 @@ esp_err_t Keyboard::HandleEvents() {
 
   ESP_LOGV(TAG, "Reading keyboard events.");
 
-  adp5589::Register::INT_STATUS interrupt_status;
+  kbd::adp5589::Register::INT_STATUS interrupt_status;
   err = Read(&interrupt_status);
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "Failure reading INT_STATUS");
@@ -439,7 +439,7 @@ esp_err_t Keyboard::HandleEvents() {
     return ESP_FAIL;
   }
 
-  adp5589::Register::Status status_reg;
+  kbd::adp5589::Register::Status status_reg;
   err = Read(&status_reg);
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "Failure reading status register");
@@ -452,7 +452,7 @@ esp_err_t Keyboard::HandleEvents() {
   }
 
   constexpr uint8_t kMaxFIFOEntries = 16;
-  adp5589::Register::FIFO fifo[kMaxFIFOEntries];
+  kbd::adp5589::Register::FIFO fifo[kMaxFIFOEntries];
 
   for (uint8_t i = 0; i < status_reg.EC; i++) {
     event_number_++;
@@ -483,7 +483,7 @@ esp_err_t Keyboard::HandleEvents() {
   return ReportHIDEvents();
 }
 
-esp_err_t Keyboard::Read(adp5589::Register::Status* reg) {
+esp_err_t Keyboard::Read(kbd::adp5589::Register::Status* reg) {
   uint8_t b;
   esp_err_t err = ReadByte(RegNum::Status, &b);
   if (err != ESP_OK)
@@ -499,7 +499,7 @@ esp_err_t Keyboard::Read(adp5589::Register::Status* reg) {
   return ESP_OK;
 }
 
-esp_err_t Keyboard::Read(adp5589::Register::INT_STATUS* reg) {
+esp_err_t Keyboard::Read(kbd::adp5589::Register::INT_STATUS* reg) {
   uint8_t b;
   esp_err_t err = ReadByte(RegNum::INT_STATUS, &b);
   if (err != ESP_OK)
@@ -517,7 +517,7 @@ esp_err_t Keyboard::Read(adp5589::Register::INT_STATUS* reg) {
   return ESP_OK;
 }
 
-esp_err_t Keyboard::Read(adp5589::Register::FIFO* reg) {
+esp_err_t Keyboard::Read(kbd::adp5589::Register::FIFO* reg) {
   uint8_t b;
   esp_err_t err = ReadByte(RegNum::FIFO_1, &b);
   if (err != ESP_OK)
@@ -529,7 +529,7 @@ esp_err_t Keyboard::Read(adp5589::Register::FIFO* reg) {
   return ESP_OK;
 }
 
-esp_err_t Keyboard::Read(adp5589::Register::ID* reg) {
+esp_err_t Keyboard::Read(kbd::adp5589::Register::ID* reg) {
   uint8_t b;
   esp_err_t err = ReadByte(RegNum::ID, &b);
   if (err != ESP_OK)
