@@ -9,7 +9,7 @@ idf_component_register(
     "${CMAKE_SOURCE_DIR}/libs/inih/ini.c"
     "${CMAKE_SOURCE_DIR}/libs/lv_lib_png/lodepng.c"
     "${CMAKE_SOURCE_DIR}/libs/lv_lib_png/lv_png.c"
-    "${CMAKE_SOURCE_DIR}/libs/kbdlib/src/adp5589.cc"
+    "${CMAKE_SOURCE_DIR}/libs/kbdlib/src/lm8330.cc"
     "${CMAKE_SOURCE_DIR}/libs/tjpgdec/src/tjpgd.c"
     "${IDF_PATH}/components/tinyusb/tinyusb/src/class/hid/hid_device.c"
     "${IDF_PATH}/components/tinyusb/tinyusb/src/device/usbd.c"
