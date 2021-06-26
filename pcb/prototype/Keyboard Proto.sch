@@ -6,17 +6,25 @@ encoding utf-8
 Sheet 1 1
 Title "Keyboard Prototype Board"
 Date "2020-12-27"
-Rev "4"
+Rev "2"
 Comp "Prototype Schematic"
-Comment1 "Based on FeatherS2 and ADP5589 keyboard IC"
+Comment1 "Based on FeatherS2 and LM8330 keyboard IC"
 Comment2 ""
 Comment3 "License: MIT"
 Comment4 "Design: cmumford"
 $EndDescr
 Text GLabel 5650 5850 2    50   Input ~ 0
-I2C0_SDA
+3V3_SDA
 Text GLabel 5650 5750 2    50   Input ~ 0
-I2C0_SCL
+3V3_SCL
+Text GLabel 8200 1650 0    50   Input ~ 0
+1V8_SDA
+Text GLabel 8200 1750 0    50   Input ~ 0
+1V8_SCL
+Text GLabel 8200 1850 0    50   Input ~ 0
+1V8_KBDINT
+Text GLabel 5650 5550 2    50   Input ~ 0
+3V3_KBDINT
 $Comp
 L Switch:SW_Push Q1
 U 1 1 5FCC9F75
@@ -162,10 +170,28 @@ Wire Wire Line
 	6300 2600 6350 2600
 Wire Wire Line
 	4550 2600 4550 2850
+Text GLabel 8200 1950 0    50   Input ~ 0
+1V8_RST
 Text GLabel 4800 4450 0    50   Input ~ 0
 3V3
 Text GLabel 4800 4650 0    50   Input ~ 0
 GND
+Text GLabel 8750 3650 3    50   Input ~ 0
+GND
+Text GLabel 8700 1200 1    50   Input ~ 0
+1V8
+Text GLabel 9250 1950 2    50   Input ~ 0
+ROW0
+Text GLabel 9250 1850 2    50   Input ~ 0
+ROW1
+Text GLabel 9250 2300 2    50   Input ~ 0
+COL0
+Text GLabel 9250 2200 2    50   Input ~ 0
+COL1
+Text GLabel 9250 2400 2    50   Input ~ 0
+COL2
+Text GLabel 9250 2500 2    50   Input ~ 0
+COL3
 Text GLabel 6350 2850 3    50   Input ~ 0
 COL0
 Text GLabel 4550 2850 3    50   Input ~ 0
@@ -242,51 +268,265 @@ Text GLabel 5650 5150 2    50   Input ~ 0
 T_CS
 Text GLabel 5650 5050 2    50   Input ~ 0
 T_IRQ
+$Comp
+L LM8330:LM8330 U4
+U 1 1 5FE7EC0A
+P 9250 2150
+F 0 "U4" H 8250 3100 50  0000 C CNN
+F 1 "LM8330" H 8350 3000 50  0000 C CNN
+F 2 "BGA0016:BGA0016" H 9250 2150 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/lm8330.pdf" H 9250 2150 50  0001 C CNN
+F 4 "Texas Instruments" H 8150 2900 50  0000 C CNN "Manufacturer"
+	1    9250 2150
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9250 1650
+NoConn ~ 9250 1750
+NoConn ~ 9250 2600
+NoConn ~ 9250 2700
+NoConn ~ 9250 2800
+NoConn ~ 9250 2900
+NoConn ~ 9250 3050
+NoConn ~ 9250 3150
+NoConn ~ 9250 3250
+NoConn ~ 8200 2350
+NoConn ~ 8200 2450
+NoConn ~ 8200 2550
+NoConn ~ 8200 2650
+$Comp
+L Regulator_Linear:MIC5504-1.8YM5 U3
+U 1 1 5FE8CB62
+P 1900 1600
+F 0 "U3" H 1900 1967 50  0000 C CNN
+F 1 "MIC5504-1.8YM5" H 1900 1876 50  0000 C CNN
+F 2 "Package_TO_SOT_SMD:SOT-23-5" H 1900 1200 50  0001 C CNN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/MIC550X.pdf" H 1650 1850 50  0001 C CNN
+	1    1900 1600
+	1    0    0    -1  
+$EndComp
+$Comp
+L LSF0204DPWR:LSF0204DPWR U2
+U 1 1 5FE8D187
+P 1900 3700
+F 0 "U2" H 2200 4250 50  0000 C CNN
+F 1 "LSF0204DPWR" H 2350 4150 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 2850 3250 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/lsf0204d.pdf" H 1350 4150 50  0001 C CNN
+F 4 "Texas Instruments" H 2400 4350 50  0001 C CNN "Manufacturer"
+	1    1900 3700
+	1    0    0    -1  
+$EndComp
+Text GLabel 1000 1500 0    50   Input ~ 0
+3V3
+Text GLabel 5650 4850 2    50   Input ~ 0
+EN
+Text GLabel 1500 1700 0    50   Input ~ 0
+EN
+Text GLabel 1900 2050 3    50   Input ~ 0
+GND
+Wire Wire Line
+	1900 1900 1900 1950
+$Comp
+L Device:C_Small C1
+U 1 1 5FE9973B
+P 1200 1750
+F 0 "C1" H 1000 1800 50  0000 L CNN
+F 1 "1µF/10V" H 750 1700 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric" H 1200 1750 50  0001 C CNN
+F 3 "~" H 1200 1750 50  0001 C CNN
+	1    1200 1750
+	1    0    0    -1  
+$EndComp
+Text GLabel 2600 1500 2    50   Input ~ 0
+1V8
+Wire Wire Line
+	2300 1500 2450 1500
+$Comp
+L Device:C_Small C2
+U 1 1 5FE9BA17
+P 2450 1750
+F 0 "C2" H 2542 1796 50  0000 L CNN
+F 1 "1µF/10V" H 2542 1705 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric" H 2450 1750 50  0001 C CNN
+F 3 "~" H 2450 1750 50  0001 C CNN
+	1    2450 1750
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1900 1950 2450 1950
+Wire Wire Line
+	2450 1950 2450 1850
+Connection ~ 1900 1950
+Wire Wire Line
+	2450 1650 2450 1500
+Connection ~ 2450 1500
+Wire Wire Line
+	2450 1500 2600 1500
+Wire Wire Line
+	1000 1500 1200 1500
+Wire Wire Line
+	1200 1850 1200 1950
+Wire Wire Line
+	1200 1650 1200 1500
+Connection ~ 1200 1500
+Wire Wire Line
+	1200 1500 1500 1500
+Wire Wire Line
+	1900 1950 1200 1950
+Wire Wire Line
+	1900 1950 1900 2050
+Text GLabel 1950 3250 1    50   Input ~ 0
+3V3
+Text GLabel 1850 3250 1    50   Input ~ 0
+1V8
+Text GLabel 1900 4150 3    50   Input ~ 0
+GND
+Text GLabel 1500 3500 0    50   Input ~ 0
+GND
 Text GLabel 4800 5350 0    50   Input ~ 0
 SCK
-Text GLabel 2000 4400 2    50   Input ~ 0
-I2C0_SCL
-Text GLabel 2000 4650 2    50   Input ~ 0
-I2C0_SDA
-Text GLabel 1450 4150 1    50   Input ~ 0
+Text GLabel 2300 3700 2    50   Input ~ 0
+3V3_SDA
+Text GLabel 2300 3600 2    50   Input ~ 0
+3V3_SCL
+Text GLabel 1500 3700 0    50   Input ~ 0
+1V8_SDA
+Text GLabel 1500 3600 0    50   Input ~ 0
+1V8_SCL
+Text GLabel 2300 3900 2    50   Input ~ 0
+3V3_KBDINT
+Text GLabel 1500 3900 0    50   Input ~ 0
+1V8_KBDINT
+Text GLabel 2300 3800 2    50   Input ~ 0
+3V3_RST
+Text GLabel 1500 3800 0    50   Input ~ 0
+1V8_RST
+Text GLabel 2350 6850 2    50   Input ~ 0
+1V8_SDA
+Text GLabel 2350 7050 2    50   Input ~ 0
+1V8_SCL
+Text GLabel 2350 7250 2    50   Input ~ 0
+1V8_KBDINT
+Text GLabel 2350 7450 2    50   Input ~ 0
+1V8_RST
+Text GLabel 1100 6650 1    50   Input ~ 0
+1V8
+$Comp
+L Device:R_Small R6
+U 1 1 5FEB396C
+P 2150 6850
+F 0 "R6" V 2050 6850 50  0000 C CNN
+F 1 "226Ω" V 2250 6850 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 2150 6850 50  0001 C CNN
+F 3 "~" H 2150 6850 50  0001 C CNN
+	1    2150 6850
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R5
+U 1 1 5FEB4643
+P 1900 7050
+F 0 "R5" V 1800 7050 50  0000 C CNN
+F 1 "226Ω" V 2000 7050 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 1900 7050 50  0001 C CNN
+F 3 "~" H 1900 7050 50  0001 C CNN
+	1    1900 7050
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R3
+U 1 1 5FEB5280
+P 1650 7250
+F 0 "R3" V 1550 7250 50  0000 C CNN
+F 1 "226Ω" V 1750 7250 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 1650 7250 50  0001 C CNN
+F 3 "~" H 1650 7250 50  0001 C CNN
+	1    1650 7250
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	1100 6650 1100 6850
+Wire Wire Line
+	1100 7450 1250 7450
+Wire Wire Line
+	2250 6850 2350 6850
+Wire Wire Line
+	2050 6850 1100 6850
+Connection ~ 1100 6850
+Wire Wire Line
+	1100 6850 1100 7050
+Connection ~ 1100 7050
+Wire Wire Line
+	1100 7050 1100 7250
+Connection ~ 1100 7250
+Wire Wire Line
+	1100 7250 1100 7450
+Text GLabel 2000 5650 2    50   Input ~ 0
+3V3_SDA
+Text GLabel 2000 5900 2    50   Input ~ 0
+3V3_SCL
+Text GLabel 1450 5400 1    50   Input ~ 0
 3V3
 $Comp
 L Device:R_Small R4
 U 1 1 5FEC5323
-P 1850 4400
-F 0 "R4" V 1750 4400 50  0000 C CNN
-F 1 "2.2kΩ" V 1950 4400 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 1850 4400 50  0001 C CNN
-F 3 "~" H 1850 4400 50  0001 C CNN
-	1    1850 4400
+P 1850 5650
+F 0 "R4" V 1750 5650 50  0000 C CNN
+F 1 "2.2kΩ" V 1950 5650 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 1850 5650 50  0001 C CNN
+F 3 "~" H 1850 5650 50  0001 C CNN
+	1    1850 5650
 	0    1    1    0   
 $EndComp
 Wire Wire Line
-	2000 4400 1950 4400
+	2000 5650 1950 5650
 $Comp
-L Device:R_Small R3
+L Device:R_Small R2
 U 1 1 5FEC6AE7
-P 1600 4650
-F 0 "R3" V 1500 4650 50  0000 C CNN
-F 1 "2.2kΩ" V 1700 4650 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 1600 4650 50  0001 C CNN
-F 3 "~" H 1600 4650 50  0001 C CNN
-	1    1600 4650
+P 1600 5900
+F 0 "R2" V 1500 5900 50  0000 C CNN
+F 1 "2.2kΩ" V 1700 5900 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 1600 5900 50  0001 C CNN
+F 3 "~" H 1600 5900 50  0001 C CNN
+	1    1600 5900
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R1
+U 1 1 5FEB569E
+P 1350 7450
+F 0 "R1" V 1250 7450 50  0000 C CNN
+F 1 "226Ω" V 1450 7450 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 1350 7450 50  0001 C CNN
+F 3 "~" H 1350 7450 50  0001 C CNN
+	1    1350 7450
 	0    1    1    0   
 $EndComp
 Wire Wire Line
-	1700 4650 2000 4650
+	1450 7450 2350 7450
 Wire Wire Line
-	1450 4150 1450 4400
+	1550 7250 1100 7250
 Wire Wire Line
-	1450 4650 1500 4650
+	1750 7250 2350 7250
 Wire Wire Line
-	1750 4400 1450 4400
-Connection ~ 1450 4400
+	1800 7050 1100 7050
 Wire Wire Line
-	1450 4400 1450 4650
+	2000 7050 2350 7050
+Wire Wire Line
+	1700 5900 2000 5900
+Wire Wire Line
+	1450 5400 1450 5650
+Wire Wire Line
+	1450 5900 1500 5900
+Wire Wire Line
+	1750 5650 1450 5650
+Connection ~ 1450 5650
+Wire Wire Line
+	1450 5650 1450 5900
 Wire Notes Line
 	3400 550  3400 8050
+Wire Notes Line
+	3400 4500 500  4500
 Wire Notes Line
 	3400 2500 500  2500
 Wire Notes Line
@@ -301,7 +541,11 @@ Text Notes 5100 3900 0    197  ~ 0
 MCU
 Text Notes 4500 1150 0    118  ~ 0
 Keyboard Matrix
-Text Notes 1050 3550 0    118  ~ 0
+Text Notes 1250 900  0    118  ~ 0
+1.8V Regulator
+Text Notes 750  2900 0    118  ~ 0
+3.3V ↔ 1.8V level shifter
+Text Notes 1150 4950 0    118  ~ 0
 Pull-up resistors
 Text Notes 7850 900  0    118  ~ 0
 Keyboard control IC
@@ -375,14 +619,65 @@ Text GLabel 4900 7400 0    50   Input ~ 0
 GND
 Text GLabel 4900 7300 0    50   Input ~ 0
 3V3
-Text GLabel 4900 7100 0    50   Input ~ 0
-I2C1_SDA
-Text GLabel 4900 7200 0    50   Input ~ 0
-I2C1_SCL
+Text GLabel 4000 7100 0    50   Input ~ 0
+SDA
+Text GLabel 5650 5450 2    50   Input ~ 0
+SDA
+Text GLabel 5650 5350 2    50   Input ~ 0
+SCL
+Text GLabel 4000 7200 0    50   Input ~ 0
+SCL
 Wire Notes Line
 	3400 6250 7000 6250
 Text Notes 3950 6550 0    118  ~ 0
 Volume Display
+Text GLabel 4300 6750 0    50   Input ~ 0
+3V3
+Wire Wire Line
+	4000 7100 4400 7100
+Wire Wire Line
+	4900 7200 4650 7200
+$Comp
+L Device:R_Small R7
+U 1 1 5FEB56DF
+P 4400 6950
+F 0 "R7" H 4500 7000 50  0000 C CNN
+F 1 "2.2kΩ" H 4550 6900 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 4400 6950 50  0001 C CNN
+F 3 "~" H 4400 6950 50  0001 C CNN
+	1    4400 6950
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R8
+U 1 1 5FEB5F07
+P 4650 6950
+F 0 "R8" H 4550 7000 50  0000 C CNN
+F 1 "2.2kΩ" H 4500 6900 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 4650 6950 50  0001 C CNN
+F 3 "~" H 4650 6950 50  0001 C CNN
+	1    4650 6950
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	4300 6750 4400 6750
+Wire Wire Line
+	4650 6750 4650 6850
+Wire Wire Line
+	4650 7050 4650 7200
+Connection ~ 4650 7200
+Wire Wire Line
+	4650 7200 4000 7200
+Wire Wire Line
+	4400 6750 4400 6850
+Connection ~ 4400 6750
+Wire Wire Line
+	4400 6750 4650 6750
+Wire Wire Line
+	4400 7050 4400 7100
+Connection ~ 4400 7100
+Wire Wire Line
+	4400 7100 4900 7100
 Text Notes 5350 6550 0    79   ~ 0
 (separate I2C)
 Text GLabel 9750 5350 0    50   Input ~ 0
@@ -393,6 +688,41 @@ Text GLabel 4800 5450 0    50   Input ~ 0
 MOSI
 Text GLabel 4800 5550 0    50   Input ~ 0
 MISO
+Wire Wire Line
+	8700 1200 8700 1300
+$Comp
+L Device:C_Small C3
+U 1 1 60362264
+P 9100 1300
+F 0 "C3" V 8871 1300 50  0000 C CNN
+F 1 "0.1μF" V 8962 1300 50  0000 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric" H 9100 1300 50  0001 C CNN
+F 3 "~" H 9100 1300 50  0001 C CNN
+	1    9100 1300
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GND #PWR0101
+U 1 1 603638A2
+P 9450 1350
+F 0 "#PWR0101" H 9450 1100 50  0001 C CNN
+F 1 "GND" H 9455 1177 50  0000 C CNN
+F 2 "" H 9450 1350 50  0001 C CNN
+F 3 "" H 9450 1350 50  0001 C CNN
+	1    9450 1350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9000 1300 8700 1300
+Connection ~ 8700 1300
+Wire Wire Line
+	8700 1300 8700 1450
+Wire Wire Line
+	9200 1300 9450 1300
+Wire Wire Line
+	9450 1300 9450 1350
+Text GLabel 5650 5650 2    50   Input ~ 0
+3V3_RST
 $Comp
 L FeatherS2:FeatherS2 U5
 U 1 1 60105E93
@@ -406,174 +736,4 @@ F 3 "https://www.adafruit.com/product/4062" H 4900 5950 50  0001 C CNN
 $EndComp
 Text GLabel 4800 4350 0    50   Input ~ 0
 RST
-$Comp
-L ADP5589:ADP5589 U2
-U 1 1 606FE7E2
-P 8750 2600
-F 0 "U2" H 8725 4056 50  0000 C CNN
-F 1 "ADP5589" H 8725 3965 50  0000 C CNN
-F 2 "ADP5589:ADP5589" H 8100 4000 50  0001 C CNN
-F 3 "" H 8100 4000 50  0001 C CNN
-	1    8750 2600
-	1    0    0    -1  
-$EndComp
-Text GLabel 5650 5350 2    50   Input ~ 0
-I2C1_SCL
-Text GLabel 5650 5450 2    50   Input ~ 0
-I2C1_SDA
-Text GLabel 5650 5550 2    50   Input ~ 0
-KBD_INT
-Text GLabel 8300 2650 0    50   Input ~ 0
-KBD_INT
-Text GLabel 8300 2050 0    50   Input ~ 0
-KBD_RST
-Text GLabel 7850 2350 0    50   Input ~ 0
-I2C0_SDA
-Text GLabel 7850 2450 0    50   Input ~ 0
-I2C0_SCL
-$Comp
-L power:GND #PWR0101
-U 1 1 60701E9D
-P 8750 3700
-F 0 "#PWR0101" H 8750 3450 50  0001 C CNN
-F 1 "GND" H 8755 3527 50  0000 C CNN
-F 2 "" H 8750 3700 50  0001 C CNN
-F 3 "" H 8750 3700 50  0001 C CNN
-	1    8750 3700
-	1    0    0    -1  
-$EndComp
-Text GLabel 8650 1400 0    50   Input ~ 0
-3V3
-Wire Wire Line
-	8650 1400 8750 1400
-Wire Wire Line
-	8750 1400 8750 1500
-Text GLabel 2000 7000 2    50   Input ~ 0
-I2C1_SCL
-Text GLabel 2000 7250 2    50   Input ~ 0
-I2C1_SDA
-Text GLabel 1450 6750 1    50   Input ~ 0
-3V3
-$Comp
-L Device:R_Small R2
-U 1 1 60708D97
-P 1850 7000
-F 0 "R2" V 1750 7000 50  0000 C CNN
-F 1 "2.2kΩ" V 1950 7000 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 1850 7000 50  0001 C CNN
-F 3 "~" H 1850 7000 50  0001 C CNN
-	1    1850 7000
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	2000 7000 1950 7000
-$Comp
-L Device:R_Small R1
-U 1 1 60708D9E
-P 1600 7250
-F 0 "R1" V 1500 7250 50  0000 C CNN
-F 1 "2.2kΩ" V 1700 7250 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 1600 7250 50  0001 C CNN
-F 3 "~" H 1600 7250 50  0001 C CNN
-	1    1600 7250
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	1700 7250 2000 7250
-Wire Wire Line
-	1450 6750 1450 7000
-Wire Wire Line
-	1450 7250 1500 7250
-Wire Wire Line
-	1750 7000 1450 7000
-Connection ~ 1450 7000
-Wire Wire Line
-	1450 7000 1450 7250
-NoConn ~ 5650 4850
-Text GLabel 9150 2400 2    50   Input ~ 0
-ROW0
-Text GLabel 9150 2300 2    50   Input ~ 0
-ROW1
-Text GLabel 9150 2500 2    50   Input ~ 0
-COL0
-Text GLabel 9150 2600 2    50   Input ~ 0
-COL1
-Text GLabel 9150 2700 2    50   Input ~ 0
-COL2
-Text GLabel 9150 2800 2    50   Input ~ 0
-COL3
-NoConn ~ 9150 2900
-NoConn ~ 9150 3000
-NoConn ~ 9150 3100
-NoConn ~ 9150 3200
-NoConn ~ 9150 3300
-NoConn ~ 9150 3400
-NoConn ~ 9150 3500
-NoConn ~ 9150 1700
-NoConn ~ 9150 1800
-NoConn ~ 9150 1900
-NoConn ~ 9150 2000
-NoConn ~ 9150 2100
-NoConn ~ 9150 2200
-Text Notes 1800 4150 0    87   ~ 0
-Keyboard I2C
-Text Notes 1850 6650 0    87   ~ 0
-Volume Disp. I2C
-$Comp
-L Connector:TestPoint TP1
-U 1 1 6074E56B
-P 7950 2350
-F 0 "TP1" H 7750 2600 50  0000 L CNN
-F 1 "TestPoint" H 7550 2500 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 8150 2350 50  0001 C CNN
-F 3 "~" H 8150 2350 50  0001 C CNN
-	1    7950 2350
-	1    0    0    -1  
-$EndComp
-$Comp
-L Connector:TestPoint TP2
-U 1 1 6074ECE2
-P 7950 2450
-F 0 "TP2" H 8100 2700 50  0000 R CNN
-F 1 "TestPoint" H 8350 2600 50  0000 R CNN
-F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 8150 2450 50  0001 C CNN
-F 3 "~" H 8150 2450 50  0001 C CNN
-	1    7950 2450
-	-1   0    0    1   
-$EndComp
-Wire Wire Line
-	7850 2350 7950 2350
-Wire Wire Line
-	8300 2350 7950 2350
-Connection ~ 7950 2350
-Wire Wire Line
-	7850 2450 7950 2450
-Wire Wire Line
-	7950 2450 8300 2450
-Connection ~ 7950 2450
-Text GLabel 2000 5600 2    50   Input ~ 0
-KBD_INT
-Text GLabel 1450 5350 1    50   Input ~ 0
-3V3
-$Comp
-L Device:R_Small R5
-U 1 1 6072DE79
-P 1850 5600
-F 0 "R5" V 1750 5600 50  0000 C CNN
-F 1 "2.2kΩ" V 1950 5600 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 1850 5600 50  0001 C CNN
-F 3 "~" H 1850 5600 50  0001 C CNN
-	1    1850 5600
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	2000 5600 1950 5600
-Wire Wire Line
-	1450 5350 1450 5600
-Wire Wire Line
-	1750 5600 1450 5600
-Text Notes 1800 5350 0    87   ~ 0
-Keyboard INT
-Text GLabel 5650 5650 2    50   Input ~ 0
-KBD_RST
 $EndSCHEMATC
