@@ -18,11 +18,11 @@
 #include "gpio_pins.h"
 #include "usb_hid.h"
 
+using kbd::lm8330::kSlaveAddress;
 using kbd::lm8330::RegNum;
 
 namespace {
 constexpr char TAG[] = "Keyboard";
-constexpr uint8_t kSlaveAddress = 0x88;  // I2C address of LM8330 IC.
 constexpr i2c::Address::Size kI2CAddressSize = i2c::Address::Size::bit7;
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
