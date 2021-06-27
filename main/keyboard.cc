@@ -18,12 +18,14 @@
 #include "gpio_pins.h"
 #include "usb_hid.h"
 
+using i2c::Address;
+using i2c::Operation;
 using kbd::lm8330::kSlaveAddress;
 using kbd::lm8330::RegNum;
 
 namespace {
 constexpr char TAG[] = "Keyboard";
-constexpr i2c::Address::Size kI2CAddressSize = i2c::Address::Size::bit7;
+constexpr Address::Size kI2CAddressSize = i2c::Address::Size::bit7;
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -32,12 +34,19 @@ esp_err_t ResetKeyboard(gpio_num_t reset_pin) {
   if (err != ESP_OK)
     return err;
 
-  vTaskDelay(pdMS_TO_TICKS(30));
-  err = gpio_set_level(reset_pin, 1);
+  // Typical RESETN glith filter is 100 nS, so this delay
+  // is more than sufficient.
+  constexpr uint32_t kResetDelayMs = 2;
+
+  vTaskDelay(pdMS_TO_TICKS(2));
+  err = gpio_set_level(reset_pin, kResetDelayMs);
   if (err != ESP_OK)
     return err;
 
-  vTaskDelay(pdMS_TO_TICKS(30));
+  // Not sure how long the chip takes after reset to be ready.
+  // Choose some reasonably long time.
+  constexpr uint32_t kStartupTimeMs = 50;
+  vTaskDelay(pdMS_TO_TICKS(kStartupTimeMs));
   return ESP_OK;
 }
 }  // namespace
@@ -64,22 +73,13 @@ esp_err_t Keyboard::Reset() {
   if (err != ESP_OK)
     return err;
 
-#if 0
-  kbd::lm8330::reg::ID reg_id;
-  err = Read(&reg_id);
-  if (err != ESP_OK)
-    return err;
-  key_states_.fill(false);
-  ESP_LOGI(TAG, "Keyboard reset, mfr: %u, rev: %u", reg_id.MAN, reg_id.REV);
-#endif
-
   return ESP_OK;
 }
 
 esp_err_t Keyboard::InitializeInterrupts(i2c::Operation& op) {
 #if 0
   if (!op.RestartReg(static_cast<uint8_t>(RegNum::INT_EN),
-                     i2c::Address::Mode::WRITE)) {
+                     Address::Mode::WRITE)) {
     return ESP_FAIL;
   }
   constexpr kbd::lm8330::reg::INT_EN reg = {
@@ -97,17 +97,38 @@ esp_err_t Keyboard::InitializeInterrupts(i2c::Operation& op) {
   return ESP_OK;
 }
 
+// Initialize the keyboard. See KEYSCAN INITIALIZATION in
+// LM8330 datasheet.
 esp_err_t Keyboard::Initialize() {
-  esp_err_t err;
-
   ESP_LOGD(TAG, "Initializing keyboard");
 
-  uint8_t value;
-  err = ReadByte(kbd::lm8330::RegNum::MFGCODE, &value);
-  if (err != ESP_OK)
-    return err;
+  uint8_t reg_mfgcode;
 
-  ESP_LOGI(TAG, "Keyboard initialized.");
+  Operation op = i2c_master_.CreateReadOp(kSlaveAddress, kI2CAddressSize,
+                                          static_cast<uint8_t>(RegNum::MFGCODE),
+                                          "kbdinit");
+  if (!op.ready())
+    return ESP_FAIL;
+
+  if (!op.Read(&reg_mfgcode, sizeof(reg_mfgcode)))
+    return ESP_FAIL;
+
+  {
+    op.RestartReg(static_cast<uint8_t>(RegNum::CLKEN), Address::Mode::WRITE);
+    constexpr kbd::lm8330::reg::CLKEN clken = {
+        .Reserved1 = 0,
+        .TIMEN = 0,
+        .Reserved2 = 0,
+        .KBDEN = 1,
+    };
+    if (!op.WriteByte(clken))
+      return ESP_FAIL;
+  }
+
+  if (!op.Execute())
+    return ESP_FAIL;
+
+  ESP_LOGI(TAG, "Keyboard initialized, mfgcode: 0x%x", reg_mfgcode);
   return ESP_OK;
 }
 
@@ -205,24 +226,6 @@ esp_err_t Keyboard::HandleEvents() {
   return ReportHIDEvents();
 #endif
 }
-
-#if 0
-esp_err_t Keyboard::Read(kbd::lm8330::reg::Status* reg) {
-  uint8_t b;
-  esp_err_t err = ReadByte(RegNum::Status, &b);
-  if (err != ESP_OK)
-    return err;
-
-  // clang-format off
-  reg->LOGIC2_STAT = b & 0b10000000 ? 1 : 0;
-  reg->LOGIC1_STAT = b & 0b01000000 ? 1 : 0;
-  reg->LOCK_STAT   = b & 0b00100000 ? 1 : 0;
-  reg->EC          = b & 0b00011111;
-  // clang-format on
-
-  return ESP_OK;
-}
-#endif
 
 esp_err_t Keyboard::ReadByte(RegNum reg, uint8_t* value) {
   return i2c_master_.ReadRegister(kSlaveAddress, kI2CAddressSize,
