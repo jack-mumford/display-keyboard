@@ -10,6 +10,16 @@
   )
 
   (page A4)
+  (title_block
+    (title "Display Keyboard")
+    (date 2021-06-29)
+    (rev 1)
+    (company BigMumf)
+    (comment 1 "Based on FeatherS2 and ADP5589 keyboard IC")
+    (comment 3 "License: MIT")
+    (comment 4 "Design: Chris and Jack Mumford")
+  )
+
   (layers
     (0 F.Cu signal)
     (31 B.Cu signal)

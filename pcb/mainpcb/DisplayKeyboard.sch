@@ -5,13 +5,13 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 1 2
 Title "Display Keyboard"
-Date "2020-12-27"
+Date "2021-06-29"
 Rev "4"
 Comp "Display Keyboard Schematic"
 Comment1 "Based on FeatherS2 and ADP5589 keyboard IC"
 Comment2 ""
 Comment3 "License: MIT"
-Comment4 "Design: cmumford"
+Comment4 "Design: Chris and Jack Mumford"
 $EndDescr
 Text GLabel 5650 5850 2    50   Input ~ 0
 I2C0_SDA
