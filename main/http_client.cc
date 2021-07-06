@@ -76,8 +76,9 @@ HTTPClient::~HTTPClient() = default;
 
 esp_err_t HTTPClient::DoSSLCheck() {
   int status;
-  return DoGET("https://www.howsmyssl.com/a/check", std::vector<HeaderValue>(),
-               [](const void*, int) { return ESP_OK; }, &status);
+  return DoGET(
+      "https://www.howsmyssl.com/a/check", std::vector<HeaderValue>(),
+      [](const void*, int) { return ESP_OK; }, &status);
 }
 
 esp_err_t HTTPClient::DoGET(const std::string& url,
