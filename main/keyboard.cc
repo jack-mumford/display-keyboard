@@ -29,6 +29,48 @@ constexpr Address::Size kI2CAddressSize = i2c::Address::Size::bit7;
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
+/**
+ * @brief Convert an LM8330 Keyboard event code to a TinyUSB HID keycode.
+ *
+ * @param event_code The code returned by the keyboard IC.
+ *
+ * @return The TinyUSB HID keycode. HID_KEY_NONE if no mapping.
+ */
+uint8_t KeyboardKeyIDToHIDKeyCode(kbd::lm8330::reg::EVTCODE event_code) {
+  switch (event_code.KEYROW) {
+    case 0:
+      switch (event_code.KEYCOL) {
+        case 0:
+          return HID_KEY_SHIFT_LEFT;
+        case 1:
+          return HID_KEY_Q;
+        case 2:
+          return HID_KEY_W;
+        case 3:
+          return HID_KEY_E;
+        default:
+          return HID_KEY_NONE;
+      }
+      break;
+    case 1:
+      switch (event_code.KEYCOL) {
+        case 0:
+          return HID_KEY_CONTROL_LEFT;
+        case 1:
+          return HID_KEY_A;
+        case 2:
+          return HID_KEY_S;
+        case 3:
+          return HID_KEY_D;
+        default:
+          return HID_KEY_NONE;
+      }
+      break;
+    default:
+      return HID_KEY_NONE;
+  }
+}
+
 esp_err_t ResetKeyboard(gpio_num_t reset_pin) {
   esp_err_t err = gpio_set_level(reset_pin, 0);
   if (err != ESP_OK)
@@ -48,6 +90,28 @@ esp_err_t ResetKeyboard(gpio_num_t reset_pin) {
   constexpr uint32_t kStartupTimeMs = 50;
   vTaskDelay(pdMS_TO_TICKS(kStartupTimeMs));
   return ESP_OK;
+}
+
+uint8_t GetModifierFlag(uint8_t keycode) {
+  switch (keycode) {
+    case HID_KEY_SHIFT_LEFT:
+      return KEYBOARD_MODIFIER_LEFTSHIFT;
+    case HID_KEY_SHIFT_RIGHT:
+      return KEYBOARD_MODIFIER_RIGHTSHIFT;
+    case HID_KEY_CONTROL_LEFT:
+      return KEYBOARD_MODIFIER_LEFTCTRL;
+    case HID_KEY_CONTROL_RIGHT:
+      return KEYBOARD_MODIFIER_RIGHTCTRL;
+    case HID_KEY_ALT_LEFT:
+      return KEYBOARD_MODIFIER_LEFTALT;
+    case HID_KEY_ALT_RIGHT:
+      return KEYBOARD_MODIFIER_RIGHTALT;
+    case HID_KEY_GUI_LEFT:
+      return KEYBOARD_MODIFIER_LEFTGUI;
+    case HID_KEY_GUI_RIGHT:
+      return KEYBOARD_MODIFIER_RIGHTGUI;
+  }
+  return 0x0;
 }
 }  // namespace
 
@@ -77,24 +141,18 @@ esp_err_t Keyboard::Reset() {
 }
 
 esp_err_t Keyboard::InitializeInterrupts(i2c::Operation& op) {
-#if 0
-  if (!op.RestartReg(static_cast<uint8_t>(RegNum::INT_EN),
+  if (!op.RestartReg(static_cast<uint8_t>(RegNum::KBDMSK),
                      Address::Mode::WRITE)) {
     return ESP_FAIL;
   }
-  constexpr kbd::lm8330::reg::INT_EN reg = {
+  constexpr kbd::lm8330::reg::KBDMSK kbdmask = {
       .Reserved = 0,
-      .LOGIC2_IEN = false,
-      .LOGIC1_IEN = false,
-      .LOCK_IEN = false,
-      .OVRFLOW_IEN = true,
-      .GPI_IEN = false,
-      .EVENT_IEN = true,
+      .MSKELINT = 0,
+      .MSKEINT = 1,
+      .MSKLINT = 0,
+      .MSKSINT = 1,
   };
-  if (!op.WriteByte(reg))
-    return ESP_FAIL;
-#endif
-  return ESP_OK;
+  return op.WriteByte(kbdmask) ? ESP_OK : ESP_FAIL;
 }
 
 // Initialize the keyboard. See KEYSCAN INITIALIZATION in
@@ -102,6 +160,7 @@ esp_err_t Keyboard::InitializeInterrupts(i2c::Operation& op) {
 esp_err_t Keyboard::Initialize() {
   ESP_LOGD(TAG, "Initializing keyboard");
 
+  esp_err_t err;
   uint8_t reg_mfgcode;
 
   Operation op = i2c_master_.CreateReadOp(kSlaveAddress, kI2CAddressSize,
@@ -114,7 +173,10 @@ esp_err_t Keyboard::Initialize() {
     return ESP_FAIL;
 
   {
-    op.RestartReg(static_cast<uint8_t>(RegNum::CLKEN), Address::Mode::WRITE);
+    err = op.RestartReg(static_cast<uint8_t>(RegNum::CLKEN),
+                        Address::Mode::WRITE);
+    if (err != ESP_OK)
+      return err;
     constexpr kbd::lm8330::reg::CLKEN clken = {
         .Reserved1 = 0,
         .TIMEN = 0,
@@ -124,6 +186,23 @@ esp_err_t Keyboard::Initialize() {
     if (!op.WriteByte(clken))
       return ESP_FAIL;
   }
+
+  {
+    err = op.RestartReg(static_cast<uint8_t>(RegNum::KBDSIZE),
+                        Address::Mode::WRITE);
+    if (err != ESP_OK)
+      return err;
+    constexpr kbd::lm8330::reg::KBDSIZE kbd_size = {
+        .ROWSIZE = 2,
+        .COLSIZE = 4,
+    };
+    if (!op.WriteByte(kbd_size))
+      return ESP_FAIL;
+  }
+
+  err = InitializeInterrupts(op);
+  if (err != ESP_OK)
+    return err;
 
   if (!op.Execute())
     return ESP_FAIL;
@@ -141,7 +220,7 @@ esp_err_t Keyboard::ReportHIDEvents() {
   for (uint8_t keycode = 0; keycode < key_states_.size(); keycode++) {
     if (!key_states_[keycode])
       continue;
-    uint8_t modifier_bit = 0 /*GetModifierFlag(keycode)*/;
+    uint8_t modifier_bit = GetModifierFlag(keycode);
     if (modifier_bit) {
       modifier |= modifier_bit;
     } else {
@@ -159,72 +238,55 @@ esp_err_t Keyboard::ReportHIDEvents() {
 }
 
 esp_err_t Keyboard::HandleEvents() {
-#if 1
-  return ESP_OK;
-#else
   esp_err_t err;
+  uint8_t reg;
 
   ESP_LOGV(TAG, "Reading keyboard events.");
 
-  kbd::lm8330::reg::INT_STATUS interrupt_status;
-  err = Read(&interrupt_status);
-  if (err != ESP_OK) {
-    ESP_LOGE(TAG, "Failure reading INT_STATUS");
+  err = ReadByte(RegNum::IRQST, &reg);
+  if (err != ESP_OK)
     return err;
-  }
-  // Write back the INT_STATUS register to clear the INT flags.
-  err = WriteByte(RegNum::INT_STATUS, interrupt_status);
-  if (err != ESP_OK) {
-    ESP_LOGE(TAG, "Failure writing INT_STATUS");
-  }
-  if (interrupt_status.OVRFLOW_INT) {
-    ESP_LOGE(TAG, "Keyboard FIFO overflow.");
+  const kbd::lm8330::reg::IRQST intr_status = reg;
+  if (!intr_status.KBDIRQ)
+    return ESP_OK;
+
+  err = ReadByte(RegNum::KBDMIS, &reg);
+  if (err != ESP_OK)
+    return err;
+  const kbd::lm8330::reg::KBDIS masked_intr_status = reg;
+  if (!masked_intr_status.EVTINT)
+    return ESP_OK;
+
+  uint8_t num_events = 0;
+#if 1
+  constexpr size_t kKeyboardFIFOSize = 15;
+  uint8_t events[kKeyboardFIFOSize];
+  if (!i2c_master_.Read(kSlaveAddress, events, sizeof(events),
+                        /*send_start=*/true)) {
     return ESP_FAIL;
   }
-
-  kbd::lm8330::reg::Status status_reg;
-  err = Read(&status_reg);
-  if (err != ESP_OK) {
-    ESP_LOGE(TAG, "Failure reading status register");
-    return err;
-  }
-
-  if (!status_reg.EC) {
-    ESP_LOGV(TAG, "No keyboard events.");
-    return ESP_OK;
-  }
-
-  constexpr uint8_t kMaxFIFOEntries = 16;
-  kbd::lm8330::reg::FIFO fifo[kMaxFIFOEntries];
-
-  for (uint8_t i = 0; i < status_reg.EC; i++) {
-    event_number_++;
-    err = Read(&fifo[i]);
-    if (err != ESP_OK) {
-      ESP_LOGE(TAG, "Error reading FIFO entry %u", i);
-      return err;
-    }
-  }
-
-  for (uint8_t i = 0; i < status_reg.EC; i++) {
-#ifdef ONLY_LOG_EVENTS
-    const char key_state = fifo[i].Event_State ? 'D' : 'U';
-    ESP_LOGI(TAG, "keyboard event[%u/%u] (0x%02x) id %s:%c", i + 1,
-             status_reg.EC, fifo[i].Event_State,
-             lm8330::EventToName(static_cast<EventID>(fifo[i].IDENTIFIER)),
-             key_state);
-#else
-    const uint8_t hid_keycode = KeyboardKeyIDToHIDKeyCode(fifo[i].IDENTIFIER);
+  for (size_t i = 0; i < kKeyboardFIFOSize; i++) {
+    if (events[i] == 0x7f)  // If event is empty.
+      break;
+    num_events++;
+    const kbd::lm8330::reg::EVTCODE event_code = events[i];
+    const uint8_t hid_keycode = KeyboardKeyIDToHIDKeyCode(event_code);
     if (hid_keycode < key_states_.size()) {
-      const bool key_pressed = fifo[i].Event_State & 0b10000000;
+      const bool key_pressed = !event_code.RELEASE;
       key_states_[hid_keycode] = key_pressed;
     }
-#endif
   }
-
-  ESP_LOGV(TAG, "    Done reading keyboard.");
-  return ReportHIDEvents();
+#else
+  err = ReadByte(RegNum::KBDCODE0, &reg);
+  if (err != ESP_OK)
+    return err;
+  if (reg != 0x7f) {  // If not empty (see datasheet).
+    const kbd::lm8330::reg::KBDCODE keyboard_code = reg;
+  }
 #endif
+
+  ESP_LOGV(TAG, "    Read %u keyboard events.", num_events);
+  return ReportHIDEvents();
 }
 
 esp_err_t Keyboard::ReadByte(RegNum reg, uint8_t* value) {
