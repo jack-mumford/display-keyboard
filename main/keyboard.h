@@ -9,9 +9,6 @@
 namespace kbd {
 namespace lm8330 {
 enum class RegNum : uint8_t;
-
-namespace reg {
-}  // namespace reg
 }  // namespace lm8330
 }  // namespace kbd
 
