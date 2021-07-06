@@ -79,9 +79,8 @@ esp_err_t ResetKeyboard(gpio_num_t reset_pin) {
   // Typical RESETN glith filter is 100 nS, so this delay
   // is more than sufficient.
   constexpr uint32_t kResetDelayMs = 2;
-
-  vTaskDelay(pdMS_TO_TICKS(2));
-  err = gpio_set_level(reset_pin, kResetDelayMs);
+  vTaskDelay(pdMS_TO_TICKS(kResetDelayMs));
+  err = gpio_set_level(reset_pin, 1);
   if (err != ESP_OK)
     return err;
 
@@ -207,7 +206,7 @@ esp_err_t Keyboard::Initialize() {
   if (!op.Execute())
     return ESP_FAIL;
 
-  ESP_LOGI(TAG, "Keyboard initialized, mfgcode: 0x%x", reg_mfgcode);
+  ESP_LOGI(TAG, "Keyboard initialized, mfgcode: 0x%x.", reg_mfgcode);
   return ESP_OK;
 }
 
