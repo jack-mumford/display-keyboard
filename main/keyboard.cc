@@ -120,7 +120,7 @@ Keyboard::Keyboard(i2c::Master i2c_master)
 Keyboard::~Keyboard() = default;
 
 esp_err_t Keyboard::Reset() {
-  ESP_LOGD(TAG, "Resetting keyboard");
+  ESP_LOGD(TAG, "Resetting...");
 
   constexpr gpio_config_t config = {
       .pin_bit_mask = (1ULL << kKeyboardResetGPIO),
@@ -141,7 +141,12 @@ esp_err_t Keyboard::Reset() {
   if (err != ESP_OK)
     return err;
 
-  ESP_LOGI(TAG, "Keyboard reset, mfgcode: 0x%x.", mfgcode);
+  uint8_t swrev;
+  err = ReadByte(RegNum::SWREV, &swrev);
+  if (err != ESP_OK)
+    return err;
+
+  ESP_LOGI(TAG, "Reset complete, mfgcode: 0x%x, swrev: 0x%x", mfgcode, swrev);
 
   return ESP_OK;
 }
