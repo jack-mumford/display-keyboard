@@ -116,7 +116,7 @@ esp_err_t KeyboardTask::CreateKeyLogTimer() {
     ESP_LOGE(TAG, "Unable to create keyboard event timer");
     return err;
   }
-  constexpr uint64_t kTimerPeriodUsec = 100000;  // 1/10 second.
+  constexpr uint64_t kTimerPeriodUsec = 500000;  // 1/2 second.
   err = esp_timer_start_periodic(time_update_timer_, kTimerPeriodUsec);
   if (err != ESP_OK)
     ESP_LOGE(TAG, "Unable to start the keyboard event timer");

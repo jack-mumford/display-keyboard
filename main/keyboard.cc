@@ -136,22 +136,97 @@ esp_err_t Keyboard::Reset() {
   if (err != ESP_OK)
     return err;
 
+  uint8_t mfgcode;
+  err = ReadByte(RegNum::MFGCODE, &mfgcode);
+  if (err != ESP_OK)
+    return err;
+
+  ESP_LOGI(TAG, "Keyboard reset, mfgcode: 0x%x.", mfgcode);
+
   return ESP_OK;
 }
 
-esp_err_t Keyboard::InitializeInterrupts(i2c::Operation& op) {
-  if (!op.RestartReg(static_cast<uint8_t>(RegNum::KBDMSK),
-                     Address::Mode::WRITE)) {
-    return ESP_FAIL;
-  }
+esp_err_t Keyboard::EnableInterrupts() {
   constexpr kbd::lm8330::reg::KBDMSK kbdmask = {
       .Reserved = 0,
-      .MSKELINT = 0,
-      .MSKEINT = 1,
-      .MSKLINT = 0,
-      .MSKSINT = 1,
+      .MSKELINT = 0,  // 0: kbd event lost interrupt RELINT triggers IRQ line.
+      .MSKEINT = 0,   // 0: kbd event interrupt REVINT triggers IRQ line.
+      .MSKLINT = 1,   // 1: kbd lost interrupt RKLINT is masked.
+      .MSKSINT = 1,   // 1: kbd status interrupt RSINT is masked.
   };
-  return op.WriteByte(kbdmask) ? ESP_OK : ESP_FAIL;
+  return WriteByte(RegNum::KBDMSK, kbdmask);
+}
+
+esp_err_t Keyboard::InitializeKeys() {
+  Operation op = i2c_master_.CreateWriteOp(
+      kSlaveAddress, kI2CAddressSize, static_cast<uint8_t>(RegNum::KBDSIZE),
+      "initkeys");
+  if (!op.ready())
+    return ESP_FAIL;
+
+  {
+    constexpr kbd::lm8330::reg::KBDSIZE value = {
+        .ROWSIZE = 2,
+        .COLSIZE = 4,
+    };
+    if (!op.WriteByte(value))
+      return ESP_FAIL;
+  }
+
+  {
+    if (!op.RestartReg(static_cast<uint8_t>(RegNum::KBDDEDCFG0),
+                       Address::Mode::WRITE)) {
+      return ESP_FAIL;
+    }
+    constexpr uint16_t value = 0xFC3F;
+    if (!op.Write(&value, sizeof(value)))
+      return ESP_FAIL;
+  }
+
+  {
+    if (!op.RestartReg(static_cast<uint8_t>(RegNum::IOCFG),
+                       Address::Mode::WRITE)) {
+      return ESP_FAIL;
+    }
+    constexpr uint8_t value =
+        0xF8;  // Write default value to enable all pins as keyboard matrix
+    if (!op.WriteByte(value))
+      return ESP_FAIL;
+  }
+
+  {
+    if (!op.RestartReg(static_cast<uint8_t>(RegNum::IOPC0),
+                       Address::Mode::WRITE)) {
+      return ESP_FAIL;
+    }
+    constexpr uint16_t value =
+        0xAAAA;  // Configure pullup resistors for KPX[7:0].
+    if (!op.Write(&value, sizeof(value)))
+      return ESP_FAIL;
+  }
+
+  {
+    if (!op.RestartReg(static_cast<uint8_t>(RegNum::IOPC1),
+                       Address::Mode::WRITE)) {
+      return ESP_FAIL;
+    }
+    constexpr uint16_t value =
+        0x5555;  // Configure pulldown resistors for KPY[7:0].
+    if (!op.Write(&value, sizeof(value)))
+      return ESP_FAIL;
+  }
+
+  return ESP_OK;
+}
+
+esp_err_t Keyboard::EnableClock() {
+  constexpr kbd::lm8330::reg::CLKEN clken = {
+      .Reserved1 = 0,
+      .TIMEN = 0,
+      .Reserved2 = 0,
+      .KBDEN = 1,
+  };
+  return WriteByte(RegNum::CLKEN, clken);
 }
 
 // Initialize the keyboard. See KEYSCAN INITIALIZATION in
@@ -159,54 +234,19 @@ esp_err_t Keyboard::InitializeInterrupts(i2c::Operation& op) {
 esp_err_t Keyboard::Initialize() {
   ESP_LOGD(TAG, "Initializing keyboard");
 
-  esp_err_t err;
-  uint8_t reg_mfgcode;
-
-  Operation op = i2c_master_.CreateReadOp(kSlaveAddress, kI2CAddressSize,
-                                          static_cast<uint8_t>(RegNum::MFGCODE),
-                                          "kbdinit");
-  if (!op.ready())
-    return ESP_FAIL;
-
-  if (!op.Read(&reg_mfgcode, sizeof(reg_mfgcode)))
-    return ESP_FAIL;
-
-  {
-    err = op.RestartReg(static_cast<uint8_t>(RegNum::CLKEN),
-                        Address::Mode::WRITE);
-    if (err != ESP_OK)
-      return err;
-    constexpr kbd::lm8330::reg::CLKEN clken = {
-        .Reserved1 = 0,
-        .TIMEN = 0,
-        .Reserved2 = 0,
-        .KBDEN = 1,
-    };
-    if (!op.WriteByte(clken))
-      return ESP_FAIL;
-  }
-
-  {
-    err = op.RestartReg(static_cast<uint8_t>(RegNum::KBDSIZE),
-                        Address::Mode::WRITE);
-    if (err != ESP_OK)
-      return err;
-    constexpr kbd::lm8330::reg::KBDSIZE kbd_size = {
-        .ROWSIZE = 2,
-        .COLSIZE = 4,
-    };
-    if (!op.WriteByte(kbd_size))
-      return ESP_FAIL;
-  }
-
-  err = InitializeInterrupts(op);
+  esp_err_t err = InitializeKeys();
   if (err != ESP_OK)
     return err;
 
-  if (!op.Execute())
-    return ESP_FAIL;
+  err = EnableInterrupts();
+  if (err != ESP_OK)
+    return err;
 
-  ESP_LOGI(TAG, "Keyboard initialized, mfgcode: 0x%x.", reg_mfgcode);
+  err = EnableClock();
+  if (err != ESP_OK)
+    return err;
+
+  ESP_LOGI(TAG, "Keyboard initialized.");
   return ESP_OK;
 }
 
@@ -240,21 +280,23 @@ esp_err_t Keyboard::HandleEvents() {
   esp_err_t err;
   uint8_t reg;
 
-  ESP_LOGV(TAG, "Reading keyboard events.");
-
   err = ReadByte(RegNum::IRQST, &reg);
   if (err != ESP_OK)
     return err;
   const kbd::lm8330::reg::IRQST intr_status = reg;
-  if (!intr_status.KBDIRQ)
+  if (!intr_status.KBDIRQ) {
+    ESP_LOGV(TAG, "Read: keyboard interrupt inactive.");
     return ESP_OK;
+  }
 
   err = ReadByte(RegNum::KBDMIS, &reg);
   if (err != ESP_OK)
     return err;
   const kbd::lm8330::reg::KBDIS masked_intr_status = reg;
-  if (!masked_intr_status.EVTINT)
+  if (!masked_intr_status.EVTINT) {
+    ESP_LOGV(TAG, "Read: No EVTINT.");
     return ESP_OK;
+  }
 
   uint8_t num_events = 0;
 #if 1
@@ -284,7 +326,7 @@ esp_err_t Keyboard::HandleEvents() {
   }
 #endif
 
-  ESP_LOGV(TAG, "    Read %u keyboard events.", num_events);
+  ESP_LOGV(TAG, "Read: Read %u keyboard events.", num_events);
   return ReportHIDEvents();
 }
 

@@ -4,7 +4,6 @@
 
 #include <esp_err.h>
 #include <i2clib/master.h>
-#include <i2clib/operation.h>
 
 namespace kbd {
 namespace lm8330 {
@@ -47,7 +46,9 @@ class Keyboard {
   esp_err_t ReportHIDEvents();
   esp_err_t WriteByte(kbd::lm8330::RegNum reg, uint8_t value);
   esp_err_t ReadByte(kbd::lm8330::RegNum reg, uint8_t* value);
-  esp_err_t InitializeInterrupts(i2c::Operation& op);
+  esp_err_t EnableInterrupts();
+  esp_err_t InitializeKeys();
+  esp_err_t EnableClock();
 
   i2c::Master i2c_master_;
 
