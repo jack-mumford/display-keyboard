@@ -144,6 +144,13 @@ esp_err_t Keyboard::Reset() {
   if (!op.ready() || !op.Read(values, sizeof(values)) || !op.Execute())
     return ESP_FAIL;
 
+  // The IRQN is driven low after Power-On Reset due to PORIRQ signal. The value
+  // 0x01 must be written to the RSTINTCLR register (0x84) to release the IRQN
+  // pin.
+  err = WriteByte(RegNum::RSTINTCLR, 0x01);
+  if (err != ESP_OK)
+    return err;
+
   ESP_LOGI(TAG, "Reset complete, mfgcode: 0x%x, swrev: 0x%x", values[0],
            values[1]);
 
