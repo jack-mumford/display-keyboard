@@ -152,14 +152,41 @@ esp_err_t Keyboard::Reset() {
 }
 
 esp_err_t Keyboard::EnableInterrupts() {
-  constexpr kbd::lm8330::reg::KBDMSK kbdmask = {
-      .Reserved = 0,
-      .MSKELINT = 0,  // 0: kbd event lost interrupt RELINT triggers IRQ line.
-      .MSKEINT = 0,   // 0: kbd event interrupt REVINT triggers IRQ line.
-      .MSKLINT = 1,   // 1: kbd lost interrupt RKLINT is masked.
-      .MSKSINT = 1,   // 1: kbd status interrupt RSINT is masked.
-  };
-  return WriteByte(RegNum::KBDMSK, kbdmask);
+  Operation op = i2c_master_.CreateWriteOp(kSlaveAddress, kI2CAddressSize,
+                                           static_cast<uint8_t>(RegNum::KBDIC),
+                                           "init-int");
+  if (!op.ready())
+    return ESP_FAIL;
+  {
+    constexpr kbd::lm8330::reg::KBDIC value = {
+        .SFOFF = 0,  // 0: keyboard layout and SF keys are scanned
+        .Reserved = 0,
+        .EVTIC = 1,  // 1: Clear EVTCODE FIFO and corresponding interrupts
+                     // REVTINT and RELINT.
+        .KBDIC = 1,  // 1: Clear RSINT and RKLINT
+    };
+
+    if (!op.WriteByte(value))
+      return ESP_FAIL;
+  }
+
+  {
+    constexpr kbd::lm8330::reg::KBDMSK value = {
+        .Reserved = 0,
+        .MSKELINT = 0,  // 0: kbd event lost interrupt RELINT triggers IRQ line.
+        .MSKEINT = 0,   // 0: kbd event interrupt REVINT triggers IRQ line.
+        .MSKLINT = 1,   // 1: kbd lost interrupt RKLINT is masked.
+        .MSKSINT = 1,   // 1: kbd status interrupt RSINT is masked.
+    };
+    if (!op.RestartReg(static_cast<uint8_t>(RegNum::KBDMSK),
+                       Address::Mode::WRITE)) {
+      return ESP_FAIL;
+    }
+    if (!op.WriteByte(value))
+      return ESP_FAIL;
+  }
+
+  return op.Execute() ? ESP_OK : ESP_FAIL;
 }
 
 esp_err_t Keyboard::InitializeKeys() {
@@ -221,7 +248,7 @@ esp_err_t Keyboard::InitializeKeys() {
       return ESP_FAIL;
   }
 
-  return ESP_OK;
+  return op.Execute() ? ESP_OK : ESP_FAIL;
 }
 
 esp_err_t Keyboard::EnableClock() {
