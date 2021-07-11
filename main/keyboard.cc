@@ -332,16 +332,16 @@ esp_err_t Keyboard::HandleEvents() {
   uint8_t num_events = 0;
 #if 1
   constexpr size_t kKeyboardFIFOSize = 15;
-  uint8_t events[kKeyboardFIFOSize];
-  if (!i2c_master_.Read(kSlaveAddress, events, sizeof(events),
-                        /*send_start=*/true)) {
-    return ESP_FAIL;
-  }
+
   for (size_t i = 0; i < kKeyboardFIFOSize; i++) {
-    if (events[i] == 0x7f)  // If event is empty.
+    uint8_t value;
+    err = ReadByte(RegNum::EVTCODE, &value);
+    if (err != ESP_OK)
+      return err;
+    if (value == 0x7f)  // If event is empty.
       break;
     num_events++;
-    const kbd::lm8330::reg::EVTCODE event_code = events[i];
+    const kbd::lm8330::reg::EVTCODE event_code = value;
     const uint8_t hid_keycode = KeyboardKeyIDToHIDKeyCode(event_code);
     if (hid_keycode < key_states_.size()) {
       const bool key_pressed = !event_code.RELEASE;
