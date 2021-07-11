@@ -136,17 +136,16 @@ esp_err_t Keyboard::Reset() {
   if (err != ESP_OK)
     return err;
 
-  uint8_t mfgcode;
-  err = ReadByte(RegNum::MFGCODE, &mfgcode);
-  if (err != ESP_OK)
-    return err;
+  // MFGCODE and SWREV are adjacent, so read both in a single operation.
+  uint8_t values[2];
+  Operation op = i2c_master_.CreateReadOp(kSlaveAddress, kI2CAddressSize,
+                                          static_cast<uint8_t>(RegNum::MFGCODE),
+                                          "mfg-swrev");
+  if (!op.ready() || !op.Read(values, sizeof(values)) || !op.Execute())
+    return ESP_FAIL;
 
-  uint8_t swrev;
-  err = ReadByte(RegNum::SWREV, &swrev);
-  if (err != ESP_OK)
-    return err;
-
-  ESP_LOGI(TAG, "Reset complete, mfgcode: 0x%x, swrev: 0x%x", mfgcode, swrev);
+  ESP_LOGI(TAG, "Reset complete, mfgcode: 0x%x, swrev: 0x%x", values[0],
+           values[1]);
 
   return ESP_OK;
 }
