@@ -3,7 +3,7 @@
 #define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
 #include <esp_log.h>
 #include <esp_sntp.h>
-#include <i2clib/master.h>
+#include <i2clib/bus.h>
 #include <nvs_flash/include/nvs_flash.h>
 
 #include "config_reader.h"
@@ -99,7 +99,7 @@ esp_err_t MainTask::InitializSNTP() {
 // static
 esp_err_t MainTask::InitializeI2C() {
   // Used for Keyboard.
-  constexpr i2c::Master::InitParams i2c_0_config = {
+  constexpr i2c::Bus::InitParams i2c_0_config = {
       .i2c_bus = I2C_NUM_0,
       .sda_gpio = kI2C0_SDA_GPIO,
       .scl_gpio = kI2C0_SCL_GPIO,
@@ -107,7 +107,7 @@ esp_err_t MainTask::InitializeI2C() {
       .sda_pullup_enable = false,
       .scl_pullup_enable = false,
   };
-  if (!i2c::Master::Initialize(i2c_0_config)) {
+  if (!i2c::Bus::Initialize(i2c_0_config)) {
     ESP_LOGE(TAG, "Can't initialize I2C0");
     return ESP_FAIL;
   }
@@ -115,7 +115,7 @@ esp_err_t MainTask::InitializeI2C() {
 // Initialize if not using tarablessd1306 for volume display.
 #ifndef CONFIG_SSD1306_ENABLE_DEFAULT_I2C_INTERFACE
   // Used for volume display.
-  constexpr i2c::Master::InitParams i2c_1_config = {
+  constexpr i2c::Bus::InitParams i2c_1_config = {
       .i2c_bus = I2C_NUM_1,
       .sda_gpio = kI2C1_SDA_GPIO,
       .scl_gpio = kI2C1_SCL_GPIO,
@@ -123,7 +123,7 @@ esp_err_t MainTask::InitializeI2C() {
       .sda_pullup_enable = false,
       .scl_pullup_enable = false,
   };
-  if (!i2c::Master::Initialize(i2c_1_config)) {
+  if (!i2c::Bus::Initialize(i2c_1_config)) {
     ESP_LOGE(TAG, "Can't initialize I2C1");
     return ESP_FAIL;
   }

@@ -3,7 +3,6 @@
 #include <esp_system.h>
 #include <freertos/include/freertos/FreeRTOS.h>
 #include <freertos/include/freertos/task.h>
-#include <i2clib/master.h>
 #include <nvs_flash/include/nvs_flash.h>
 #include <sdkconfig.h>
 

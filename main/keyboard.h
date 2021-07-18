@@ -3,7 +3,7 @@
 #include <array>
 
 #include <esp_err.h>
-#include <i2clib/master.h>
+#include <i2clib/simple_master.h>
 
 namespace kbd {
 namespace lm8330 {
@@ -16,7 +16,7 @@ constexpr size_t kNumHIDKeyCodes = 0xff;
 
 class Keyboard {
  public:
-  explicit Keyboard(i2c::Master i2c_master);
+  explicit Keyboard(i2c::SimpleMaster i2c_master);
   ~Keyboard();
 
   /**
@@ -50,7 +50,7 @@ class Keyboard {
   esp_err_t InitializeKeys();
   esp_err_t EnableClock();
 
-  i2c::Master i2c_master_;
+  i2c::SimpleMaster i2c_master_;
 
   /**
    * Array used to map TinyUSB's HID KEYCODE value to the button

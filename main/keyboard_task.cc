@@ -22,7 +22,7 @@ constexpr EventBits_t EVENT_ALL = BIT0;
 
 KeyboardTask::KeyboardTask()
     : event_group_(xEventGroupCreate()),
-      keyboard_(i2c::Master(kKeyboardPort, /*mutex=*/nullptr)),
+      keyboard_(i2c::SimpleMaster(kKeyboardPort, /*mutex=*/nullptr)),
       mutex_(xSemaphoreCreateMutex()) {}
 
 KeyboardTask::~KeyboardTask() {

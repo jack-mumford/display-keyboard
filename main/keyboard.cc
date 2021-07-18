@@ -11,8 +11,8 @@
 #include <esp_log.h>
 #include <esp_task_wdt.h>
 #include <i2clib/address.h>
-#include <i2clib/master.h>
 #include <i2clib/operation.h>
+#include <i2clib/simple_master.h>
 #include <kbdlib/lm8330.h>
 
 #include "gpio_pins.h"
@@ -114,7 +114,7 @@ uint8_t GetModifierFlag(uint8_t keycode) {
 }
 }  // namespace
 
-Keyboard::Keyboard(i2c::Master i2c_master)
+Keyboard::Keyboard(i2c::SimpleMaster i2c_master)
     : i2c_master_(std::move(i2c_master)), key_states_({false}) {}
 
 Keyboard::~Keyboard() = default;

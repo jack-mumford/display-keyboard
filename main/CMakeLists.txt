@@ -4,7 +4,9 @@ idf_component_register(
   SRCS
     ${SOURCES}
     "${CMAKE_SOURCE_DIR}/libs/i2clib/src/address.cc"
+    "${CMAKE_SOURCE_DIR}/libs/i2clib/src/bus.cc"
     "${CMAKE_SOURCE_DIR}/libs/i2clib/src/master.cc"
+    "${CMAKE_SOURCE_DIR}/libs/i2clib/src/simple_master.cc"
     "${CMAKE_SOURCE_DIR}/libs/i2clib/src/operation.cc"
     "${CMAKE_SOURCE_DIR}/libs/inih/ini.c"
     "${CMAKE_SOURCE_DIR}/libs/lv_lib_png/lodepng.c"
