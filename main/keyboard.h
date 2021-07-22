@@ -49,6 +49,7 @@ class Keyboard {
   esp_err_t EnableInterrupts();
   esp_err_t InitializeKeys();
   esp_err_t EnableClock();
+  esp_err_t SetAutoSleepEnabled(bool enabled);
 
   i2c::SimpleMaster i2c_master_;
 

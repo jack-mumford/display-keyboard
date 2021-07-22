@@ -197,61 +197,65 @@ esp_err_t Keyboard::EnableInterrupts() {
 
 esp_err_t Keyboard::InitializeKeys() {
   Operation op = i2c_master_.CreateWriteOp(
-      kSlaveAddress, kI2CAddressSize, static_cast<uint8_t>(RegNum::KBDSIZE),
+      kSlaveAddress, kI2CAddressSize, static_cast<uint8_t>(RegNum::KBDSETTLE),
       "initkeys");
   if (!op.ready())
     return ESP_FAIL;
 
-  {
-    constexpr kbd::lm8330::reg::KBDSIZE value = {
-        .ROWSIZE = 2,
-        .COLSIZE = 4,
-    };
-    if (!op.WriteByte(value))
-      return ESP_FAIL;
+  constexpr kbd::lm8330::reg::KBDSETTLE kRegKBDSETTLE = {
+      .WAIT = 0x80,  // 12 msec.
+  };
+  if (!op.WriteByte(kRegKBDSETTLE))
+    return ESP_FAIL;
+
+  constexpr kbd::lm8330::reg::KBDBOUNCE kRegKBDBOUNCE = {
+      .WAIT = 0x80,  // 12 msec.
+  };
+  if (!op.RestartReg(static_cast<uint8_t>(RegNum::KBDBOUNCE),
+                     Address::Mode::WRITE) ||
+      !op.WriteByte(kRegKBDBOUNCE)) {
+    return ESP_FAIL;
   }
 
-  {
-    if (!op.RestartReg(static_cast<uint8_t>(RegNum::KBDDEDCFG0),
-                       Address::Mode::WRITE)) {
-      return ESP_FAIL;
-    }
-    constexpr uint16_t value = 0xFC3F;
-    if (!op.Write(&value, sizeof(value)))
-      return ESP_FAIL;
+  constexpr kbd::lm8330::reg::KBDSIZE kRegKBDSIZE = {
+      .ROWSIZE = 2,
+      .COLSIZE = 4,
+  };
+  if (!op.RestartReg(static_cast<uint8_t>(RegNum::KBDSIZE),
+                     Address::Mode::WRITE) ||
+      !op.WriteByte(kRegKBDSIZE)) {
+    return ESP_FAIL;
   }
 
-  {
-    if (!op.RestartReg(static_cast<uint8_t>(RegNum::IOCFG),
-                       Address::Mode::WRITE)) {
-      return ESP_FAIL;
-    }
-    constexpr uint8_t value =
-        0xF8;  // Write default value to enable all pins as keyboard matrix
-    if (!op.WriteByte(value))
-      return ESP_FAIL;
+  constexpr uint16_t kRegKBDDEDCFG0 = 0xFC3F;
+  if (!op.RestartReg(static_cast<uint8_t>(RegNum::KBDDEDCFG0),
+                     Address::Mode::WRITE) ||
+      !op.Write(&kRegKBDDEDCFG0, sizeof(kRegKBDDEDCFG0))) {
+    return ESP_FAIL;
   }
 
-  {
-    if (!op.RestartReg(static_cast<uint8_t>(RegNum::IOPC0),
-                       Address::Mode::WRITE)) {
-      return ESP_FAIL;
-    }
-    constexpr uint16_t value =
-        0xAAAA;  // Configure pullup resistors for KPX[7:0].
-    if (!op.Write(&value, sizeof(value)))
-      return ESP_FAIL;
+  constexpr uint8_t kRegIOCFG =
+      0xF8;  // Write default value to enable all pins as keyboard matrix
+  if (!op.RestartReg(static_cast<uint8_t>(RegNum::IOCFG),
+                     Address::Mode::WRITE) ||
+      !op.WriteByte(kRegIOCFG)) {
+    return ESP_FAIL;
   }
 
-  {
-    if (!op.RestartReg(static_cast<uint8_t>(RegNum::IOPC1),
-                       Address::Mode::WRITE)) {
-      return ESP_FAIL;
-    }
-    constexpr uint16_t value =
-        0x5555;  // Configure pulldown resistors for KPY[7:0].
-    if (!op.Write(&value, sizeof(value)))
-      return ESP_FAIL;
+  constexpr uint16_t kRegIOPC0 =
+      0xAAAA;  // Configure pullup resistors for KPX[7:0].
+  if (!op.RestartReg(static_cast<uint8_t>(RegNum::IOPC0),
+                     Address::Mode::WRITE) ||
+      !op.Write(&kRegIOPC0, sizeof(kRegIOPC0))) {
+    return ESP_FAIL;
+  }
+
+  constexpr uint16_t kRegIOPC1 =
+      0x5555;  // Configure pulldown resistors for KPY[7:0].
+  if (!op.RestartReg(static_cast<uint8_t>(RegNum::IOPC1),
+                     Address::Mode::WRITE) ||
+      !op.Write(&kRegIOPC1, sizeof(kRegIOPC1))) {
+    return ESP_FAIL;
   }
 
   return op.Execute() ? ESP_OK : ESP_FAIL;
@@ -265,6 +269,14 @@ esp_err_t Keyboard::EnableClock() {
       .KBDEN = 1,
   };
   return WriteByte(RegNum::CLKEN, clken);
+}
+
+esp_err_t Keyboard::SetAutoSleepEnabled(bool enabled) {
+  const kbd::lm8330::reg::AUTOSLP reg = {
+      .Reserved = 0,
+      .ENABLE = enabled,
+  };
+  return WriteByte(RegNum::AUTOSLP, reg);
 }
 
 // Initialize the keyboard. See KEYSCAN INITIALIZATION in
@@ -281,6 +293,10 @@ esp_err_t Keyboard::Initialize() {
     return err;
 
   err = EnableClock();
+  if (err != ESP_OK)
+    return err;
+
+  err = SetAutoSleepEnabled(false);
   if (err != ESP_OK)
     return err;
 
