@@ -1,4 +1,4 @@
-name: Push Audit
+name: Push CI
 
 on: push
 
@@ -10,7 +10,7 @@ jobs:
       ALWAYS_LINT_ALL_FILES: false
       EC_FIX_ERROR: false
     steps:
-      - name: CheckoutCode
+      - name: Checkout code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -19,3 +19,11 @@ jobs:
         env:
           ALWAYS_LINT_ALL_FILES: false
           EC_FIX_ERROR: false
+
+    build:
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: esp-idf build
+        uses: sebastianPsm/esp-idf-ci-action@1
