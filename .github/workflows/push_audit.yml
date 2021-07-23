@@ -20,10 +20,10 @@ jobs:
           ALWAYS_LINT_ALL_FILES: false
           EC_FIX_ERROR: false
 
-    build:
-      runs-on: ubuntu-latest
-      steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-      - name: esp-idf build
-        uses: sebastianPsm/esp-idf-ci-action@1
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+    - name: esp-idf build
+      uses: sebastianPsm/esp-idf-ci-action@1
