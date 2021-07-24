@@ -39,9 +39,8 @@ cd display-keyboard
 ./make submodules
 ```
 
-**Note**: Because this project makes use of new features (USB) of the ESP32-S2
-          it requires a version of ESP-IDF more recent than v4.2. At present
-          this means the "master" branch of esp-idf.
+**Note**: This project makes use of new features (USB) of the ESP32-S2
+          and requires ESP-IDF v4.3.
 
 ## Building
 
