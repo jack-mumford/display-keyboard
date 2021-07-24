@@ -3,6 +3,8 @@
 This project is the hardware design and software for a USB keyboard with an
 integrated touch display.
 
+![Status](https://github.com/BigMumf/display-keyboard/actions/workflows/push_audit.yml/badge.svg)
+
 Hardware features:
 
 * Mechanical keys.
