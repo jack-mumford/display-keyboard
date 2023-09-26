@@ -34,7 +34,7 @@ the [pcb](pcb) directory.
 ## Getting Code
 
 ```sh
-git clone https://github.com/BigMumf/display-keyboard.git
+git clone https://github.com/jack-mumford/display-keyboard.git
 cd display-keyboard
 ./make submodules
 ```
